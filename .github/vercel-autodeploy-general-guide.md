@@ -1,13 +1,17 @@
 # Vercel deployment setup
 
-Use the production URL listed in the Vercel project dashboard. Every push to `main` runs verification regardless of which files changed. Once verification passes, GitHub Actions requests a Vercel deployment if the author of the new tip commit differs from the GitHub repository owner or has no GitHub username in the push event. When the tip commit is authored by the repository owner, Vercel's Git integration handles the deployment.
+Use the production URL listed in the Vercel project dashboard. GitHub Actions verifies pushes to `main` or `dev` and pull requests targeting either branch. Vercel’s native Git integration handles production deploys for owner-authored commits and also deployed a contributor push to the live site during verification. [Vercel for GitHub](https://vercel.com/docs/git/vercel-for-github)
 
-The hook builds the latest tip of its configured branch. Its response confirms the request was accepted. The Vercel dashboard shows whether the deployment finished successfully.
+## Automatic contributor deploys through GitHub Actions
 
-## Owner setup
+To enable the separate Actions deploy job for contributor changes, configure the production project and repository together:
 
-1. In the Vercel project serving the production URL, open **Settings → Git**. Confirm the connected repository and the production branch. Keep native Git deployments enabled for the repository owner's commits and create a Deploy Hook for `main`. [Vercel Deploy Hooks](https://vercel.com/docs/deploy-hooks)
-2. In GitHub, create or select the `production` environment under **Settings → Environments**. Limit deployments to `main` and add the hook URL as the environment secret `VERCEL_DEPLOY_HOOK_URL`. Treat the URL as a credential. [GitHub deployment environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
-3. Merge the workflows. Check **Actions → Deploy to Vercel** after a push to `main`, or manually run it from `main`. Check that the resulting deployment in Vercel is **Ready** and serves the expected changes at the production URL.
+1. In **Vercel → Settings → Git**, create a Deploy Hook for `main` in the project that owns the live domain. [Vercel Deploy Hooks](https://vercel.com/docs/deploy-hooks)
+2. In GitHub, restrict the `production` environment to `main` and add the hook URL as the environment secret `VERCEL_DEPLOY_HOOK_URL`. Then set the repository Actions variable `VERCEL_AUTO_DEPLOY_HOOK` to `true`. The secret authorizes the request. The variable enables it on pushes. [GitHub deployment environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) · [GitHub Actions variables](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#vars-context)
+3. After the next push with a contributor-authored tip commit, confirm that **Verify and deploy to Vercel** passes verification and queues the hook. Then confirm Vercel reports **Ready**. A push with an owner-authored tip commit skips the hook. GitHub determines the tip author even when someone else pushed the commit.
 
-For a push containing multiple commits, the workflow checks the author of the final commit. This handles a contributor-authored commit merged or pushed by the owner. A manual run from `main` always requests the hook after verification passes. Pull requests run verification, and previews depend on the project's Vercel Git settings.
+The hook builds the latest tip of `main`. When both the hook and native Git integration deploy contributor pushes, Vercel can queue both builds. Leave the Actions variable unset if native Git alone is sufficient. To manually request a redeploy, run **Actions → Verify and deploy to Vercel** from `main` with the hook secret configured.
+
+## Multiple Vercel checks on a commit
+
+GitHub shows a status for each connected Vercel project. Identify the project that owns the live domain before investigating failures. If another connected project fails, the Vercel owner can inspect its deployment logs and fix it if it is in use, or disconnect its Git integration if it is obsolete. [Vercel Git settings](https://vercel.com/docs/project-configuration/git-settings)
