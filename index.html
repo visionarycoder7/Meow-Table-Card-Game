@@ -55,7 +55,7 @@ button.sec{background:#33473b;color:#fff}button.uno{background:#d72600;color:#ff
 .row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
 input[type=text]{font:inherit;padding:8px;border-radius:8px;border:1px solid #4a6155;background:#0e1a14;color:#fff;width:150px}
 details{margin-top:16px;background:#0005;padding:10px 14px;border-radius:10px;line-height:1.5}
-</style></head><body><div id="app"></div>
+</style><script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body><div id="app"></div>
 <script>
 const C={R:'#d72600',Y:'#d99a00',G:'#2a9d48',B:'#0b6fd1',W:'#222'};
 const NAMES={R:'Red',Y:'Yellow',G:'Green',B:'Blue'};
@@ -194,11 +194,31 @@ function myTok(){try{let t=sessionStorage.getItem('nm_tok');if(!t){t=rnd(10);ses
 let EV=null,SEQ=0;
 function doPlay(i,c,col,tgt){if(NET&&NET.role==='client')return netSend({a:'play',id:c.id,col,tgt});play(i,c,col,tgt)}
 function netSend(d){NET.rm.emit('act',{tok:NET.tok,...d})}
-async function openRoom(code,role){
- const room=typeof claude!=='undefined'?await claude.use('room'):null;
- if(!room){alert('Online rooms are not available in this view. Open the page on claude.ai with the room feature allowed, or play offline.');return false}
- let rm;try{rm=await room.join('nm-'+code)}catch(e){alert('Could not open the room ('+(e&&e.code||'error')+').');return false}
- NET={role,rm,code,tok:myTok(),seq:0,seats:[],hostPeer:null,us:[]};ME=-1;return true}
+function netAdapter(role,peer){
+ const hs={},pls=[];let conns=[],hostConn=null;
+ const fire=(t,m)=>(hs[t]||[]).forEach(fn=>{try{fn(m)}catch(e){console.error(e)}});
+ const rm={
+  emit(t,d){const msg={t,d};
+   if(role==='client'){if(hostConn&&hostConn.open)hostConn.send(msg)}
+   else conns.forEach(c=>{if(c.open&&(!d||d.to===undefined||(c.metadata&&c.metadata.tok===d.to)))c.send(msg)})},
+  on(t,fn){(hs[t]=hs[t]||[]).push(fn);return()=>{hs[t]=(hs[t]||[]).filter(x=>x!==fn)}},
+  onPeers(fn){pls.push(fn);return()=>{const k=pls.indexOf(fn);if(k>=0)pls.splice(k,1)}},
+  leave(){try{peer.destroy()}catch(e){}}};
+ const wire=c=>{conns.push(c);
+  c.on('data',d=>{if(d&&typeof d.t==='string')fire(d.t,{peer:c.peer,data:d.d})});
+  c.on('close',()=>{conns=conns.filter(x=>x!==c);pls.slice().forEach(fn=>fn({left:[{peer:c.peer}]}))});
+  c.on('error',()=>{})};
+ return{rm,wire,setHost(c){hostConn=c}}}
+function openRoom(code,role){return new Promise(res=>{
+ if(typeof Peer==='undefined'){alert('Could not load the connection library. Check your internet connection and reload.');return res(false)}
+ const tok=myTok(),pid='nomercy-'+code,peer=role==='host'?new Peer(pid):new Peer();let done=false;
+ const fail=m=>{if(done)return;done=true;clearTimeout(to);try{peer.destroy()}catch(e){}alert(m);res(false)};
+ const to=setTimeout(()=>fail(role==='host'?'Could not reach the connection server. Try again.':'Could not connect to that room. Check the code and try again.'),12000);
+ peer.on('error',e=>fail(e.type==='unavailable-id'?'That room code is already taken. Try again.':e.type==='peer-unavailable'?'No room found with that code.':'Connection error ('+e.type+').'));
+ const ready=ad=>{done=true;clearTimeout(to);NET={role,rm:ad.rm,code,tok,seq:0,seats:[],hostPeer:null,us:[]};ME=-1;res(true)};
+ peer.on('open',()=>{const ad=netAdapter(role,peer);
+  if(role==='host'){peer.on('connection',c=>ad.wire(c));ready(ad)}
+  else{const c=peer.connect(pid,{reliable:true,metadata:{tok}});c.on('open',()=>{ad.setHost(c);ad.wire(c);ready(ad)})}})})}
 async function createRoom(){
  if(!await openRoom(rnd(5),'host'))return;
  NET.seats=[{name:esc(rawName()),bot:false,tok:NET.tok,peer:null}];ME=0;hostListen();lobbySend();render()}
@@ -238,6 +258,7 @@ function bcast(){if(!NET||NET.role!=='host'||!G)return;
 async function joinRoom(){
  const code=(($('#rcode')||{}).value||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');if(code.length<3)return alert('Enter the room code first.');
  if(!await openRoom(code,'client'))return;const rm=NET.rm;
+ NET.us.push(rm.onPeers(ch=>{if(NET&&ch.left.length){alert('The host left the room.');leaveRoom()}}));
  NET.us.push(rm.on('lobby',m=>{const d=m.data||{};if(d.code!==NET.code)return;
   if(d.rej===NET.tok){alert(d.why);leaveRoom();return}
   if(NET.hostPeer&&m.peer!==NET.hostPeer)return;if(!Array.isArray(d.seats))return;
