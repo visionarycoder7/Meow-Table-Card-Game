@@ -42,3 +42,5 @@ To exercise the production build locally, stop development and run `npm run chec
 ## License
 
 Meow Table uses the [GNU Affero General Public License, version 3](LICENSE) (`AGPL-3.0-only`) for the project’s original software. Third-party dependencies retain their own licenses. See the [release and licensing notes](docs/release-and-licensing.md) for attribution, branding, and source availability.
+
+The [branding notes](docs/release-and-licensing.md#branding-files-and-share-metadata) identify the editable artwork, icon exports, and public URL setting for social previews.
