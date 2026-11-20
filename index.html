@@ -12,6 +12,10 @@ h1{font-size:22px;margin:0}h3{margin:0 0 10px}.mut{color:var(--mut)}
 button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:9px 14px;margin:3px;background:#ffd23f;color:#222;cursor:pointer}
 button.sec{background:#33473b;color:#fff}button.uno{background:#d72600;color:#fff;font-style:italic;font-size:18px;padding:10px 24px;border-radius:30px;box-shadow:0 0 12px #ffd23f}button:disabled{opacity:.4;cursor:not-allowed}
 .pl{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.pl div{background:#0006;border:2px solid #ffffff22;border-radius:10px;padding:8px 12px}
+.ic{position:absolute;left:0;right:0;bottom:15%;text-align:center;z-index:1;font-size:11px;font-style:normal;color:var(--c);font-weight:900}.card.big .ic{font-size:15px}
+.tag{position:absolute;top:-4px;left:50%;transform:translate(-50%,-100%);background:#d72600;color:#fff;font-weight:900;font-size:13px;padding:3px 10px;border-radius:8px;white-space:nowrap;z-index:6;opacity:0;animation:tagf 2.4s forwards;pointer-events:none}
+@keyframes tagf{0%{opacity:0;transform:translate(-50%,-60%) scale(.6)}8%{opacity:1;transform:translate(-50%,-100%) scale(1.15)}14%{transform:translate(-50%,-100%) scale(1)}85%{opacity:1}100%{opacity:0}}
+.guide{font-size:13px}
 .arena{position:relative;height:clamp(400px,62vh,540px);margin:14px 0}
 .felt{position:absolute;inset:7% 4%;border-radius:50%;background:radial-gradient(ellipse at center,#2d7048,#16402a);border:6px solid #0b2418;box-shadow:inset 0 0 50px #000a,0 12px 30px #000a}
 .seat{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;transition:opacity .3s}
@@ -79,8 +83,8 @@ function sh(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i]
 const desc=c=>(c.color!=='W'?NAMES[c.color]+' ':'')+(/^\d$/.test(c.type)?c.type:NM[c.type]);
 const act=()=>G.pl.map((p,i)=>i).filter(i=>!G.pl[i].out);
 function nxt(i){const n=G.pl.length;do{i=(i+G.dir+n)%n}while(G.pl[i].out);return i}
-function dr(){if(!G.deck.length){const t=G.disc.pop();G.deck=sh(G.disc);G.disc=[t]}return G.deck.pop()||null}
-function log(s){if(/shouts UNO/.test(s))sfx.uno();else if(/forgot/.test(s))sfx.buzz();G.lg.push(s);G.lg=G.lg.slice(-4)}
+function dr(){if(!G.deck.length){const t=G.disc.pop();G.deck=sh(G.disc.concat(G.aside||[]));G.aside=[];G.disc=[t]}return G.deck.pop()||null}
+function log(s){if(/shouts UNO/.test(s))sfx.uno();else if(/skipped/.test(s))sfx.skip();else if(/forgot/.test(s))sfx.buzz();G.lg.push(s);G.lg=G.lg.slice(-4)}
 function canPlay(c){const t=G.top;if(G.pend)return dv(c)>0&&dv(c)>=dv(t);return c.color==='W'||c.color===G.color||c.type===t.type}
 const hasPlay=p=>p.hand.some(canPlay);
 
@@ -93,7 +97,7 @@ function start(list){
  render();tick()}
 
 function mercy(){
- G.pl.forEach(p=>{if(!p.out&&p.hand.length>=25){p.out=true;G.deck=sh(G.deck.concat(p.hand));p.hand=[];log('💀 '+p.name+' reached 25 cards and is out (Mercy Rule)')}});
+ G.pl.forEach(p=>{if(!p.out&&p.hand.length>=25){p.out=true;G.aside=(G.aside||[]).concat(p.hand);p.hand=[];log('💀 '+p.name+' reached 25 cards and is out (Mercy Rule)')}});
  const a=act();if(a.length===1&&G.win===null)G.win=a[0]}
 function callUno(){if(!canAct())return;const p=G.pl[G.cur];if(p.hand.length!==2||p.uno)return;if(NET&&NET.role==='client')return netSend({a:'uno'});p.uno=true;log('📣 '+p.name+' shouts UNO!');render()}
 function end(skip=0,from=G.cur){G.pl.forEach(q=>q.uno=false);let c=from;for(let k=0;k<=skip;k++)c=nxt(c);G.cur=c;G.revealed=false;render();tick()}
@@ -108,19 +112,26 @@ function play(i,card,chosen,tgt){
  if(!p.hand.length){G.win=i;return render()}
  let skip=0,again=false;
  if(t==='skip')skip=1;
- if(t==='rev'||t==='wrd4'){G.dir*=-1;if(t==='rev'&&act().length===2)skip=1}
+ if(t==='rev'||t==='wrd4'){G.dir*=-1;if(act().length===2)skip=1}
  if(dv(card))G.pend+=dv(card);
  if(t==='skipall'){again=true;log('Everyone else is skipped!')}
  if(t==='7'&&tgt!=null){const a=G.pl[tgt];[p.hand,a.hand]=[a.hand,p.hand];log(p.name+' swapped hands with '+a.name)}
  if(t==='0'){const o=[i];let j=nxt(i);while(j!==i){o.push(j);j=nxt(j)}
   const h=o.map(k=>G.pl[k].hand);o.forEach((k,n)=>G.pl[k].hand=h[(n-1+o.length)%o.length]);log('All hands rotate!')}
  if(forgot){log('⚠️ '+p.name+' forgot to call UNO and draws 2!');G.fd={n:2,to:i};for(let k=0;k<2;k++){const c=dr();if(!c)break;p.hand.push(c)}}
+ G.ban=mkBan(i,t,skip,tgt);
  mercy();if(G.win!==null)return render();
  if(t==='roul'){const w=nxt(i);G.modal={type:'roul',who:w};render();
   if(G.pl[w].bot)setTimeout(()=>roul(botColor(G.pl[w])),1000);return}
  if(again){render();tick();return}
  end(skip)}
 
+function mkBan(i,t,skip,tgt){const it=[];
+ if(t==='skipall')act().forEach(j=>{if(j!==i)it.push({i:j,txt:'\u2298 SKIPPED'})});
+ else if(skip){const j=nxt(i);it.push({i:j,txt:'\u2298 SKIPPED'});log('\u2298 '+G.pl[j].name+' is skipped')}
+ if(t==='7'&&tgt!=null)it.push({i,txt:'\u21c4 SWAP'},{i:tgt,txt:'\u21c4 SWAP'});
+ if(t==='0')act().forEach(j=>it.push({i:j,txt:'\u21bb PASS'}));
+ return it.length?{t:performance.now(),items:it}:null}
 function roul(col){if(NET&&NET.role==='client')return netSend({a:'roul',col});
  const w=G.modal.who;G.modal=null;G.color=col;let n=0;
  while(true){const c=dr();if(!c)break;G.pl[w].hand.push(c);n++;if(c.color===col)break}
@@ -169,7 +180,8 @@ function botMove(){
 
 /* UI */
 function face(c){return /^\d$/.test(c.type)?c.type:LBL[c.type]}
-function cardH(c,extra='',click=''){const f=face(c);return `<div data-id="${c.id}" class="card ${c.color==='W'?'w':''} ${f.length>2?'sm':''} ${extra}" style="--c:${C[c.color]}" title="${desc(c)}" ${click}><span class="k">${f}</span><b>${f}</b><span class="k r">${f}</span></div>`}
+const ic=c=>c.type==='7'?'<em class="ic">\u21c4</em>':c.type==='0'?'<em class="ic">\u21bb</em>':'';
+function cardH(c,extra='',click=''){const f=face(c);return `<div data-id="${c.id}" class="card ${c.color==='W'?'w':''} ${f.length>2?'sm':''} ${extra}" style="--c:${C[c.color]}" title="${desc(c)}" ${click}><span class="k">${f}</span><b>${f}</b><span class="k r">${f}</span>${ic(c)}</div>`}
 function seat(d){if(S.length+d<2||S.length+d>6)return;if(d>0)S.push({name:'Bot '+S.length,bot:true});else S.pop();render()}
 function go(){start(S.map((s,i)=>({name:esc(s.name.trim()||'Player '+(i+1)),bot:s.bot})))}
 function setupH(){return `<h1>No Mercy</h1>
@@ -253,7 +265,7 @@ function onAct(d){
   play(i,c,col,tgt)}}
 function viewFor(i){const p=G.pl[i];return{me:i,hand:p.hand.map(enc),pl:G.pl.map(q=>({name:q.name,bot:q.bot,out:q.out,uno:q.uno,n:q.hand.length})),top:enc(G.top),col:G.color,dir:G.dir,pend:G.pend,cur:G.cur,win:G.win,dk:G.deck.length,lg:G.lg,rm:G.modal&&G.modal.type==='roul'&&G.modal.who===i?{who:i}:null,ev:EV}}
 function bcast(){if(!NET||NET.role!=='host'||!G)return;
- if(G.fl||G.fd)EV={seq:++SEQ,fl:G.fl&&G.fl.c?{i:G.fl.i,c:enc(G.fl.c)}:null,fd:G.fd?{n:Math.min(G.fd.n,6),to:G.fd.to}:null};
+ if(G.fl||G.fd)EV={seq:++SEQ,fl:G.fl&&G.fl.c?{i:G.fl.i,c:enc(G.fl.c)}:null,fd:G.fd?{n:Math.min(G.fd.n,6),to:G.fd.to}:null,ban:G.ban&&!G.ban.sent?(G.ban.sent=true,{items:G.ban.items}):null};
  G.pl.forEach((p,i)=>{if(!p.bot&&p.tok&&i!==ME)NET.rm.emit('state',{to:p.tok,v:viewFor(i)})})}
 async function joinRoom(){
  const code=(($('#rcode')||{}).value||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');if(code.length<3)return alert('Enter the room code first.');
@@ -268,11 +280,11 @@ async function joinRoom(){
  NET.int=setInterval(()=>{if(!NET.joined)hello()},2000);
  NET.to=setTimeout(()=>{if(NET&&!NET.joined){alert('No host found for that code. Check it and try again.');leaveRoom()}},9000);render()}
 function applyView(v){
- const lm=G&&G.modal&&G.modal.card?G.modal:null;let fl=null,fd=null;
+ const lm=G&&G.modal&&G.modal.card?G.modal:null;let fl=null,fd=null,ban=G&&G.ban||null;
  if(v.ev&&v.ev.seq>NET.seq){NET.seq=v.ev.seq;
   if(v.ev.fl){const c=tk(v.ev.fl.c),el=document.querySelector('[data-id="'+c.id+'"]');fl={h:cardH(c),a:el?el.getBoundingClientRect():ctr(v.ev.fl.i===v.me?'.hand':'#opp'+v.ev.fl.i),c,i:v.ev.fl.i}}
-  if(v.ev.fd)fd=v.ev.fd}
- G={pl:v.pl.map((q,i)=>({name:q.name,bot:q.bot,out:q.out,uno:q.uno,hand:i===v.me?v.hand.map(tk):Array(q.n).fill(0)})),cur:v.cur,dir:v.dir,pend:v.pend,color:v.col,top:tk(v.top),deck:Array(v.dk),win:v.win,lg:v.lg,humans:1,revealed:true,modal:v.rm?{type:'roul',who:v.rm.who}:(lm&&v.cur===v.me&&v.win===null?lm:null),fl,fd};
+  if(v.ev.fd)fd=v.ev.fd;ban=v.ev.ban?{t:performance.now(),items:v.ev.ban.items}:null}
+ G={pl:v.pl.map((q,i)=>({name:q.name,bot:q.bot,out:q.out,uno:q.uno,hand:i===v.me?v.hand.map(tk):Array(q.n).fill(0)})),cur:v.cur,dir:v.dir,pend:v.pend,color:v.col,top:tk(v.top),deck:Array(v.dk),win:v.win,lg:v.lg,humans:1,revealed:true,modal:v.rm?{type:'roul',who:v.rm.who}:(lm&&v.cur===v.me&&v.win===null?lm:null),fl,fd,ban};
  ME=v.me;render()}
 function leaveRoom(){clearTimeout(T);
  if(NET){clearInterval(NET.int);clearTimeout(NET.to);NET.us.forEach(u=>{try{u()}catch(e){}});try{NET.rm.leave()}catch(e){}}
@@ -295,10 +307,16 @@ function arena(cur){
  const n=G.pl.length,hi=NET?ME:G.humans===1?G.pl.findIndex(p=>!p.bot):0,base=Math.max(hi,0);
  const seats=G.pl.map((p,i)=>{
   const th=(90+((i-base+n)%n)*360/n)*Math.PI/180,x=50+45*Math.cos(th),y=50+43*Math.sin(th);
-  const me=(NET||G.humans===1)&&i===hi,m=Math.min(p.hand.length,10);
+  const me=(NET||G.humans===1)&&i===hi,m=Math.min(p.hand.length,10);const bn=G.ban&&performance.now()-G.ban.t<2400?G.ban.items.find(x=>x.i===i):null,tag=bn?`<div class="tag" style="animation-delay:-${((performance.now()-G.ban.t)/1000).toFixed(2)}s">${bn.txt}</div>`:'';
   const fan=me?'':Array.from({length:m},(_,j)=>{const a=(j-(m-1)/2)*7;return `<span class="mc" style="transform:rotate(${a}deg) translateY(${Math.abs(a)*.35}px)"></span>`}).join('')+(p.hand.length>10?`<em>+${p.hand.length-10}</em>`:'');
-  return `<div id="opp${i}" class="seat ${i===G.cur&&G.win===null?'cur':''} ${p.out?'out':''} ${p.hand.length>=20?'warn':''}" style="left:${x}%;top:${y}%"><div class="fan">${fan}</div><div class="chip" style="animation-delay:${ph(1.8)}">${p.name}${p.bot?' \ud83e\udd16':''} \u00b7 <b>${p.hand.length}</b>/25</div></div>`}).join('');
+  return `<div id="opp${i}" class="seat ${i===G.cur&&G.win===null?'cur':''} ${p.out?'out':''} ${p.hand.length>=20?'warn':''}" style="left:${x}%;top:${y}%">${tag}<div class="fan">${fan}</div><div class="chip" style="animation-delay:${ph(1.8)}">${p.name}${p.bot?' \ud83e\udd16':''} \u00b7 <b>${p.hand.length}</b>/25</div></div>`}).join('');
  return `<div class="arena"><div class="felt"></div>${seats}<div class="center"><div class="dirring ${G.dir<0?'rev':''}" style="animation-delay:${ph(16)}"></div><div class="cc"><div id="deck" class="bob" style="animation-delay:${ph(4)}"><div class="card back big"><b>NO<br>MERCY</b><i>${G.deck.length} left</i></div></div><div id="disc">${cardH(G.top,'big')}</div></div><div class="info">Color: <span class="dot" style="background:${C[G.color]}"></span> <b>${NAMES[G.color]}</b>${G.pend?`<div class="pend" style="margin-top:6px">+${G.pend} to draw!</div>`:''}<div style="margin-top:4px">Turn: <b>${G.pl[G.cur].name}</b></div></div></div></div>`}
+function guideH(){return `<details class="guide"><summary>Card guide</summary><p>
+<b>7 \u21c4 Swap:</b> swap hands with a player you choose.<br><b>0 \u21bb Pass:</b> every hand moves to the next player in the direction of play.<br>
+<b>\u2298 Skip:</b> next player loses their turn.<br><b>\u2298\u2298 Skip Everyone:</b> everyone else is skipped, you play again.<br>
+<b>\u21c4 Reverse:</b> flips direction (skips the other player in a 2-player game).<br><b>+2 / +4 / +6 / +10:</b> next player draws and loses their turn, unless they stack an equal or higher draw card.<br>
+<b>\u2715 Discard All:</b> drop every card of that colour from your hand.<br><b>\u21c4+4 Wild Reverse Draw 4:</b> reverses, then the next player draws 4 (in a 2-player game you take it, but you can stack it back).<br>
+<b>? Color Roulette:</b> next player picks a colour and draws until one appears.</p></details>`}
 function render(){
  const a=$('#app');if(!G){a.innerHTML=NET?lobbyH():SCR==='menu'?menuH():setupH();return}
  const cur=G.pl[G.cur];
@@ -311,7 +329,7 @@ function render(){
   h+=`<div class="hand">${hand.map(c=>{const ok=mine&&canPlay(c);return cardH(c,mine?(ok?'ok':'no'):'',ok?`onclick="pick(${c.id})"`:'')}).join('')}</div>`;
   if(mine)h+=`<div style="text-align:center"><button class="uno" onclick="callUno()" ${G.pl[v].uno||G.pl[v].hand.length!==2?'disabled':''}>${G.pl[v].uno?'UNO! ✓':'UNO!'}</button><button onclick="doDraw()" ${!G.pend&&hasPlay(G.pl[v])?'disabled':''}>${G.pend?'Draw '+G.pend+' (take penalty)':'Draw card(s)'}</button></div>`}
  else h+=`<p class="mut" style="text-align:center">${G.humans>1?'Hands hidden between turns.':'Watching…'}</p>`;
- let ov='';
+ h+=guideH();let ov='';
  if(G.win!==null)ov=`<div class="ov"><div class="box"><h3>🏆 ${G.pl[G.win].name} wins!</h3>${NET?(NET.role==='host'?'<button onclick="hostStart()">Play again</button>':'<p class="mut">Waiting for the host…</p>')+'<button class="sec" onclick="leaveRoom()">Leave room</button>':'<button onclick="go()">Play again</button><button class="sec" onclick="G=null;render()">Change players</button>'}</div></div>`;
  else if(G.modal){const m=G.modal;
   if(!(m.type==='roul'&&(G.pl[m.who].bot||(NET&&m.who!==ME)))){
@@ -325,7 +343,7 @@ let AC=null,mute=false;
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(AC.state==='suspended')AC.resume();return AC}
 function noise(t0,dur,f0,f1,vol){const a=ac();if(!a||mute)return;const n=a.sampleRate*dur|0,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;const t=a.currentTime+t0;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+dur);const g=a.createGain();g.gain.value=vol;s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
 function tone(f0,f1,dur,type,vol,t0=0){const a=ac();if(!a||mute)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur)}
-const sfx={playGo(){noise(0,.3,900,4200,.45)},playEnd(){tone(170,55,.14,'sine',.55);noise(0,.06,3000,1500,.5)},drawGo(){noise(0,.14,2800,1500,.3)},drawEnd(){noise(0,.05,2000,1000,.25)},uno(){tone(660,660,.12,'triangle',.3);tone(880,880,.18,'triangle',.3,.12)},buzz(){tone(130,90,.3,'sawtooth',.18)}};
+const sfx={playGo(){noise(0,.3,900,4200,.45)},playEnd(){tone(170,55,.14,'sine',.55);noise(0,.06,3000,1500,.5)},drawGo(){noise(0,.14,2800,1500,.3)},drawEnd(){noise(0,.05,2000,1000,.25)},uno(){tone(660,660,.12,'triangle',.3);tone(880,880,.18,'triangle',.3,.12)},buzz(){tone(130,90,.3,'sawtooth',.18)},skip(){tone(520,180,.22,'square',.12)}};
 addEventListener('pointerdown',()=>ac(),{once:true});
 function ctr(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{left:r.left+r.width/2-32,top:r.top+r.height/2-48,width:64,height:96}}
 function fly(html,a,b,ms,delay,done,snd){
