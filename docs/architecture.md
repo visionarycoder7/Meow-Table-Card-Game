@@ -69,7 +69,7 @@ Follow the [frontend playbook](frontend-playbook.md) for Tailwind setup, compone
 
 ## Build and deployment contract
 
-These are the commands the workspace milestone must make available from the repository root. Record the pinned Node.js version and commit the npm lockfile when the workspace is scaffolded.
+Run these commands from the repository root. Phase 1 pins Node.js in `.nvmrc` and commits the npm lockfile. The test scripts are added when their suites land in later phases.
 
 | Command | Expected result |
 | --- | --- |
@@ -82,7 +82,7 @@ These are the commands the workspace milestone must make available from the repo
 | `npm run test:e2e` | Starts a disposable local production build and exercises it with isolated browser sessions. |
 
 1. **Prototype.** The existing Vercel project deploys the static site through its native Git integration. GitHub Actions runs static verification. Keep the prototype available while the new app passes a hosted playtest. [Prototype deployment guide](../.github/vercel-autodeploy-general-guide.md)
-2. **Pilot.** Start dedicated hosting on a separate URL. For Render, use one web-service instance, build with `npm ci && npm run build`, start with `npm start`, bind to `0.0.0.0` using the provided `PORT`, and configure `GET /healthz` as the service health check. Serve the UI and Socket.IO from the same origin. Deploy during a quiet period because replacing the process drops in-memory matches. [Render web services](https://render.com/docs/web-services) · [Render WebSockets](https://render.com/docs/websocket)
+2. **Pilot.** Start dedicated hosting on a separate URL. For Render, use one web-service instance, build with `npm ci && npm run build`, start with `npm start`, set `HOST=0.0.0.0` alongside the provided `PORT`, and configure `GET /healthz` as the service health check. Serve the UI and Socket.IO from the same origin. Deploy during a quiet period because replacing the process drops in-memory matches. [Render web services](https://render.com/docs/web-services) · [Render WebSockets](https://render.com/docs/websocket)
 3. **Public URL decision.** After the pilot passes, the owner can share the pilot URL or keep Vercel as the public frontend with a separate socket service. If split hosting is required, explicitly configure the frontend's HTTPS socket endpoint and allow only the approved frontend origins on the service. Repeat the invite, reconnect, and mobile-network checks against that split deployment.
 
 Vercel’s WebSocket support is in public beta. Connections are pinned to a function instance and close when it reaches its maximum duration. Vercel’s own multi-client example uses Redis to coordinate instances. The pilot uses one long-running process so room state and sockets can stay together. [Vercel WebSocket announcement](https://vercel.com/changelog/websocket-support-is-now-in-public-beta) · [Vercel multi-client example](https://vercel.com/kb/guide/real-time-chat-websockets)

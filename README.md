@@ -2,7 +2,7 @@
 
 A browser card game for friends who want to create a private room, share a code or link, and play a full match together.
 
-**Current state.** The [single-page prototype](index.html) contains browser-hosted rooms, same-device play, bots, card rules, and audiovisual effects. The server-backed app is at the planning stage.
+**Current state.** The [single-page prototype](index.html) contains browser-hosted rooms, same-device play, bots, card rules, and audiovisual effects. The server-backed app currently has a local workspace and browser shell.
 
 [Vercel deployment setup](.github/vercel-autodeploy-general-guide.md)
 
@@ -20,8 +20,20 @@ The recommended pilot is one Node.js service serving the browser app and the liv
 | [Architecture and stack](docs/architecture.md) | Why one service is enough, room and message rules, build commands, and deployment options. |
 | [Frontend playbook](docs/frontend-playbook.md) | Reusable brief for component-first UI, Tailwind v4, typography, motion, and visual review. |
 | [Contributor workflow](docs/contributor-workflow.md) | Milestones, dependencies, release checks, and a task brief for Codex or Antigravity. |
+| [Phase implementation guide](docs/implementation-phases.md) | Copyable task brief, scope and checks per phase, and Codex review and commit rules. |
 
-Start with the [owner decisions](docs/product-and-gameplay.md#decisions-for-the-owner) and then the [workspace milestone](docs/contributor-workflow.md#milestones). Each milestone has a gate that tells the next contributor what they can build on.
+## Run locally
+
+Use Node.js 24.22.1 from `.nvmrc`.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open [the Vite app](http://localhost:5173). The Express service and Socket.IO listen on port 3001. Vite forwards `/healthz` and `/socket.io` to that service.
+
+To exercise the production server locally, stop development and run `npm run check`, `npm run build`, then `npm start`. Open [the compiled app](http://127.0.0.1:3001). Use `PORT` to change the server port and `HOST` to change the bind address. A hosted Node service sets `HOST=0.0.0.0`. The root prototype deploys separately through Vercel.
 
 ## License
 

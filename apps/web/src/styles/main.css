@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0e1a14;
+  --color-felt: #2d7048;
+  --color-ink: #eef3ef;
+  --color-muted: #9db0a4;
+  --color-accent: #ffd23f;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+}

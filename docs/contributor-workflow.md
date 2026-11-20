@@ -20,6 +20,8 @@ Use focused branches and pull requests against `main`. Link each PR to the agree
 
 ## Working with Codex and Antigravity
 
+Use the [phase implementation guide](implementation-phases.md) to assign a specific phase, record Codex's independent verification, and commit locally. The owner pushes the commits manually.
+
 Give each agent one independently reviewable milestone slice. If both are working at once, use separate branches or worktrees and agree on which paths each agent owns. Merge changes to the shared protocol before assigning dependent server or browser changes. Both agents should read the current checkout and Git status at the start so they pick up work already in progress.
 
 Start a handoff with a self-contained brief. Use exact file paths and commands once they exist. Copy the acceptance checks for that slice into the brief so the receiving agent can verify the work without reading the conversation.
