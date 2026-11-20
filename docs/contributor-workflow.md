@@ -4,17 +4,17 @@
 
 ## Before implementation
 
-Review the [product](product-and-gameplay.md) and [architecture](architecture.md) with the owner. Pin the working branch and milestone for each task before editing. The workspace and lobby can be built while the owner reviews the original game rules. The hosted lobby needs access to a pilot service, and full gameplay needs the approved rules reference.
+Review the [product](product-and-gameplay.md) and [architecture](architecture.md) with the owner. Pin the working branch and milestone for each task before editing. Build and test the upgraded workspace on localhost while Vercel serves the root prototype. The workspace and lobby can proceed while the owner reviews the original rules. Full gameplay needs the approved rules reference.
 
 ## Milestones
 
 | Milestone | Work | Ready for review when |
 | --- | --- | --- |
 | 1. Workspace setup | Set up npm workspaces, the React browser app, and the Node service. Add the root commands from the [build contract](architecture.md#build-and-deployment-contract) as their features land. | From a clean checkout, run `npm ci`, `npm run check`, `npm run build`, and `npm start`. The app shell loads and `/healthz` responds. |
-| 2. Online room flow | Build guest entry, create room, copy invite, join by code or link, lobby presence, and host start permissions. Deploy this slice to the pilot service. | Two phones or browsers on different networks join the hosted lobby and see the same participant list. A separate room remains isolated. Verify the hosted network path here, before building the full deck. |
+| 2. Online room flow | Build guest entry, create room, copy invite, join by code or link, lobby presence, and host start permissions. | Two independent browser sessions join the same room on localhost and see the same participant list. A separate room remains isolated. |
 | 3. Playable match | Implement one complete game loop first, including deal, legal play or draw, turn advance, result, and rematch. Then add each approved original card effect in a small change with its rule tests. | Two independent sessions finish a full game and rematch. The engine tests cover each approved action and edge case. Each browser receives only its own hand. |
 | 4. Recovery and Meow identity | Handle refresh, disconnect, seat expiry, and host transfer. Add original card visuals and owner-approved Meow touches. Check phone layout, keyboard use, and audio controls. | A reconnect restores the correct hand and any pending decision. Friends can finish a game on separate devices. |
-| 5. Release | Run workspace type checks, build, rules and room tests, and browser tests in CI for the server-backed app. Document rollback and what happens to live rooms during a deployment. Cut over the published URL if the owner approves. | The owner has reviewed the gameplay and theme, and the release checklist below passes against the hosted build. |
+| 5. Release | Run workspace checks in CI and verify the compiled app locally. Document rollback and room lifecycle. Codex handles the [prototype cutover](implementation-phases.md#codex-only-prototype-cutover) after the owner is ready to verify the release target. | Local release checks pass first. Hosted checks and the public URL switch are verified by Codex after the production target is available. |
 
 Use focused branches and pull requests against `main`. Link each PR to the agreed milestone. Include reproduction steps and test results. For UI changes, add a short recording or screenshots of the affected flow. Ask the owner to review player-facing rule and theme decisions before merge.
 
@@ -46,6 +46,8 @@ Start a handoff with a self-contained brief. Use exact file paths and commands o
 - The hosted Source and License links work from a signed-out browser and match the shipped version. Review branding and asset provenance against the [release notes](release-and-licensing.md).
 
 ## Hosted playtest
+
+Run this during release preparation after local checks pass and the owner is ready to test the production candidate. Codex owns the verification and cutover. Antigravity can provide local evidence from its assigned phase.
 
 1. Open the same pilot URL on a laptop over Wi-Fi and a phone on mobile data. Create a room on one device and join it from the other using the invite. Repeat once with a typed code.
 2. Start a match, take turns on both devices, and confirm the discard, order, and hand counts agree after each move. Confirm each browser sees its own cards and that a full or started room rejects new guests.

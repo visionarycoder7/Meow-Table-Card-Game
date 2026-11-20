@@ -51,7 +51,7 @@ Player-visible states include lobby, active turn, pending player choice, match f
 - **`tests/e2e/`** — Multi-player browser flows and reconnect checks.
 - **`docs/`** — Product decisions, game rules, architecture, and contributor workflow.
 
-Use npm workspaces from the repository root. Keep the root prototype available as a reference during the rollout. After the replacement passes the multiplayer acceptance checks, the owner can choose whether to archive it or rely on Git history.
+Use npm workspaces from the repository root. Keep the root `index.html` and `vercel.json` as the live prototype build contract during local development. The upgraded Vite entry is `apps/web/index.html`. Codex retires the root file and updates the deployment configuration together at the [cutover gate](implementation-phases.md#codex-only-prototype-cutover). Git history retains the prototype for reference and rollback.
 
 ### Component-first frontend
 
@@ -81,9 +81,9 @@ Run these commands from the repository root. Phase 1 pins Node.js in `.nvmrc` an
 | `npm start` | Starts the compiled service and serves the browser build. |
 | `npm run test:e2e` | Starts a disposable local production build and exercises it with isolated browser sessions. |
 
-1. **Prototype.** The existing Vercel project deploys the static site through its native Git integration. GitHub Actions runs static verification. Keep the prototype available while the new app passes a hosted playtest. [Prototype deployment guide](../.github/vercel-autodeploy-general-guide.md)
-2. **Pilot.** Start dedicated hosting on a separate URL. For Render, use one web-service instance, build with `npm ci && npm run build`, start with `npm start`, set `HOST=0.0.0.0` alongside the provided `PORT`, and configure `GET /healthz` as the service health check. Serve the UI and Socket.IO from the same origin. Deploy during a quiet period because replacing the process drops in-memory matches. [Render web services](https://render.com/docs/web-services) · [Render WebSockets](https://render.com/docs/websocket)
-3. **Public URL decision.** After the pilot passes, the owner can share the pilot URL or keep Vercel as the public frontend with a separate socket service. If split hosting is required, explicitly configure the frontend's HTTPS socket endpoint and allow only the approved frontend origins on the service. Repeat the invite, reconnect, and mobile-network checks against that split deployment.
+1. **Development.** Use the upgraded app on localhost through Vite or the compiled Node server. Vercel continues publishing the root static prototype through its native Git integration. GitHub Actions verifies the static input while that input is live. [Prototype deployment guide](../.github/vercel-autodeploy-general-guide.md)
+2. **Release candidate.** After local release checks pass, use a separate candidate URL when the owner is ready for hosted testing. For Render, use one web-service instance, build with `npm ci && npm run build`, start with `npm start`, set `HOST=0.0.0.0` alongside the provided `PORT`, and configure `GET /healthz` as the service health check. Serve the UI and Socket.IO from the same origin. Deploy during a quiet period because replacing the process drops in-memory matches. [Render web services](https://render.com/docs/web-services) · [Render WebSockets](https://render.com/docs/websocket)
+3. **Public URL decision.** Once the release candidate passes, Codex prepares the agreed switch. Vercel can send visitors to a replacement Node URL or serve the built frontend if it has a verified production socket service. For split hosting, configure the HTTPS socket endpoint and allow approved frontend origins on the service. Repeat the invite, reconnect, and mobile-network checks against that configuration.
 
 Vercel’s WebSocket support is in public beta. Connections are pinned to a function instance and close when it reaches its maximum duration. Vercel’s own multi-client example uses Redis to coordinate instances. The pilot uses one long-running process so room state and sockets can stay together. [Vercel WebSocket announcement](https://vercel.com/changelog/websocket-support-is-now-in-public-beta) · [Vercel multi-client example](https://vercel.com/kb/guide/real-time-chat-websockets)
 

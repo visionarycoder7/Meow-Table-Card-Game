@@ -4,6 +4,8 @@ Read [README.md](README.md) for the current project state. Use [product and game
 
 Start by checking Git status and reading the files the task touches. Keep your changes within the assigned slice. The root `index.html` is the existing prototype. The workspace uses `apps/web/` and `apps/server/`. Add `packages/protocol/` when the first shared room messages are defined.
 
+Test the upgraded workspace on localhost. Keep the root `index.html` and `vercel.json` in place for Vercel until the [Codex-only prototype cutover](docs/implementation-phases.md#codex-only-prototype-cutover). Antigravity leaves those files and the prototype-serving Vercel settings alone. Codex verifies readiness and handles the removal and configuration switch together. The owner pushes manually.
+
 Put game rules on the server, render the authorized player view in the browser, and reuse the existing green, gold, and suit colors when building the new interface. Use the approved original rules when implementing the engine.
 
 Write straightforward code. Use names that match the project vocabulary, such as `roomCode`, `activeSeatId`, and `applyTurn`. Keep rule functions separate from socket delivery and React rendering. Follow an accepted action from validation to state change to the per-player view in one readable flow. Prefer ordinary functions and existing helpers. Extract shared code when reuse makes the callers easier to understand, and use comments to explain why a rule or ordering constraint exists.

@@ -47,6 +47,6 @@ Use text and consistent icons for buttons, card actions, alerts, activity messag
 | Disconnected players | Give players a short grace period to reclaim the same seat in the same tab. In the lobby, transfer host controls if needed. During a match, resolve an expired seat and any pending choice according to the approved rules. |
 | Gameplay and voice | Approve the original card set and signature mechanic. Confirm how prominent the Meow theme should be and provide a pronunciation reference if the game will use spoken audio. |
 
-Hosting access is needed for the first public lobby test. The original ruleset needs to be approved before implementing card effects. Workspace setup and the basic lobby can proceed independently from card balance. Include default actions for a disconnected or idle player, pending-choice expiry, and a match with no playable continuation in the rules reference before the full-match milestone.
+Build and test the workspace and lobby on localhost. Hosting access becomes necessary when the owner is ready for release-candidate testing. The original ruleset needs to be approved before implementing card effects. Include default actions for a disconnected or idle player, pending-choice expiry, and a match with no playable continuation in the rules reference before the full-match milestone.
 
 Matchmaking, accounts, rankings, chat, and permanent history are candidates for a later release. Short-lived reconnect sessions are part of the online room experience.

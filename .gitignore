@@ -5,6 +5,7 @@ build/
 *.tsbuildinfo
 .vite/
 .cache/
+.node-version
 
 # Tests and logs
 coverage/
@@ -33,3 +34,4 @@ Thumbs.db
 Desktop.ini
 *.swp
 *.vscode
+*vercel-autodeploy-general-guide.md
