@@ -8,7 +8,7 @@ Use the brand as a working name until the owner checks similar names and logos i
 
 ### Branding files and share metadata
 
-The upgraded app serves its [original SVG mark](../apps/web/public/branding/mark.svg), [editable social card](../apps/web/public/branding/social-card.svg), and their raster exports from `apps/web/public/branding/`. The artwork ships with the project under [AGPLv3](../LICENSE). It uses original geometry and system type with no bundled font files. Use the SVGs as the editable sources.
+The upgraded app serves its [original SVG mark](../frontend/public/branding/mark.svg), [editable social card](../frontend/public/branding/social-card.svg), and their raster exports from `frontend/public/branding/`. The artwork ships with the project under [AGPLv3](../LICENSE). It uses original geometry and system type with no bundled font files. Use the SVGs as the editable sources.
 
 | Asset | Export |
 | --- | --- |

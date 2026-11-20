@@ -6,8 +6,8 @@
     "node": "24.x"
   },
   "workspaces": [
-    "apps/server",
-    "apps/web"
+    "backend",
+    "frontend"
   ],
   "scripts": {
     "dev": "concurrently --kill-others --names server,web \"npm run dev --workspace @meow-table/server\" \"npm run dev --workspace @meow-table/web\"",

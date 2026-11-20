@@ -43,27 +43,27 @@ Player-visible states include lobby, active turn, pending player choice, match f
 | Disconnects | While a seat is within its grace period, the player can reclaim it with the resume credential. An explicit leave forfeits immediately. At grace expiry, remove the seat in the lobby or forfeit it in a match. Resolve pending choices through a server-owned default from the approved rules, then advance play. Timers check the current room and action state before applying an expiry. |
 | Lifecycle defaults | Start with a 60-second reconnect grace period and a 15-minute empty-room timeout. Transfer lobby or rematch host control to the earliest joined connected player when the current host leaves or their grace expires. Set a finite turn and choice deadline before the hosted playtest so a permanently idle seat cannot stall the room. |
 
-## Proposed repository layout
+## Repository layout
 
-- **`apps/web/`** — Vite entry HTML and React screens, styles, original visual assets, and socket client.
-- **`apps/server/`** — HTTP service, socket handlers, guest sessions, room lifecycle, and per-seat views. Keep card definitions, turn transitions, outcomes, and rule tests together in `apps/server/src/game/`.
-- **`packages/protocol/`** — Shared command and snapshot shapes, runtime validation, and error definitions.
-- **`tests/e2e/`** — Multi-player browser flows and reconnect checks.
+- **`frontend/`** — Vite entry HTML, React screens, styles, and original visual assets. The socket client lands with the room flow.
+- **`backend/`** — Node HTTP service and Socket.IO listener. Put room handlers, guest sessions, and per-seat views here as they land. Keep future rule transitions and tests together in `backend/src/game/`.
+- **`packages/protocol/`** — Planned for shared command and snapshot types and runtime validation.
+- **`tests/e2e/`** — Planned for multiplayer browser flows and reconnect checks.
 - **`docs/`** — Product decisions, game rules, architecture, and contributor workflow.
 
-Use npm workspaces from the repository root. Keep the root `index.html` and `vercel.json` as the live prototype build contract during local development. The upgraded Vite entry is `apps/web/index.html`. Codex retires the root file and updates the deployment configuration together at the [cutover gate](implementation-phases.md#codex-only-prototype-cutover). Git history retains the prototype for reference and rollback.
+Use npm workspaces from the repository root. Keep the root `index.html` and `vercel.json` as the live prototype build contract during local development. The upgraded Vite entry is `frontend/index.html`. Codex retires the root file and updates the deployment configuration together at the [cutover gate](implementation-phases.md#codex-only-prototype-cutover). Git history retains the prototype for reference and rollback.
 
 ### Component-first frontend
 
 | Folder | Responsibility |
 | --- | --- |
-| `apps/web/src/app/` | App shell, screen composition, and connection lifecycle. |
-| `apps/web/src/features/rooms/` | Home and lobby flows, room code, invite controls, player roster, and room errors. |
-| `apps/web/src/features/match/` | Table, card face, hand, draw and discard piles, player seats, turn status, pending choices, and results. |
-| `apps/web/src/components/` | Shared controls used across features, such as buttons, fields, and dialogs. |
-| `apps/web/src/styles/` | Tailwind v4 CSS entry and semantic theme tokens for palette, spacing, typography, focus, and motion. Put component-specific styles next to their components. |
+| `frontend/src/app/` | App shell, screen composition, and connection lifecycle. |
+| `frontend/src/features/rooms/` | Home and lobby flows, room code, invite controls, player roster, and room errors. |
+| `frontend/src/features/match/` | Table, card face, hand, draw and discard piles, player seats, turn status, pending choices, and results. |
+| `frontend/src/components/` | Shared controls used across features, such as buttons, fields, and dialogs. |
+| `frontend/src/styles/` | Tailwind v4 CSS entry and semantic theme tokens for palette, spacing, typography, focus, and motion. Put component-specific styles next to their components. |
 
-Build and review the individual controls and game pieces before composing the full screens. Keep feature components with their feature and extract a shared component when another feature has the same need. Give visual components typed props and callbacks so they can render representative states without a live server. A feature controller handles the authorized snapshot, connection state, and command submission. The game engine stays in `apps/server/src/game/`.
+Build and review the individual controls and game pieces before composing the full screens. Keep feature components with their feature and extract a shared component when another feature has the same need. Give visual components typed props and callbacks so they can render representative states without a live server. A feature controller handles the authorized snapshot, connection state, and command submission. The game engine stays in `backend/src/game/`.
 
 Follow the [frontend playbook](frontend-playbook.md) for Tailwind setup, component design, motion, and verification. The [Meow Table visual baseline](product-and-gameplay.md#visual-baseline) supplies the project palette.
 
@@ -77,13 +77,13 @@ Run these commands from the repository root. Phase 1 pins Node.js in `.nvmrc` an
 | `npm run dev` | Runs Vite and the Node service locally. Vite proxies game connections to the service. |
 | `npm run check` | Checks TypeScript across the workspace. |
 | `npm test` | Runs rules and room integration tests once those suites exist. |
-| `npm run build` | Builds the shared protocol, server, and browser in dependency order. |
+| `npm run build` | Builds the backend and frontend workspaces. Build the shared protocol first once it is added and needs a compile step. |
 | `npm start` | Starts the compiled service and serves the browser build. |
 | `npm run test:e2e` | Starts a disposable local production build and exercises it with isolated browser sessions. |
 
 1. **Development.** Use the upgraded app on localhost through Vite or the compiled Node server. Vercel continues publishing the root static prototype through its native Git integration. GitHub Actions verifies the static input while that input is live. [Prototype deployment guide](../.github/vercel-autodeploy-general-guide.md)
 2. **Release candidate.** After local release checks pass, use a separate candidate URL when the owner is ready for hosted testing. For Render, use one web-service instance, build with `npm ci && npm run build`, start with `npm start`, set `HOST=0.0.0.0` alongside the provided `PORT`, and configure `GET /healthz` as the service health check. Serve the UI and Socket.IO from the same origin. Deploy during a quiet period because replacing the process drops in-memory matches. [Render web services](https://render.com/docs/web-services) · [Render WebSockets](https://render.com/docs/websocket)
-3. **Public URL decision.** Once the release candidate passes, Codex prepares the agreed switch. Vercel can send visitors to a replacement Node URL or serve the built frontend if it has a verified production socket service. For split hosting, configure the HTTPS socket endpoint and allow approved frontend origins on the service. Repeat the invite, reconnect, and mobile-network checks against that configuration.
+3. **Public URL decision.** Once the release candidate passes, Codex prepares the agreed switch. Vercel can send visitors to a replacement Node URL or serve the built frontend from `frontend/` if it has a verified production socket service. For split hosting, implement a configurable public socket origin and allow approved frontend origins on the backend. Repeat the invite, reconnect, and mobile-network checks against that configuration.
 
 Vercel’s WebSocket support is in public beta. Connections are pinned to a function instance and close when it reaches its maximum duration. Vercel’s own multi-client example uses Redis to coordinate instances. The pilot uses one long-running process so room state and sockets can stay together. [Vercel WebSocket announcement](https://vercel.com/changelog/websocket-support-is-now-in-public-beta) · [Vercel multi-client example](https://vercel.com/kb/guide/real-time-chat-websockets)
 
@@ -91,8 +91,12 @@ Vercel’s WebSocket support is in public beta. Connections are pinned to a func
 
 | Option | When it fits | Trade-off |
 | --- | --- | --- |
+| Vercel frontend with a Node web service backend | The owner wants the frontend on Vercel and wants to keep Socket.IO. | Requires public backend URL wiring and cross-origin checks. |
 | Keep the browser-hosted PeerJS model | Static-only hosting is the primary constraint and guests can accept that the creator must stay online. | The host's browser holds all hands and the deck. Closing it ends play. |
 | Add durable storage behind the Node service | A release must recover active matches after restarts or deploys. | Persist state and seat identity with each accepted command, and restore pending choices and deadlines when the service comes back. |
-| Cloudflare Workers with Durable Objects | The team prefers a managed per-room runtime with built-in storage. | Adds Cloudflare-specific deployment and room lifecycle design. [Durable Objects overview](https://developers.cloudflare.com/durable-objects/) |
+| Cloudflare Workers with Durable Objects | The team prefers a managed per-room runtime with built-in storage. | Needs a Worker entry point, a compatible transport, per-room persistence, and tests for hibernation and reconnects. [Durable Object WebSockets](https://developers.cloudflare.com/durable-objects/best-practices/websockets/) |
+| Vercel frontend and Vercel Functions backend | The team prefers one hosting provider and is willing to adapt the backend. | Function lifetime limits and instance routing require shared state, coordination, and reconnect handling. [Vercel WebSocket behavior](https://vercel.com/kb/guide/do-vercel-serverless-functions-support-websocket-connections) |
 
 GitHub Pages can serve the prototype or a separately built frontend. The proposed Node service needs a host that runs a server and accepts WebSocket connections. [GitHub Pages overview](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
+
+The owner’s local `deployment.local.md`, if present, has the release setup steps. The current deployment target remains the static prototype until Codex verifies the replacement.

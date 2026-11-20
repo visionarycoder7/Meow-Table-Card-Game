@@ -35,7 +35,7 @@ results, and anything Codex still needs to verify.
 
 **Tracker:** A02. **Commit:** `feat: scaffold the Meow Table workspace`
 
-1. Set up npm workspaces and a root lockfile. Record the Node version. Provide root `dev`, `check`, `build`, and `start` scripts that run the actual apps.
+1. Use the root npm workspaces `frontend/` and `backend/` and the root lockfile. Record the Node version. Provide root `dev`, `check`, `build`, and `start` scripts that run the actual apps.
 2. Build a small React/Vite shell with Tailwind v4 and the existing green and gold palette. Start with a visual component and a screen that composes it. Add room controls in Phase 2 when they work.
 3. Attach Socket.IO to the Express HTTP listener. Add `GET /healthz` returning `{"status":"ok"}`. Configure Vite to proxy health and socket requests locally. Serve the compiled web app from the production server.
 4. Keep the root prototype and its publish path available. Introduce `packages/protocol/` in Phase 2 when the first room messages need it.
@@ -77,27 +77,27 @@ results, and anything Codex still needs to verify.
 **Tracker:** A10. **Commit:** `ci: verify the Meow Table multiplayer release`
 
 1. Add workspace checks to the existing CI workflow. Run type checks, the build, rule and room tests, and the relevant browser flows. Preserve the root prototype verification while Vercel serves it.
-2. Verify the compiled app locally with independent browser sessions. Document process restarts, room expiry, rollback, and how the Source and License links point to the shipped release.
+2. Verify the compiled app locally with independent browser sessions. Document process restarts, room expiry, rollback, and how the Source and License links point to the shipped release. Choose the hosting target with the owner. If the owner chooses split hosting or Cloudflare Workers, verify the required transport and room-state changes before public cutover. The owner's `deployment.local.md` contains provider steps if present.
 3. Once local release checks pass and the owner is ready to test hosting, Codex validates the production target with the [hosted playtest](contributor-workflow.md#hosted-playtest). Record the build revision, devices, networks, and results. Local readiness and hosted verification can be recorded separately.
 
 **Codex checks:** Finish, reconnect, and rematch on localhost first. Repeat these checks across two different networks on the owner-approved release target. Check a larger table and signed-out Source and License links. Mark the phase verified once the hosted evidence is recorded.
 
 ### Codex-only prototype cutover
 
-The root `index.html` is Vercel's live input, and `apps/web/index.html` is the upgraded Vite entry. Antigravity leaves the root `index.html`, `vercel.json`, and live project settings in place. It can implement and test assigned work in the workspace.
+The root `index.html` is Vercel's live input, and `frontend/index.html` is the upgraded Vite entry. Antigravity leaves the root `index.html`, `vercel.json`, and live project settings in place. It can implement and test assigned work in the workspace.
 
 Codex decides when the prototype can be retired based on evidence:
 
 1. The compiled localhost build passes the complete release flow. Verify room creation, joining by code and link, a full match under the approved rules, private hands, reconnect, and rematch. Record any prototype-only modes the owner approved deferring.
 2. The replacement has a verified production target that actually runs or reaches the multiplayer service. Agree on the public URL and rollback path with the owner. A static frontend needs a reachable production socket endpoint. Use the last working prototype deployment or commit as the rollback reference.
-3. Once those gates pass, remove the **root** `index.html` and update `vercel.json` for the agreed public target in the same change. Keep `apps/web/index.html`. Update the GitHub verification job and documentation that reference the root prototype. Replace any historical reference links in the local tracker with links to the preserved Git revision.
+3. Once those gates pass, remove the **root** `index.html` and update `vercel.json` for the agreed public target in the same change. Keep `frontend/index.html`. Update the GitHub verification job and documentation that reference the root prototype. Replace any historical reference links in the local tracker with links to the preserved Git revision.
 4. Verify the replacement build, deploy configuration, CI entry points, and user-facing Source and License links. Prepare the cutover for the owner's manual push. If any gate is open, retain the root prototype and its current Vercel configuration and record the missing evidence.
 
 ## Phase status
 
 | Phase | State | Evidence |
 | --- | --- | --- |
-| 1. Workspace | Verified | `npm ci`, `npm run check`, and `npm run build` passed. `npm start` served the compiled app, CSS and JS, `/healthz`, and a Socket.IO handshake. `npm run dev` served the app and proxied health and WebSockets. Chrome rendered the shell at 390 and 1280 CSS pixels. |
+| 1. Workspace | Verified | Clean install, type checks, and build passed after moving to `frontend/` and `backend/`. `npm start` served the app, its assets, health, and Socket.IO. `npm run dev` served the app and proxied health and WebSockets. The Phase 1 shell was reviewed at 390 and 1280 CSS pixels. |
 | 2. Rooms | Planned | Requires Phase 1. |
 | 3. Match | Planned | Requires the lobby and approved original rules. |
 | 4. Recovery and UI | Planned | Requires the match loop. |

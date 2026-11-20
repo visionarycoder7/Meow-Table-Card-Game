@@ -4,6 +4,8 @@ A browser card game for friends who want to create a private room, share a code 
 
 **Current state.** Phase 1 is verified. The server-backed workspace has a React shell and a Node service. Phase 2 adds private rooms and lobby presence.
 
+The React/Vite workspace is in `frontend/` and the Express/Socket.IO workspace is in `backend/`. The repository root holds the npm scripts and shared lockfile.
+
 [Vercel deployment setup](.github/vercel-autodeploy-general-guide.md)
 
 ## What we’re building
@@ -38,6 +40,10 @@ npm run dev
 Open [the Vite app](http://localhost:5173). The Express service and Socket.IO listen on port 3001. Vite forwards `/healthz` and `/socket.io` to that service.
 
 To exercise the production build locally, stop development and run `npm run check`, `npm run build`, then `npm start`. Open [the compiled app](http://127.0.0.1:3001). Use `PORT` to change the server port. Until cutover, use these local URLs for the upgraded app.
+
+## Future hosting
+
+For the first release, one Node web service can serve the frontend build and host live rooms on the same origin. A Vercel frontend with a separate backend is also possible. The owner’s local `deployment.local.md`, if present, has the dashboard settings and compares a Node host, Cloudflare Durable Objects, and Vercel Functions. See the [architecture](docs/architecture.md#alternatives-and-when-to-reconsider) for the trade-offs.
 
 ## License
 

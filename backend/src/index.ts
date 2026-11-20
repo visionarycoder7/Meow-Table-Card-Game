@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 
 const app = express();
 const httpServer = createServer(app);
-const webBuild = fileURLToPath(new URL('../../web/dist/', import.meta.url));
+const webBuild = fileURLToPath(new URL('../../frontend/dist/', import.meta.url));
 const port = Number(process.env.PORT ?? '3001');
 const host = process.env.HOST ?? '127.0.0.1';
 
