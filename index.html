@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>No Mercy Card Game</title>
+<title>Meow Table</title>
 <style>
 :root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#0e1a14;--fg:#eef3ef;--mut:#9db0a4}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%}
@@ -10,7 +10,7 @@ body{background:radial-gradient(ellipse at top,#1b3a2b,var(--bg));background-col
 h1{font-size:22px;margin:0}h3{margin:0 0 10px}.mut{color:var(--mut)}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:9px 14px;margin:3px;background:#ffd23f;color:#222;cursor:pointer}
-button.sec{background:#33473b;color:#fff}button.uno{background:#d72600;color:#fff;font-style:italic;font-size:18px;padding:10px 24px;border-radius:30px;box-shadow:0 0 12px #ffd23f}button:disabled{opacity:.4;cursor:not-allowed}
+button.sec{background:#33473b;color:#fff}button.meow{background:#ffd23f;color:#222;font-size:18px;padding:10px 24px}button:disabled{opacity:.4;cursor:not-allowed}
 .pl{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.pl div{background:#0006;border:2px solid #ffffff22;border-radius:10px;padding:8px 12px}
 .ic{position:absolute;left:0;right:0;bottom:15%;text-align:center;z-index:1;font-size:11px;font-style:normal;color:var(--c);font-weight:900}.card.big .ic{font-size:15px}
 .tag{position:absolute;top:-4px;left:50%;transform:translate(-50%,-100%);background:#d72600;color:#fff;font-weight:900;font-size:13px;padding:3px 10px;border-radius:8px;white-space:nowrap;z-index:6;opacity:0;animation:tagf 2.4s forwards;pointer-events:none}
@@ -20,7 +20,7 @@ button.sec{background:#33473b;color:#fff}button.uno{background:#d72600;color:#ff
 .felt{position:absolute;inset:7% 4%;border-radius:50%;background:radial-gradient(ellipse at center,#2d7048,#16402a);border:6px solid #0b2418;box-shadow:inset 0 0 50px #000a,0 12px 30px #000a}
 .seat{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;transition:opacity .3s}
 .fan{display:flex;height:36px;align-items:flex-end;justify-content:center}.fan em{color:#fff;font-size:12px;margin-left:8px;font-style:normal}
-.mc{width:22px;height:32px;margin-left:-11px;border-radius:4px;border:2px solid #fff;background:radial-gradient(ellipse at center,#c1121f 42%,#111 44%);box-shadow:0 1px 3px #0009}
+.mc{width:22px;height:32px;margin-left:-11px;border-radius:4px;border:2px solid #fff;background:repeating-linear-gradient(135deg,#244735 0 4px,#101d16 4px 8px);box-shadow:0 1px 3px #0009}
 .mc:first-child{margin-left:0}
 .chip{background:#000b;border:2px solid #ffffff22;border-radius:14px;padding:3px 10px;font-size:13px;white-space:nowrap}
 .chip b{color:#ffd23f}
@@ -36,14 +36,14 @@ button.sec{background:#33473b;color:#fff}button.uno{background:#d72600;color:#ff
 .info{text-align:center;font-size:14px;position:relative}
 .hand .card{transition:transform .15s}.hand .card.ok:hover{transform:translateY(-16px)}
 @media (max-width:600px){.mc{width:16px;height:24px;margin-left:-8px}.fan{height:28px}.dirring{display:none}}
-.card{position:relative;width:64px;height:96px;border-radius:10px;background:var(--c);border:4px solid #fff;color:#fff;flex:none;overflow:hidden;font-family:"Arial Black",Impact,system-ui,sans-serif;font-style:italic;box-shadow:0 3px 8px #0008;user-select:none}
-.card::before{content:"";position:absolute;left:10%;top:6%;width:80%;height:88%;background:#fff;border-radius:50%;transform:rotate(24deg)}
+.card{position:relative;width:64px;height:96px;border-radius:10px;background:var(--c);border:4px solid #fff;color:#fff;flex:none;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-weight:800;box-shadow:0 3px 8px #0008;user-select:none}
+.card::before{content:"";position:absolute;inset:16% 10%;background:#eef3ef;border-radius:5px}
 .card b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--c);text-shadow:2px 2px 0 #0004;z-index:1}
 .card .k{position:absolute;font-size:12px;z-index:1;text-shadow:1px 1px 0 #0007;line-height:1}
 .card .k:first-of-type{top:4px;left:5px}.card .k.r{bottom:4px;right:5px;transform:rotate(180deg)}
 .card.sm b{font-size:18px}
 .card.w{background:#111}.card.w::before{background:conic-gradient(#d72600 0 25%,#0b6fd1 0 50%,#2a9d48 0 75%,#edb500 0)}.card.w b{color:#fff;text-shadow:0 0 4px #000,2px 2px 0 #000}
-.card.back::before{background:#c1121f}.card.back b{color:#ffd23f;font-size:13px;line-height:1.1;text-align:center;text-shadow:1px 1px 0 #000}
+.card.back{background:#101d16}.card.back::before{background:#244735;border:1px solid #7b9b83}.card.back b{color:#ffd23f;font-size:13px;line-height:1.1;text-align:center;text-shadow:1px 1px 0 #000}
 .card.back i{position:absolute;bottom:3px;width:100%;text-align:center;font-size:9px;z-index:1;font-style:normal}
 .card.big{width:84px;height:126px}.card.big b{font-size:38px}.card.big.sm b{font-size:24px}.card.big .k{font-size:15px}.card.big.back b{font-size:16px}
 .fly{position:fixed;z-index:20;pointer-events:none}.fly .card{width:100%;height:100%}
@@ -59,7 +59,7 @@ button.sec{background:#33473b;color:#fff}button.uno{background:#d72600;color:#ff
 .row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
 input[type=text]{font:inherit;padding:8px;border-radius:8px;border:1px solid #4a6155;background:#0e1a14;color:#fff;width:150px}
 details{margin-top:16px;background:#0005;padding:10px 14px;border-radius:10px;line-height:1.5}
-</style><script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body><div id="app"></div>
+.project-links{text-align:center;padding:8px 12px 20px;color:var(--mut);font-size:13px}.project-links a{color:var(--fg);margin:0 6px}</style><script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body><div id="app"></div><footer class="project-links"><a href="./index.html" download="meow-table-source.html">Source</a><a href="./LICENSE">License</a></footer>
 <script>
 const C={R:'#d72600',Y:'#d99a00',G:'#2a9d48',B:'#0b6fd1',W:'#222'};
 const NAMES={R:'Red',Y:'Yellow',G:'Green',B:'Blue'};
@@ -84,7 +84,7 @@ const desc=c=>(c.color!=='W'?NAMES[c.color]+' ':'')+(/^\d$/.test(c.type)?c.type:
 const act=()=>G.pl.map((p,i)=>i).filter(i=>!G.pl[i].out);
 function nxt(i){const n=G.pl.length;do{i=(i+G.dir+n)%n}while(G.pl[i].out);return i}
 function dr(){if(!G.deck.length){const t=G.disc.pop();G.deck=sh(G.disc.concat(G.aside||[]));G.aside=[];G.disc=[t]}return G.deck.pop()||null}
-function log(s){if(/shouts UNO/.test(s))sfx.uno();else if(/skipped/.test(s))sfx.skip();else if(/forgot/.test(s))sfx.buzz();G.lg.push(s);G.lg=G.lg.slice(-4)}
+function log(s){if(/shouts Meow/.test(s))sfx.meow();else if(/skipped/.test(s))sfx.skip();else if(/forgot/.test(s))sfx.buzz();G.lg.push(s);G.lg=G.lg.slice(-4)}
 function canPlay(c){const t=G.top;if(G.pend)return dv(c)>0&&dv(c)>=dv(t);return c.color==='W'||c.color===G.color||c.type===t.type}
 const hasPlay=p=>p.hand.some(canPlay);
 
@@ -96,11 +96,11 @@ function start(list){
  G.disc=[c];G.top=c;G.color=c.color;log('Game started. First card: '+desc(c));
  render();tick()}
 
-function mercy(){
- G.pl.forEach(p=>{if(!p.out&&p.hand.length>=25){p.out=true;G.aside=(G.aside||[]).concat(p.hand);p.hand=[];log('💀 '+p.name+' reached 25 cards and is out (Mercy Rule)')}});
+function applyHandLimit(){
+ G.pl.forEach(p=>{if(!p.out&&p.hand.length>=25){p.out=true;G.aside=(G.aside||[]).concat(p.hand);p.hand=[];log('💀 '+p.name+' reached 25 cards and is out (hand limit)')}});
  const a=act();if(a.length===1&&G.win===null)G.win=a[0]}
-function callUno(){if(!canAct())return;const p=G.pl[G.cur];if(p.hand.length!==2||p.uno)return;if(NET&&NET.role==='client')return netSend({a:'uno'});p.uno=true;log('📣 '+p.name+' shouts UNO!');render()}
-function end(skip=0,from=G.cur){G.pl.forEach(q=>q.uno=false);let c=from;for(let k=0;k<=skip;k++)c=nxt(c);G.cur=c;G.revealed=false;render();tick()}
+function callMeow(){if(!canAct())return;const p=G.pl[G.cur];if(p.hand.length!==2||p.meow)return;if(NET&&NET.role==='client')return netSend({a:'meow'});p.meow=true;log('📣 '+p.name+' shouts Meow!');render()}
+function end(skip=0,from=G.cur){G.pl.forEach(q=>q.meow=false);let c=from;for(let k=0;k<=skip;k++)c=nxt(c);G.cur=c;G.revealed=false;render();tick()}
 
 function play(i,card,chosen,tgt){
  const p=G.pl[i],t=card.type;const el=document.querySelector('[data-id="'+card.id+'"]');G.fl={h:cardH(card),a:el?el.getBoundingClientRect():ctr('#opp'+i),c:card,i};
@@ -108,7 +108,7 @@ function play(i,card,chosen,tgt){
  if(card.color!=='W')G.color=card.color;else if(chosen)G.color=chosen;
  log(p.name+' played '+desc(card)+(card.color==='W'&&chosen?' → '+NAMES[chosen]:''));
  if(t==='discard'){const ex=p.hand.filter(c=>c.color===card.color);p.hand=p.hand.filter(c=>c.color!==card.color);G.disc.unshift(...ex);if(ex.length)log(p.name+' discarded '+ex.length+' more '+NAMES[card.color]+' card(s)')}
- const forgot=p.hand.length===1&&!p.uno;
+ const forgot=p.hand.length===1&&!p.meow;
  if(!p.hand.length){G.win=i;return render()}
  let skip=0,again=false;
  if(t==='skip')skip=1;
@@ -118,9 +118,9 @@ function play(i,card,chosen,tgt){
  if(t==='7'&&tgt!=null){const a=G.pl[tgt];[p.hand,a.hand]=[a.hand,p.hand];log(p.name+' swapped hands with '+a.name)}
  if(t==='0'){const o=[i];let j=nxt(i);while(j!==i){o.push(j);j=nxt(j)}
   const h=o.map(k=>G.pl[k].hand);o.forEach((k,n)=>G.pl[k].hand=h[(n-1+o.length)%o.length]);log('All hands rotate!')}
- if(forgot){log('⚠️ '+p.name+' forgot to call UNO and draws 2!');G.fd={n:2,to:i};for(let k=0;k<2;k++){const c=dr();if(!c)break;p.hand.push(c)}}
+ if(forgot){log('⚠️ '+p.name+' forgot to call Meow and draws 2!');G.fd={n:2,to:i};for(let k=0;k<2;k++){const c=dr();if(!c)break;p.hand.push(c)}}
  G.ban=mkBan(i,t,skip,tgt);
- mercy();if(G.win!==null)return render();
+ applyHandLimit();if(G.win!==null)return render();
  if(t==='roul'){const w=nxt(i);G.modal={type:'roul',who:w};render();
   if(G.pl[w].bot)setTimeout(()=>roul(botColor(G.pl[w])),1000);return}
  if(again){render();tick();return}
@@ -136,13 +136,13 @@ function roul(col){if(NET&&NET.role==='client')return netSend({a:'roul',col});
  const w=G.modal.who;G.modal=null;G.color=col;let n=0;
  while(true){const c=dr();if(!c)break;G.pl[w].hand.push(c);n++;if(c.color===col)break}
  log(G.pl[w].name+' chose '+NAMES[col]+' and drew '+n+' card(s), turn skipped');G.fd={n,to:w};
- mercy();if(G.win!==null)return render();end(0,w)}
+ applyHandLimit();if(G.win!==null)return render();end(0,w)}
 
 function drawAct(i){
  const p=G.pl[i];let pen=G.pend>0;
  if(pen){log(p.name+' drew '+G.pend+' (penalty)');G.fd={n:G.pend,to:i};for(let k=0;k<G.pend;k++){const c=dr();if(!c)break;p.hand.push(c)}G.pend=0}
  else{let n=0;while(true){const c=dr();if(!c)break;p.hand.push(c);n++;if(canPlay(c)||p.hand.length>=25)break}log(p.name+' drew '+n+' card(s)');G.fd={n,to:i}}
- mercy();if(G.win!==null)return render();
+ applyHandLimit();if(G.win!==null)return render();
  if(pen||p.out||!hasPlay(p))return end(0);
  render();tick()}
 
@@ -175,7 +175,7 @@ function botMove(){
   if(c.type==='7')s+=p.hand.length>minO?1.5:-3;
   if(c.color==='W')s-=1;return s};
  opts.sort((a,b)=>sc(b)-sc(a));const c=opts[0];
- if(p.hand.length===2){p.uno=Math.random()>.15;if(p.uno)log('📣 '+p.name+' shouts UNO!')}
+ if(p.hand.length===2){p.meow=Math.random()>.15;if(p.meow)log('📣 '+p.name+' shouts Meow!')}
  play(i,c,c.color==='W'?botColor(p):null,c.type==='7'?others[0]:null)}
 
 /* UI */
@@ -184,7 +184,7 @@ const ic=c=>c.type==='7'?'<em class="ic">\u21c4</em>':c.type==='0'?'<em class="i
 function cardH(c,extra='',click=''){const f=face(c);return `<div data-id="${c.id}" class="card ${c.color==='W'?'w':''} ${f.length>2?'sm':''} ${extra}" style="--c:${C[c.color]}" title="${desc(c)}" ${click}><span class="k">${f}</span><b>${f}</b><span class="k r">${f}</span>${ic(c)}</div>`}
 function seat(d){if(S.length+d<2||S.length+d>6)return;if(d>0)S.push({name:'Bot '+S.length,bot:true});else S.pop();render()}
 function go(){start(S.map((s,i)=>({name:esc(s.name.trim()||'Player '+(i+1)),bot:s.bot})))}
-function setupH(){return `<h1>No Mercy</h1>
+function setupH(){return `<h1>Meow Table</h1>
 <p class="mut">Pass-and-play with friends on one device, with optional bots. Untick “Bot” for each real player (2–6 seats).</p>
 ${S.map((s,i)=>`<div class="row"><input type="text" maxlength="12" value="${esc(s.name)}" oninput="S[${i}].name=this.value"><label><input type="checkbox" ${s.bot?'checked':''} onchange="S[${i}].bot=this.checked"> Bot</label></div>`).join('')}
 <div class="row"><button class="sec" onclick="seat(1)">+ Seat</button><button class="sec" onclick="seat(-1)">− Seat</button><button class="sec" onclick="SCR='menu';render()">Back</button><button onclick="go()">Start game</button></div>
@@ -195,8 +195,8 @@ ${S.map((s,i)=>`<div class="row"><input type="text" maxlength="12" value="${esc(
 <b>Discard All:</b> dump every card of that color from your hand. <b>Skip Everyone:</b> play again.<br>
 <b>Wild Color Roulette:</b> next player picks a color and draws until it appears, then loses their turn.<br>
 <b>No playable card:</b> draw until you get one you can play.<br>
-<b>UNO call:</b> tap UNO! while you hold 2 cards, before you play one. Forget, and you draw 2 after your play leaves you with 1 card.<br>
-<b>Mercy:</b> reach 25 cards and you are out. Empty your hand (or be last standing) to win.</p></details>`}
+<b>Last-card call:</b> tap Meow! while you hold 2 cards, before you play one. Forget, and you draw 2 after your play leaves you with 1 card.<br>
+<b>Hand limit:</b> reach 25 cards and you are out. Empty your hand (or be last standing) to win.</p></details>`}
 
 /* ---- online rooms: the host browser runs the rules, friends send actions ---- */
 const RC='abcdefghjkmnpqrstuvwxyz23456789',rnd=n=>Array.from({length:n},()=>RC[Math.random()*RC.length|0]).join('');
@@ -223,7 +223,7 @@ function netAdapter(role,peer){
  return{rm,wire,setHost(c){hostConn=c}}}
 function openRoom(code,role){return new Promise(res=>{
  if(typeof Peer==='undefined'){alert('Could not load the connection library. Check your internet connection and reload.');return res(false)}
- const tok=myTok(),pid='nomercy-'+code,peer=role==='host'?new Peer(pid):new Peer();let done=false;
+ const tok=myTok(),pid='meow-table-'+code,peer=role==='host'?new Peer(pid):new Peer();let done=false;
  const fail=m=>{if(done)return;done=true;clearTimeout(to);try{peer.destroy()}catch(e){}alert(m);res(false)};
  const to=setTimeout(()=>fail(role==='host'?'Could not reach the connection server. Try again.':'Could not connect to that room. Check the code and try again.'),12000);
  peer.on('error',e=>fail(e.type==='unavailable-id'?'That room code is already taken. Try again.':e.type==='peer-unavailable'?'No room found with that code.':'Connection error ('+e.type+').'));
@@ -258,12 +258,12 @@ function onAct(d){
  if(d.a==='roul'){if(G.modal&&G.modal.type==='roul'&&G.modal.who===i&&isCol(d.col))roul(d.col);return}
  if(G.modal||G.cur!==i)return;
  if(d.a==='draw'){if(G.pend>0||!hasPlay(p))drawAct(i);return}
- if(d.a==='uno'){if(p.hand.length===2&&!p.uno){p.uno=true;log('\ud83d\udce3 '+p.name+' shouts UNO!');render()}return}
+ if(d.a==='meow'){if(p.hand.length===2&&!p.meow){p.meow=true;log('\ud83d\udce3 '+p.name+' shouts Meow!');render()}return}
  if(d.a==='play'){const c=p.hand.find(x=>x.id===d.id);if(!c||!canPlay(c))return;let col=null,tgt=null;
   if(c.type==='7'){tgt=d.tgt;if(!Number.isInteger(tgt)||tgt===i||!G.pl[tgt]||G.pl[tgt].out)return}
   else if(c.color==='W'&&c.type!=='roul'){col=d.col;if(!isCol(col))return}
   play(i,c,col,tgt)}}
-function viewFor(i){const p=G.pl[i];return{me:i,hand:p.hand.map(enc),pl:G.pl.map(q=>({name:q.name,bot:q.bot,out:q.out,uno:q.uno,n:q.hand.length})),top:enc(G.top),col:G.color,dir:G.dir,pend:G.pend,cur:G.cur,win:G.win,dk:G.deck.length,lg:G.lg,rm:G.modal&&G.modal.type==='roul'&&G.modal.who===i?{who:i}:null,ev:EV}}
+function viewFor(i){const p=G.pl[i];return{me:i,hand:p.hand.map(enc),pl:G.pl.map(q=>({name:q.name,bot:q.bot,out:q.out,meow:q.meow,n:q.hand.length})),top:enc(G.top),col:G.color,dir:G.dir,pend:G.pend,cur:G.cur,win:G.win,dk:G.deck.length,lg:G.lg,rm:G.modal&&G.modal.type==='roul'&&G.modal.who===i?{who:i}:null,ev:EV}}
 function bcast(){if(!NET||NET.role!=='host'||!G)return;
  if(G.fl||G.fd)EV={seq:++SEQ,fl:G.fl&&G.fl.c?{i:G.fl.i,c:enc(G.fl.c)}:null,fd:G.fd?{n:Math.min(G.fd.n,6),to:G.fd.to}:null,ban:G.ban&&!G.ban.sent?(G.ban.sent=true,{items:G.ban.items}):null};
  G.pl.forEach((p,i)=>{if(!p.bot&&p.tok&&i!==ME)NET.rm.emit('state',{to:p.tok,v:viewFor(i)})})}
@@ -284,12 +284,12 @@ function applyView(v){
  if(v.ev&&v.ev.seq>NET.seq){NET.seq=v.ev.seq;
   if(v.ev.fl){const c=tk(v.ev.fl.c),el=document.querySelector('[data-id="'+c.id+'"]');fl={h:cardH(c),a:el?el.getBoundingClientRect():ctr(v.ev.fl.i===v.me?'.hand':'#opp'+v.ev.fl.i),c,i:v.ev.fl.i}}
   if(v.ev.fd)fd=v.ev.fd;ban=v.ev.ban?{t:performance.now(),items:v.ev.ban.items}:null}
- G={pl:v.pl.map((q,i)=>({name:q.name,bot:q.bot,out:q.out,uno:q.uno,hand:i===v.me?v.hand.map(tk):Array(q.n).fill(0)})),cur:v.cur,dir:v.dir,pend:v.pend,color:v.col,top:tk(v.top),deck:Array(v.dk),win:v.win,lg:v.lg,humans:1,revealed:true,modal:v.rm?{type:'roul',who:v.rm.who}:(lm&&v.cur===v.me&&v.win===null?lm:null),fl,fd,ban};
+ G={pl:v.pl.map((q,i)=>({name:q.name,bot:q.bot,out:q.out,meow:q.meow,hand:i===v.me?v.hand.map(tk):Array(q.n).fill(0)})),cur:v.cur,dir:v.dir,pend:v.pend,color:v.col,top:tk(v.top),deck:Array(v.dk),win:v.win,lg:v.lg,humans:1,revealed:true,modal:v.rm?{type:'roul',who:v.rm.who}:(lm&&v.cur===v.me&&v.win===null?lm:null),fl,fd,ban};
  ME=v.me;render()}
 function leaveRoom(){clearTimeout(T);
  if(NET){clearInterval(NET.int);clearTimeout(NET.to);NET.us.forEach(u=>{try{u()}catch(e){}});try{NET.rm.leave()}catch(e){}}
  NET=null;ME=-1;G=null;SCR='menu';render()}
-function menuH(){return `<h1>No Mercy</h1><p class="mut">Play online with friends in a room (2–6 players), or offline on one device.</p>
+function menuH(){return `<h1>Meow Table</h1><p class="mut">Play online with friends in a room (2–6 players), or offline on one device.</p>
 <div class="row"><input id="pname" type="text" maxlength="12" placeholder="Your name" value="${esc(MYNAME)}" oninput="MYNAME=this.value"></div>
 <div class="row"><button onclick="createRoom()">Create room</button></div>
 <div class="row"><input id="rcode" type="text" maxlength="8" placeholder="Room code" style="text-transform:uppercase"><button class="sec" onclick="joinRoom()">Join room</button></div>
@@ -310,7 +310,7 @@ function arena(cur){
   const me=(NET||G.humans===1)&&i===hi,m=Math.min(p.hand.length,10);const bn=G.ban&&performance.now()-G.ban.t<2400?G.ban.items.find(x=>x.i===i):null,tag=bn?`<div class="tag" style="animation-delay:-${((performance.now()-G.ban.t)/1000).toFixed(2)}s">${bn.txt}</div>`:'';
   const fan=me?'':Array.from({length:m},(_,j)=>{const a=(j-(m-1)/2)*7;return `<span class="mc" style="transform:rotate(${a}deg) translateY(${Math.abs(a)*.35}px)"></span>`}).join('')+(p.hand.length>10?`<em>+${p.hand.length-10}</em>`:'');
   return `<div id="opp${i}" class="seat ${i===G.cur&&G.win===null?'cur':''} ${p.out?'out':''} ${p.hand.length>=20?'warn':''}" style="left:${x}%;top:${y}%">${tag}<div class="fan">${fan}</div><div class="chip" style="animation-delay:${ph(1.8)}">${p.name}${p.bot?' \ud83e\udd16':''} \u00b7 <b>${p.hand.length}</b>/25</div></div>`}).join('');
- return `<div class="arena"><div class="felt"></div>${seats}<div class="center"><div class="dirring ${G.dir<0?'rev':''}" style="animation-delay:${ph(16)}"></div><div class="cc"><div id="deck" class="bob" style="animation-delay:${ph(4)}"><div class="card back big"><b>NO<br>MERCY</b><i>${G.deck.length} left</i></div></div><div id="disc">${cardH(G.top,'big')}</div></div><div class="info">Color: <span class="dot" style="background:${C[G.color]}"></span> <b>${NAMES[G.color]}</b>${G.pend?`<div class="pend" style="margin-top:6px">+${G.pend} to draw!</div>`:''}<div style="margin-top:4px">Turn: <b>${G.pl[G.cur].name}</b></div></div></div></div>`}
+ return `<div class="arena"><div class="felt"></div>${seats}<div class="center"><div class="dirring ${G.dir<0?'rev':''}" style="animation-delay:${ph(16)}"></div><div class="cc"><div id="deck" class="bob" style="animation-delay:${ph(4)}"><div class="card back big"><b>MEOW<br>TABLE</b><i>${G.deck.length} left</i></div></div><div id="disc">${cardH(G.top,'big')}</div></div><div class="info">Color: <span class="dot" style="background:${C[G.color]}"></span> <b>${NAMES[G.color]}</b>${G.pend?`<div class="pend" style="margin-top:6px">+${G.pend} to draw!</div>`:''}<div style="margin-top:4px">Turn: <b>${G.pl[G.cur].name}</b></div></div></div></div>`}
 function guideH(){return `<details class="guide"><summary>Card guide</summary><p>
 <b>7 \u21c4 Swap:</b> swap hands with a player you choose.<br><b>0 \u21bb Pass:</b> every hand moves to the next player in the direction of play.<br>
 <b>\u2298 Skip:</b> next player loses their turn.<br><b>\u2298\u2298 Skip Everyone:</b> everyone else is skipped, you play again.<br>
@@ -322,12 +322,12 @@ function render(){
  const cur=G.pl[G.cur];
  const v=NET?ME:G.humans===1?G.pl.findIndex(p=>!p.bot):(!cur.bot&&G.revealed?G.cur:-1);
  const mine=v>=0&&v===G.cur&&G.win===null&&!G.modal;
- let h=`<div class="bar"><h1>No Mercy</h1><div><span class="mut">${G.dir===1?'↻ clockwise':'↺ counter-clockwise'} · deck ${G.deck.length}</span> <button class="sec" onclick="ac();mute=!mute;render()">${mute?'🔇':'🔊'}</button><button class="sec" onclick="if(confirm('Quit to setup?')){leaveRoom()}">Menu</button></div></div>`;
+ let h=`<div class="bar"><h1>Meow Table</h1><div><span class="mut">${G.dir===1?'↻ clockwise':'↺ counter-clockwise'} · deck ${G.deck.length}</span> <button class="sec" onclick="ac();mute=!mute;render()">${mute?'🔇':'🔊'}</button><button class="sec" onclick="if(confirm('Quit to setup?')){leaveRoom()}">Menu</button></div></div>`;
  h+=arena(cur);
  h+=`<div class="log">${G.lg.map(esc2).join('<br>')}</div>`;
  if(v>=0){const hand=[...G.pl[v].hand].sort((x,y)=>('RYGBW'.indexOf(x.color)-'RYGBW'.indexOf(y.color))||(x.type>y.type?1:-1));
   h+=`<div class="hand">${hand.map(c=>{const ok=mine&&canPlay(c);return cardH(c,mine?(ok?'ok':'no'):'',ok?`onclick="pick(${c.id})"`:'')}).join('')}</div>`;
-  if(mine)h+=`<div style="text-align:center"><button class="uno" onclick="callUno()" ${G.pl[v].uno||G.pl[v].hand.length!==2?'disabled':''}>${G.pl[v].uno?'UNO! ✓':'UNO!'}</button><button onclick="doDraw()" ${!G.pend&&hasPlay(G.pl[v])?'disabled':''}>${G.pend?'Draw '+G.pend+' (take penalty)':'Draw card(s)'}</button></div>`}
+  if(mine)h+=`<div style="text-align:center"><button class="meow" onclick="callMeow()" ${G.pl[v].meow||G.pl[v].hand.length!==2?'disabled':''}>${G.pl[v].meow?'Meow! ✓':'Meow!'}</button><button onclick="doDraw()" ${!G.pend&&hasPlay(G.pl[v])?'disabled':''}>${G.pend?'Draw '+G.pend+' (take penalty)':'Draw card(s)'}</button></div>`}
  else h+=`<p class="mut" style="text-align:center">${G.humans>1?'Hands hidden between turns.':'Watching…'}</p>`;
  h+=guideH();let ov='';
  if(G.win!==null)ov=`<div class="ov"><div class="box"><h3>🏆 ${G.pl[G.win].name} wins!</h3>${NET?(NET.role==='host'?'<button onclick="hostStart()">Play again</button>':'<p class="mut">Waiting for the host…</p>')+'<button class="sec" onclick="leaveRoom()">Leave room</button>':'<button onclick="go()">Play again</button><button class="sec" onclick="G=null;render()">Change players</button>'}</div></div>`;
@@ -343,7 +343,7 @@ let AC=null,mute=false;
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(AC.state==='suspended')AC.resume();return AC}
 function noise(t0,dur,f0,f1,vol){const a=ac();if(!a||mute)return;const n=a.sampleRate*dur|0,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;const t=a.currentTime+t0;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+dur);const g=a.createGain();g.gain.value=vol;s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
 function tone(f0,f1,dur,type,vol,t0=0){const a=ac();if(!a||mute)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur)}
-const sfx={playGo(){noise(0,.3,900,4200,.45)},playEnd(){tone(170,55,.14,'sine',.55);noise(0,.06,3000,1500,.5)},drawGo(){noise(0,.14,2800,1500,.3)},drawEnd(){noise(0,.05,2000,1000,.25)},uno(){tone(660,660,.12,'triangle',.3);tone(880,880,.18,'triangle',.3,.12)},buzz(){tone(130,90,.3,'sawtooth',.18)},skip(){tone(520,180,.22,'square',.12)}};
+const sfx={playGo(){noise(0,.3,900,4200,.45)},playEnd(){tone(170,55,.14,'sine',.55);noise(0,.06,3000,1500,.5)},drawGo(){noise(0,.14,2800,1500,.3)},drawEnd(){noise(0,.05,2000,1000,.25)},meow(){tone(660,660,.12,'triangle',.3);tone(880,880,.18,'triangle',.3,.12)},buzz(){tone(130,90,.3,'sawtooth',.18)},skip(){tone(520,180,.22,'square',.12)}};
 addEventListener('pointerdown',()=>ac(),{once:true});
 function ctr(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{left:r.left+r.width/2-32,top:r.top+r.height/2-48,width:64,height:96}}
 function fly(html,a,b,ms,delay,done,snd){
@@ -362,6 +362,6 @@ function fly(html,a,b,ms,delay,done,snd){
 function anim(){
  if(G.fl){const f=G.fl,d=$('#disc');G.fl=null;if(d&&f.a){d.style.visibility='hidden';fly(f.h,f.a,d.getBoundingClientRect(),560,0,()=>{d.style.visibility=''},'play')}}
  if(G.fd){const f=G.fd,dk=$('#deck');G.fd=null;const hv=NET?f.to===ME:(G.humans===1&&!G.pl[f.to].bot);const t=hv?ctr('.hand'):ctr('#opp'+f.to);
-  if(dk&&t)for(let k=0;k<Math.min(f.n,6);k++)fly('<div class="card back"><b>NO<br>MERCY</b></div>',dk.getBoundingClientRect(),t,420,k*120,null,'draw')}}
+  if(dk&&t)for(let k=0;k<Math.min(f.n,6);k++)fly('<div class="card back"><b>MEOW<br>TABLE</b></div>',dk.getBoundingClientRect(),t,420,k*120,null,'draw')}}
 render();
 </script></body></html>
