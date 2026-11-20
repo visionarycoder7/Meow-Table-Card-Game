@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { parseRoomCommand, roomCapacity } from '@meow-table/protocol';
+import { parseRoomCommand, roomCapacity, seatExpiredCode, seatReplacedCode } from '@meow-table/protocol';
 import type { RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
 import { applyTurn, expireTurn, forfeitSeats, matchView, rematchOpener, startMatch } from './game';
 import type { Match } from './game';
@@ -67,7 +67,7 @@ export class Room extends DurableObject<Env> {
       const lobby = await this.ctx.storage.get<Lobby>(lobbyKey);
       if (peer.type === 'pending') return this.admit(socket, peer, command, lobby);
       if (!lobby?.players.some(({ id }) => id === peer.seatId)) {
-        return this.reject(socket, 'Your seat has expired.', true);
+        return this.reject(socket, 'Your seat has expired.', seatExpiredCode);
       }
 
       if (command.type === 'leave') {
@@ -154,6 +154,13 @@ export class Room extends DurableObject<Env> {
       } else if (!bots.pop()) {
         return this.reject(socket, 'There are no bots to remove.');
       }
+    } else if (command.type === 'return-lobby') {
+      if (lobby.hostSeatId !== seatId || !lobby.match?.result) {
+        return this.reject(socket, 'Only the host can reopen a finished table.');
+      }
+      delete lobby.match;
+      delete lobby.matchRevision;
+      lobby.locked = false;
     } else if (command.type === 'start' || command.type === 'rematch') {
       if (lobby.hostSeatId !== seatId) return this.reject(socket, 'Only the host can start a match.');
       const previous = lobby.match;
@@ -180,24 +187,28 @@ export class Room extends DurableObject<Env> {
     command: RoomCommand,
     lobby: Lobby | undefined,
   ) {
-    if (peer.expiresAt <= Date.now()) return this.reject(socket, 'Join request expired.', true);
+    const now = Date.now();
+    if (peer.expiresAt <= now) return this.reject(socket, 'Join request expired.', true);
+    // An alarm can run after a resume arrives, so settle expired choices and seats before sending a snapshot.
+    if (lobby && this.expireMatchAndSeats(lobby, now)) {
+      await this.saveAndBroadcast(lobby, undefined, Boolean(lobby.match));
+      if (!lobby.players.length) lobby = undefined;
+    }
     if (command.type === 'resume' && lobby && !peer.create) {
       const seat = lobby.players.find(({ token }) => token === command.token);
-      if (!seat || (seat.expiresAt !== null && seat.expiresAt <= Date.now())) {
-        return this.reject(socket, 'Your seat has expired.', true);
-      }
+      if (!seat) return this.reject(socket, 'Your seat has expired.', seatExpiredCode);
       for (const previous of this.ctx.getWebSockets()) {
         const oldPeer = attachment(previous);
         if (oldPeer?.type === 'seat' && oldPeer.seatId === seat.id) {
           previous.serializeAttachment(null);
-          previous.close(4000, 'Seat resumed');
+          previous.close(seatReplacedCode, 'Seat resumed');
         }
       }
       seat.expiresAt = null;
       return this.establishSession(socket, lobby, seat);
     }
 
-    if (command.type !== 'enter') return this.reject(socket, 'Your seat has expired.', true);
+    if (command.type !== 'enter') return this.reject(socket, 'Your seat has expired.', seatExpiredCode);
     if (!peer.create && !lobby) return this.reject(socket, 'Room not found.', true);
     if (lobby?.locked) return this.reject(socket, 'This lobby is locked.', true);
     if (lobby && lobby.players.length + (lobby.bots?.length ?? 0) >= roomCapacity) {
@@ -256,11 +267,11 @@ export class Room extends DurableObject<Env> {
     if (scheduled === null || deadline < scheduled) await this.ctx.storage.setAlarm(deadline);
   }
 
-  private reject(socket: WebSocket, message: string, close = false) {
+  private reject(socket: WebSocket, message: string, close: boolean | number = false) {
     send(socket, { type: 'error', message });
     if (close) {
       socket.serializeAttachment(null);
-      socket.close(1008);
+      socket.close(typeof close === 'number' ? close : 1008);
     }
   }
 }

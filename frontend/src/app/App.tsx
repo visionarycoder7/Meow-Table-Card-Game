@@ -18,7 +18,8 @@ export function App() {
       </header>
       {room?.match ? <MatchTable room={room} match={room.match} seatId={seatId} connected={connection === 'connected'}
         receivedAt={room.receivedAt} error={error}
-        onAction={(action) => send({ ...action, revision: action.type === 'rematch' ? room.revision : room.matchRevision ?? room.revision })}
+        onAction={(action) => send({ ...action, revision: action.type === 'rematch' || action.type === 'return-lobby'
+          ? room.revision : room.matchRevision ?? room.revision })}
         onLeave={() => send({ type: 'leave' })} onReconnect={reconnect} />
         : room ? <Lobby room={room} seatId={seatId} connected={connection === 'connected'}
         onStart={() => send({ type: 'start', revision: room.revision })}
@@ -26,7 +27,10 @@ export function App() {
         onLock={(locked) => send({ type: 'lock', locked })} onLeave={() => send({ type: 'leave' })}
         onReconnect={reconnect} /> : <RoomEntry invitedCode={invitedCode} busy={connection === 'connecting'} onEnter={enter} />}
       {connection === 'connecting' && <p className="mt-4 text-sm text-muted" role="status">Connecting…</p>}
-      {connection === 'disconnected' && <p className="mt-4 text-sm text-muted" role="status">Connection lost. Your seat is held briefly.</p>}
+      {connection === 'disconnected' && <div className="mt-4 space-y-2">
+        <p className="text-sm text-muted" role="status">Connection lost. Your seat is held for up to 60 seconds.</p>
+        {!room && <button type="button" className="ui-button" onClick={reconnect}>Reconnect</button>}
+      </div>}
       {error && !room?.match && <p className="mt-4 rounded-lg border border-red-300/25 bg-red-400/10 px-3 py-2 text-sm text-red-200" role="alert">{error}</p>}
     </main>
   );

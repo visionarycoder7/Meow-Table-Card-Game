@@ -4,6 +4,7 @@ dist/
 build/
 *.tsbuildinfo
 .vite/
+.vite-temp/
 .cache/
 .node-version
 
@@ -20,6 +21,10 @@ test-results/
 .env.*
 !.env.example
 !.env.*.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+!.dev.vars.*.example
 .vercel/
 .wrangler/
 backend/worker-configuration.d.ts
@@ -34,5 +39,8 @@ backend/worker-configuration.d.ts
 Thumbs.db
 Desktop.ini
 *.swp
-*.vscode
-*.pdf
+
+# Personal reference material
+/references/local/
+*.local.pdf
+Nomercy-Eng.pdf

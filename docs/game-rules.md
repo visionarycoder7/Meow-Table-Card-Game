@@ -146,6 +146,7 @@ If the active player has no legal card to play—or elects voluntarily not to pl
    - Opening discard is turned.
    - The opening seat rotates clockwise from the previous opening seat in the room's seat order, including bots. The new match starts clockwise.
    - The room revision increments and match status returns to `playing`.
+4. **Back to lobby:** From a finished match, the host can reopen the same room code, change the bots, and invite more players before starting a new match. Previous match actions expire when the table reopens.
 
 ---
 
@@ -159,6 +160,8 @@ If the active player has no legal card to play—or elects voluntarily not to pl
 | **Curious Cat (Wild)** | Active player | Active player | Submit the card with the new active suit. | The active suit appears on the table. | Immediately upon submission. |
 | **Catnap (Wild Draw Four)** | Active player | Next player in order | Submit the card with the new active suit. Target draws up to 4 cards and loses their turn. | Suit and counts are public. Drawn cards only appear in the recipient's hand. | After the draw resolves. |
 | **Pounce (Signature Card)** | Active player | Chosen non-forfeited opponent | Target draws up to 2 cards or gives 1 random card to the actor. Giving a card requires at least 2 cards in the target's hand. Keep the current active suit. | Everyone sees seat names and hand counts. Only the actor and target see the transferred card. | Resolve the response, then advance from the actor in the current direction if the match continues. The target keeps their turn in the normal order. |
+
+The arrows around the piles show the server's current direction. Tail Spin reverses the arrows and the order of future turns. For example, with A, B, C, and D seated clockwise, A playing Tail Spin sends the turn to D. With only two seats left, A plays again. A new match starts clockwise, including a rematch.
 
 ### Special Resolution: Pounce as Final Card
 - If a player plays **Pounce** as their last card:
@@ -219,6 +222,8 @@ If the active player has no legal card to play—or elects voluntarily not to pl
 - **Transient Disconnect:**
   - If a player loses connection during their turn or during a pending choice, the room holds their seat for 60 seconds.
   - When the player re-establishes their socket with their private session token, the server returns the current match view, their private hand, and any pending choice prompt with remaining time.
+  - The browser tries to reconnect automatically after a brief interruption. A resumed seat moves to the latest authorized connection. The previous tab stops retrying for that seat.
+  - Turn and choice deadlines keep running during a disconnect. The server resolves expired deadlines before sending the resumed view.
 - **Seat Expiry / Forfeit:**
   - If a player's grace period expires, or if they choose **Leave room** and **Confirm leave**:
     - The seat is marked forfeited and their connection is severed.

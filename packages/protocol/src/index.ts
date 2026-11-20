@@ -3,6 +3,8 @@ const roomCodePattern = /^[A-HJ-NP-Z2-9]{8}$/;
 
 export const roomCapacity = 6;
 export const displayNameLimit = 24;
+export const seatReplacedCode = 4000;
+export const seatExpiredCode = 4001;
 
 export function normalizeRoomCode(input: string): string | null {
   const code = input.trim().toUpperCase();
@@ -42,7 +44,7 @@ export type Card = NumberCard
 export type MatchMove = { type: 'play'; cardId: number; suit?: Suit; targetSeatId?: string }
   | { type: 'draw' | 'pass' }
   | { type: 'respond-pounce'; choice: 'draw' | 'give' };
-export type MatchAction = MatchMove | { type: 'start' | 'rematch' };
+export type MatchAction = MatchMove | { type: 'start' | 'rematch' | 'return-lobby' };
 export type MatchView = {
   discard: Card;
   activeSuit: Suit;
@@ -99,6 +101,7 @@ export function parseRoomCommand(message: string | ArrayBuffer): RoomCommand | n
       return { type: 'leave' };
     case 'start':
     case 'rematch':
+    case 'return-lobby':
     case 'draw':
     case 'pass':
     case 'add-bot':

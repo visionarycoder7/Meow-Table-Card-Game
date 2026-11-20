@@ -67,6 +67,25 @@
   .table-center, .table-self { grid-column: 1 / -1; }
   .table-center { padding-block: 0.5rem; }
 
+  .table-piles {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .turn-track {
+    position: absolute;
+    z-index: -1;
+    inset: -0.25rem -2rem auto;
+    width: calc(100% + 4rem);
+    max-width: none;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .table-piles[data-direction="counterclockwise"] .turn-track {
+    transform: scaleX(-1);
+  }
+
   .table-seat {
     display: grid;
     justify-items: center;

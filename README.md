@@ -24,9 +24,14 @@ npm run dev
 
 Open [localhost:5173](http://localhost:5173). Vite runs the React frontend and local Cloudflare runtime on the same origin. Local development needs no Cloudflare login or secrets.
 
-Enter a name and select **Create room**. Copy the invite into a private window or another browser profile, enter a different name, and select **Join room**. In the host window, select **Start match**. Play a highlighted card or click the face-down draw pile. When a drawn card matches, you can play it or select **Pass and keep card**. Try a rematch to see the opening turn rotate.
+## How to play
 
-For a solo game, select **Add bot** in the lobby and then **Start match**. A host can mix bots and friends in the same room, up to six seats total. **Remove bot** removes the last bot added before the match starts.
+- **Solo:** Enter a name, choose **Create room**, add at least one bot, then choose **Start match**.
+- **With friends:** Create a room and share its invite link or code. For a two-player test on one computer, open the invite in a private window or a different browser profile. Join under another name, then start from the host window.
+- **On your turn:** Play a highlighted card that matches the active suit, rank, or action. You can also use the face-down pile to draw once. If the card matches, play it or select **Pass and keep card**. The arrows beside the piles show turn direction. Tail Spin reverses them. The table’s **Action card guide** explains the six effects.
+- **After the result:** The host can select **Rematch** with the current seats or **Back to lobby** to invite more people or change the bots.
+
+A brief connection drop triggers a few automatic retries. Use **Reconnect** or refresh the same tab while the seat is held, up to 60 seconds. The turn or choice clock continues on the server during that time.
 
 | Command | What it does |
 | --- | --- |
@@ -54,7 +59,7 @@ Test the upgraded app on localhost during development. The existing Vercel proje
 
 - [Phase guide](docs/implementation-phases.md) — scopes, agent handoffs, and verification.
 - [Product and gameplay](docs/product-and-gameplay.md) — original rules direction and release scope.
-- [Game rules](docs/game-rules.md) — playable rules, test cases, and proposed effects.
+- [Game rules](docs/game-rules.md) — deck, action effects, timing, and edge cases.
 - [Frontend playbook](docs/frontend-playbook.md) — components, styling, and accessibility.
 - [Contributor workflow](docs/contributor-workflow.md) — development sequence and playtest checks.
 - [Branding and release notes](docs/release-and-licensing.md) — asset sources, metadata, and licensing.

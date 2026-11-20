@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { normalizeDisplayName, normalizeRoomCode } from '@meow-table/protocol';
+import { normalizeDisplayName, normalizeRoomCode, seatExpiredCode, seatReplacedCode } from '@meow-table/protocol';
 import type { RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
 
 const seatKey = (code: string) => `meow-table:seat:${code}`;
 type ReceivedRoom = RoomView & { receivedAt: number };
+const retryDelays = [500, 1_000, 2_000, 4_000];
 
 function saveSeat(code: string, token: string | null) {
   try {
@@ -32,12 +33,18 @@ function showRoomInUrl(code?: string) {
 export function useLobby(invitedCode: string) {
   const socket = useRef<WebSocket | null>(null);
   const seat = useRef<{ code: string; token: string } | null>(null);
+  const retry = useRef<{ timer?: number; attempts: number }>({ attempts: 0 });
   const [room, setRoom] = useState<ReceivedRoom | null>(null);
   const [seatId, setSeatId] = useState('');
   const [connection, setConnection] = useState<'idle' | 'connecting' | 'connected' | 'disconnected'>('idle');
   const [error, setError] = useState('');
 
   const clearSeat = useCallback(() => {
+    window.clearTimeout(retry.current.timer);
+    retry.current = { attempts: 0 };
+    const current = socket.current;
+    socket.current = null;
+    current?.close();
     if (seat.current) saveSeat(seat.current.code, null);
     seat.current = null;
     showRoomInUrl();
@@ -46,7 +53,8 @@ export function useLobby(invitedCode: string) {
     setConnection('idle');
   }, []);
 
-  const connect = useCallback((target: string, command: RoomCommand) => {
+  const connect = useCallback((target: string, command: RoomCommand): void => {
+    window.clearTimeout(retry.current.timer);
     socket.current?.close();
     const url = new URL(`/ws/rooms/${target}`, location.href);
     url.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -62,12 +70,14 @@ export function useLobby(invitedCode: string) {
       const receivedAt = performance.now();
       switch (event.type) {
         case 'session':
+          retry.current = { attempts: 0 };
           seat.current = { code: event.room.code, token: event.token };
           saveSeat(event.room.code, event.token);
           showRoomInUrl(event.room.code);
           setSeatId(event.seatId);
           setRoom({ ...event.room, receivedAt });
           setConnection('connected');
+          setError('');
           break;
         case 'room':
           setRoom((current) => current && event.room.revision > current.revision
@@ -75,11 +85,6 @@ export function useLobby(invitedCode: string) {
           break;
         case 'error':
           setError(event.message);
-          if (command.type === 'resume' && next.readyState === WebSocket.OPEN &&
-            event.message === 'Your seat has expired.') {
-            saveSeat(target, null);
-            clearSeat();
-          }
           break;
         case 'left':
           clearSeat();
@@ -89,18 +94,34 @@ export function useLobby(invitedCode: string) {
     next.addEventListener('error', () => {
       if (socket.current === next) setError('Could not connect. Check your connection or try again in a minute.');
     });
-    next.addEventListener('close', () => {
+    next.addEventListener('close', ({ code }) => {
       if (socket.current !== next) return;
       socket.current = null;
-      setConnection(seat.current ? 'disconnected' : 'idle');
+      if (code === seatExpiredCode || code === seatReplacedCode) {
+        clearSeat();
+        setError(code === seatExpiredCode ? 'Your seat has expired.' : 'Your seat is now open in another tab.');
+        return;
+      }
+      const saved = seat.current;
+      setConnection(saved ? 'disconnected' : 'idle');
+      const delay = retryDelays[retry.current.attempts];
+      if (!saved || delay === undefined) return;
+      retry.current.attempts++;
+      retry.current.timer = window.setTimeout(() => {
+        if (seat.current === saved && !socket.current) connect(saved.code, { type: 'resume', token: saved.token });
+      }, delay);
     });
   }, [clearSeat]);
 
   useEffect(() => {
     const code = normalizeRoomCode(invitedCode);
     const token = code ? readSeat(code) : null;
-    if (code && token) connect(code, { type: 'resume', token });
+    if (code && token) {
+      seat.current = { code, token };
+      connect(code, { type: 'resume', token });
+    }
     return () => {
+      window.clearTimeout(retry.current.timer);
       const current = socket.current;
       socket.current = null;
       current?.close();
@@ -118,6 +139,7 @@ export function useLobby(invitedCode: string) {
       setError('Enter the 8-character room code.');
       return;
     }
+    if (seat.current && !room) clearSeat();
     connect(target, { type: 'enter', name: validName });
   }
 
@@ -128,10 +150,13 @@ export function useLobby(invitedCode: string) {
       current.send(JSON.stringify(command));
     } else if (command.type === 'leave') {
       clearSeat();
+    } else {
+      setError('Connection lost. Reconnect before trying again.');
     }
   }
 
   function reconnect() {
+    retry.current.attempts = 0;
     if (seat.current) connect(seat.current.code, { type: 'resume', token: seat.current.token });
   }
 

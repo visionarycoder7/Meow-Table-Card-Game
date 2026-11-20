@@ -1,5 +1,7 @@
 # Contributor workflow
 
+Keep personal rulebook PDFs and comparison notes under `references/local/` or use the ignored `*.local.pdf` and `*.local.md` suffixes. The tracked game rules describe Meow Table in its own wording.
+
 **Status:** Proposed implementation sequence
 
 ## Before implementation

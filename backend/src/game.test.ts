@@ -159,6 +159,27 @@ test('Hiss skips an opponent and Tail Spin reverses three seats', () => {
   pair.seats[0].hand = [effect('tail-spin'), paw(4)];
   assert.equal(applyTurn(pair, 'a', { type: 'play', cardId: 80 }, 1), null);
   assert.equal(pair.turn?.seatId, 'a');
+  assert.equal(matchView(pair, 'b').direction, -1);
+});
+
+test('repeated Tail Spin flips every seat view and skips a forfeited seat', () => {
+  const seats = [...players, { id: 'c', name: 'C' }, { id: 'd', name: 'D' }];
+  const match = startMatch(seats, 'a', 0);
+  match.discards = [paw(1)];
+  match.seats[0].hand = [effect('tail-spin'), paw(4)];
+  match.seats[1].hand = [{ ...effect('tail-spin'), id: 81 }, paw(7)];
+  match.seats[3].hand = [paw(5), paw(6)];
+  forfeitSeats(match, ['c'], 1);
+
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 80 }, 2), null);
+  assert.equal(match.turn?.seatId, 'd');
+  for (const { id } of seats) assert.equal(matchView(match, id).direction, -1);
+  assert.equal(applyTurn(match, 'd', { type: 'play', cardId: 5 }, 3), null);
+  assert.equal(match.turn?.seatId, 'b');
+  assert.equal(applyTurn(match, 'b', { type: 'play', cardId: 81 }, 4), null);
+  assert.equal(match.turn?.seatId, 'd');
+  for (const { id } of seats) assert.equal(matchView(match, id).direction, 1);
+  assert.equal(matchView(startMatch(players, 'b', 5), 'a').direction, 1);
 });
 
 test('Double Treat resolves its draw before a final-card win', () => {

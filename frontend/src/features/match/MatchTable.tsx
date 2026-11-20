@@ -46,6 +46,7 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
     : match.pounce ? myTurn ? 'Answer Pounce' : `${activeSeat?.name} is answering Pounce`
       : myTurn ? 'Your turn' : `${activeSeat?.name}’s turn`;
   const host = room.hostSeatId === seatId;
+  const clockwise = match.direction === 1;
   const canRematch = room.players.filter((player) => player.connected).length >= 2;
   const last = match.lastAction;
   const lastName = match.seats.find(({ id }) => id === last?.seatId)?.name;
@@ -80,7 +81,9 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
             {match.turn && !activeSeat?.bot && remainingTime > 0 &&
               <span className="whitespace-nowrap text-sm tabular-nums">{Math.ceil(remainingTime / 1_000)} s</span>}
           </div>
-          <div className="flex items-start gap-5 sm:gap-8">
+          <div className="table-piles flex items-start gap-5 sm:gap-8"
+            data-direction={clockwise ? 'clockwise' : 'counterclockwise'}>
+            <img className="turn-track" src="/table/turn-track.svg" alt="" aria-hidden="true" />
             <div className="text-center">
               <button type="button" className="card-back" aria-label={`Draw card, ${match.drawCount} in draw pile`}
                 disabled={!canAct || !match.canDraw || !!selected} onClick={() => onAction({ type: 'draw' })}>
@@ -96,7 +99,12 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
               <p className="mt-2 text-sm font-medium">Discard</p>
             </div>
           </div>
-          <p className="text-sm">Active suit <strong>{suitNames[match.activeSuit]}</strong> · {match.direction === -1 ? 'Counterclockwise' : 'Clockwise'}</p>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">
+            <p>Active suit <strong>{suitNames[match.activeSuit]}</strong></p>
+            <p className="text-[#ffe289]" aria-live="polite">
+              <span className="sr-only">Turn order </span>{clockwise ? 'Clockwise' : 'Counterclockwise'}
+            </p>
+          </div>
           {canAct && !match.pounce && <p className="max-w-64 text-center text-sm">
             {match.canPass ? 'Play the card you drew or pass.'
               : match.playableIds.length ? 'Match the suit, rank, or action.' : 'Draw a card to continue.'}
@@ -145,8 +153,12 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
       <div className="flex flex-wrap items-center gap-2 border-t border-ink/15 pt-4">
         {match.result && host && <button type="button" className="ui-button ui-button-primary" disabled={!connected || !canRematch}
           onClick={() => onAction({ type: 'rematch' })}>Rematch</button>}
+        {match.result && host && <button type="button" className="ui-button" disabled={!connected}
+          onClick={() => onAction({ type: 'return-lobby' })}>Back to lobby</button>}
         {match.result && canRematch && !host && <p className="w-full text-sm text-muted">The host can start a rematch.</p>}
-        {match.result && !canRematch && <p className="w-full text-sm text-muted">A rematch needs at least two seats.</p>}
+        {match.result && !canRematch && <p className="w-full text-sm text-muted">
+          {host ? 'Reopen the lobby to invite a friend or add a bot.' : 'A rematch needs at least two seats.'}
+        </p>}
         {!connected && <button type="button" className="ui-button" onClick={onReconnect}>Reconnect</button>}
         <LeaveRoomButton onLeave={onLeave} activeMatch={!match.result} />
       </div>
