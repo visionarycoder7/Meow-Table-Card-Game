@@ -22,7 +22,6 @@ test-results/
 !.env.*.example
 .vercel/
 *.local.md
-.local.md
 *.pem
 *.key
 
@@ -34,4 +33,3 @@ Thumbs.db
 Desktop.ini
 *.swp
 *.vscode
-*vercel-autodeploy-general-guide.md
