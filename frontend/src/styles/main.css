@@ -26,6 +26,59 @@
   .ui-button:disabled { opacity: 0.56; }
   .ui-button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 
+  .game-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: #192d23;
+  }
+
+  .game-tool:hover { color: var(--color-accent); }
+  .game-tool kbd {
+    border: 1px solid #658574;
+    border-radius: 0.25rem;
+    padding-inline: 0.25rem;
+    color: var(--color-muted);
+    font-size: 0.7rem;
+  }
+
+  .card-guide-dialog {
+    margin: auto;
+    width: min(43rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow: hidden;
+    border: 1px solid #658574;
+    border-radius: 0.875rem;
+    background: #14271e;
+    color: var(--color-ink);
+    box-shadow: 0 18px 48px #07120c88;
+  }
+
+  .card-guide-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-guide-dialog::backdrop {
+    background: #07120ca6;
+    backdrop-filter: blur(5px);
+  }
+
+  .card-guide-scroll {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .guide-card {
+    --card-width: 3.5rem;
+    --card-rank-size: 1.6rem;
+  }
+
+  .guide-card .card-face::before { inset: 0.8rem 0.25rem 1.45rem; }
+  .guide-card .card-rank { position: absolute; inset: 42% auto auto 50%; translate: -50% -50%; padding-top: 0; }
+  .guide-card .card-suit { grid-row: 2; white-space: nowrap; font-size: 0.55rem; line-height: 1.15; }
+
   .confirm-dialog {
     margin: auto;
     width: min(25rem, calc(100% - 2rem));
@@ -161,6 +214,7 @@
   }
 
   .card-face {
+    --face-art: url('/cards/faces/number.svg');
     display: grid;
     grid-template-rows: 1fr auto;
     place-items: center;
@@ -172,11 +226,24 @@
     box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   }
 
-  .card-face[data-suit="PAW"] { --suit-color: #b7291c; }
-  .card-face[data-suit="BELL"] { --suit-color: #efb333; --card-ink: #332411; }
-  .card-face[data-suit="NIP"] { --suit-color: #21713c; }
-  .card-face[data-suit="FISH"] { --suit-color: #1259ae; }
-  .card-face[data-suit="wild"] { --suit-color: #202720; --card-ink: #ffe289; }
+  .card-face::before {
+    content: "";
+    position: absolute;
+    inset: 1.05rem 0.45rem 1.85rem;
+    background: var(--face-art) center / 100% 100% no-repeat;
+  }
+
+  .card-face[data-action] { --face-art: url('/cards/faces/action.svg'); }
+  .card-face[data-suit="PAW"] { --suit-color: #b7291c; --rank-ink: #842219; }
+  .card-face[data-suit="BELL"] { --suit-color: #efb333; --card-ink: #332411; --rank-ink: #604012; }
+  .card-face[data-suit="NIP"] { --suit-color: #21713c; --rank-ink: #1d552e; }
+  .card-face[data-suit="FISH"] { --suit-color: #1259ae; --rank-ink: #174a86; }
+  .card-face[data-suit="wild"] {
+    --face-art: url('/cards/faces/wild.svg');
+    --suit-color: #262922;
+    --card-ink: #ffe289;
+    --rank-ink: #3b2d15;
+  }
 
   .card-index {
     position: absolute;
@@ -189,15 +256,18 @@
   .card-index-end { inset: auto 0.35rem 0.35rem auto; rotate: 180deg; }
 
   .card-rank {
+    z-index: 1;
     align-self: center;
     padding-top: 0.5rem;
     font-family: system-ui, sans-serif;
     font-size: var(--card-rank-size, 3rem);
     line-height: 1;
     font-weight: 800;
+    color: var(--rank-ink);
   }
 
   .card-suit {
+    z-index: 1;
     display: grid;
     justify-items: center;
     gap: 0.125rem;
@@ -219,6 +289,7 @@
   }
 
   .card-action-icon { inline-size: var(--card-rank-size, 3rem); }
+  .card-penalty { font-size: calc(var(--card-rank-size, 3rem) * 0.82); }
 
   .card-face[data-action] .card-suit-icon {
     position: absolute;
@@ -251,7 +322,9 @@
   }
 
   .hand-card:disabled { filter: saturate(0.72); }
-  .hand-card .card-rank { padding-top: 0.125rem; }
+  .hand-card .card-face::before { inset: 0.8rem 0.3rem 1.65rem; }
+  .hand-card .card-face[data-action]::before { inset-block-end: 1.75rem; }
+  .hand-card .card-rank { padding-top: 0; }
   .hand-card:enabled,
   .card-back:enabled {
     cursor: pointer;
@@ -269,6 +342,7 @@
     .ui-button { transition: filter 150ms ease-out; }
     .ui-button:enabled:active { scale: 0.97; }
     .confirm-dialog[open] { animation: confirm-in 160ms ease-out; }
+    .card-guide-dialog[open] { animation: confirm-in 160ms ease-out; }
     .hand-card:enabled { transition: translate 150ms ease-out; }
     .hand-card:enabled:hover { translate: 0 -3px; }
     .hand-card:enabled:active,
@@ -285,6 +359,7 @@
   html {
     color-scheme: dark;
   }
+  html:has(.card-guide-dialog[open]) { overflow: hidden; }
   button:enabled { cursor: pointer; }
   button:disabled { cursor: not-allowed; }
 }

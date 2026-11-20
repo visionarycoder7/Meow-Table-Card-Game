@@ -43,7 +43,10 @@ export function chooseBotMove(view: MatchView, opponents: Opponent[]): MatchMove
     bestScore = score;
     preferred = card;
   }
-  if (!preferred) return view.canDraw ? { type: 'draw' } : null;
+  if (!preferred) {
+    if (view.canDeepDraw && view.hand.length <= 4 && opponents[0].cardCount <= 2) return { type: 'draw', deep: true };
+    return view.canDraw ? { type: 'draw' } : null;
+  }
 
   const move = { type: 'play' as const, cardId: preferred.id };
   if (preferred.suit !== null) return move;

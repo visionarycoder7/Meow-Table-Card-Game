@@ -51,10 +51,11 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
   const host = room.hostSeatId === seatId;
   const clockwise = match.direction === 1;
   const canRematch = room.players.filter((player) => player.connected).length >= 2;
+  const discardAction = 'action' in match.discard ? actionDetails[match.discard.action] : undefined;
   const last = match.lastAction;
   const lastName = match.seats.find(({ id }) => id === last?.seatId)?.name;
   const activity = last && `${last.seatId === seatId ? 'You' : lastName} ${
-    last.type === 'play' ? `played ${cardName(last.card)}` : last.type === 'draw' ? 'drew a card'
+    last.type === 'play' ? `played ${cardName(last.card)}` : last.type === 'draw' ? last.count ? `drew ${last.count} cards` : 'drew a card'
       : last.type === 'pass' ? 'kept the drawn card' : last.choice === 'give' ? 'gave a card'
         : last.choice === 'draw' ? 'took the Pounce draw' : 'left during Pounce'}.`;
 
@@ -115,7 +116,7 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
             </div>
             <div className="text-center">
               <div role="img" aria-label={cardName(match.discard)}
-                aria-description={'action' in match.discard ? actionDetails[match.discard.action].rule : undefined}>
+                aria-description={discardAction?.rule}>
                 <CardFace card={match.discard} />
               </div>
               <p className="mt-2 text-sm font-medium">Discard</p>
@@ -127,10 +128,14 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
               <span className="sr-only">Turn order </span>{clockwise ? 'Clockwise' : 'Counterclockwise'}
             </p>
           </div>
+          {discardAction && <p className="max-w-64 text-center text-sm text-ink/90">{discardAction.rule}</p>}
           {canAct && !match.pounce && <p className="max-w-64 text-center text-sm">
             {match.canPass ? 'Play the card you drew or pass.'
-              : match.playableIds.length ? 'Match the suit, rank, or action.' : 'Draw a card to continue.'}
+              : match.playableIds.length ? 'Match the suit, rank, or action.'
+                : match.canDeepDraw ? 'Draw one or look up to three cards deep for a match.' : 'Draw a card to continue.'}
           </p>}
+          {canAct && match.canDeepDraw && <button type="button" className="ui-button"
+            onClick={(event) => submit({ type: 'draw', deep: true }, event.detail === 0)}>Deep Draw</button>}
           {match.canPass && <button type="button" className="ui-button" disabled={!canAct || !!selected}
             onClick={(event) => submit({ type: 'pass' }, event.detail === 0)}>Pass and keep card</button>}
           {canRespond && <div className="flex flex-wrap justify-center gap-2">
@@ -163,14 +168,6 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
         {!connected && <button type="button" className="ui-button" onClick={onReconnect}>Reconnect</button>}
         <LeaveRoomButton onLeave={onLeave} activeMatch={!match.result} />
       </div>
-      <details className="rounded-lg border border-ink/20 p-3 text-sm">
-        <summary className="cursor-pointer font-medium">Action card guide</summary>
-        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
-          {Object.values(actionDetails).map(({ name, rule }) => <div key={name}>
-            <dt className="font-semibold">{name}</dt><dd className="text-muted">{rule}</dd>
-          </div>)}
-        </dl>
-      </details>
     </section>
   );
 }

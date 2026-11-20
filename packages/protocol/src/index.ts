@@ -42,7 +42,8 @@ export type Card = NumberCard
   | { id: number; suit: Suit; action: (typeof suitedActions)[number] }
   | { id: number; suit: null; action: (typeof wildActions)[number] };
 export type MatchMove = { type: 'play'; cardId: number; suit?: Suit; targetSeatId?: string }
-  | { type: 'draw' | 'pass' }
+  | { type: 'draw'; deep?: true }
+  | { type: 'pass' }
   | { type: 'respond-pounce'; choice: 'draw' | 'give' };
 export type MatchAction = MatchMove | { type: 'start' | 'rematch' | 'return-lobby' };
 export type MatchView = {
@@ -54,11 +55,12 @@ export type MatchView = {
   hand: Card[];
   playableIds: number[];
   canDraw: boolean;
+  canDeepDraw?: boolean;
   canPass: boolean;
   pounce?: { actorSeatId: string; targetSeatId: string; canGive: boolean };
   turn: { seatId: string; deadline: number } | null;
   result: { winnerSeatId: string | null } | null;
-  lastAction?: { seatId: string; type: 'draw' } | { seatId: string; type: 'pass' } | { seatId: string; type: 'play'; card: Card }
+  lastAction?: { seatId: string; type: 'draw'; count?: number } | { seatId: string; type: 'pass' } | { seatId: string; type: 'play'; card: Card }
     | { seatId: string; type: 'pounce-response'; choice: 'draw' | 'give' | 'forfeit' };
 };
 
@@ -113,6 +115,9 @@ export function parseRoomCommand(message: string | ArrayBuffer): RoomCommand | n
       if (input.type === 'respond-pounce') {
         return 'choice' in input && (input.choice === 'draw' || input.choice === 'give')
           ? { type: input.type, choice: input.choice, revision: input.revision } : null;
+      }
+      if (input.type === 'draw' && 'deep' in input) {
+        return input.deep === true ? { type: 'draw', deep: true, revision: input.revision } : null;
       }
       if (input.type !== 'play') return { type: input.type, revision: input.revision };
       if (!('cardId' in input) || typeof input.cardId !== 'number' ||

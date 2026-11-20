@@ -33,3 +33,10 @@ test('effect choices require a valid suit, target, and match revision', () => {
   assert.deepEqual(parse({ type: 'respond-pounce', revision: 8, choice: 'give' }),
     { type: 'respond-pounce', revision: 8, choice: 'give' });
 });
+
+test('only an explicit true flag enables Deep Draw', () => {
+  assert.deepEqual(parseRoomCommand('{"type":"draw","revision":4,"deep":true}'),
+    { type: 'draw', revision: 4, deep: true });
+  assert.equal(parseRoomCommand('{"type":"draw","revision":4,"deep":"true"}'), null);
+  assert.deepEqual(parseRoomCommand('{"type":"draw","revision":4}'), { type: 'draw', revision: 4 });
+});

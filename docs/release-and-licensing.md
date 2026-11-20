@@ -6,7 +6,7 @@ Use **Meow Table** in the UI, project descriptions, release notes, screenshots, 
 
 Use the brand as a working name until the owner checks similar names and logos in the markets where the game will be offered. Review the public repository name, live domain, and older public artifacts at release. The existing remote and domain are managed by the owner.
 
-The local match uses original full-color card faces with a thin cream border, large ranks, and four cat-themed suit illustrations. Card backs use the Meow Table wordmark and cat mark. The editable sources are the match components and their styles. Familiar mechanics such as matching a suit or rank are expressed with Meow Table's own visuals and wording. Brand and visual similarity still require review before a public release. [U.S. Copyright Office guidance on games](https://www.copyright.gov/register/tx-games.html) [USPTO guidance on likelihood of confusion](https://www.uspto.gov/trademarks/search/likelihood-confusion)
+The local match uses original cream ticket panels over full-color suits. Numbered cards, actions, and wilds each have their own panel silhouette. Card backs use the Meow Table wordmark and cat mark. The editable templates are in `assets/cards/faces/`. Brand and visual similarity still require review before a public release. [U.S. Copyright Office guidance on games](https://www.copyright.gov/register/tx-games.html) [USPTO guidance on likelihood of confusion](https://www.uspto.gov/trademarks/search/likelihood-confusion)
 
 ### Branding files and share metadata
 

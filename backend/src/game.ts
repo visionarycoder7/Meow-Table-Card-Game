@@ -90,6 +90,11 @@ function hasDraw(match: Match) {
   return match.drawPile.length > 0 || match.discards.length > 1;
 }
 
+function mayDrawDeep(match: Match, hand: Card[]) {
+  return match.drawPile.length + match.discards.length > 2 &&
+    !hand.some((card) => matches(match, card));
+}
+
 function finish(match: Match, winnerSeatId: string | null) {
   match.turn = null;
   match.result = { winnerSeatId };
@@ -193,11 +198,19 @@ export function applyTurn(match: Match, seatId: string, move: MatchMove, now: nu
 
   if (turn.drawnCardId !== undefined) return 'Play the card you drew or pass.';
   if (!hasDraw(match)) return 'The draw pile is empty. Play a matching card.';
-  takeCards(match, seat, 1);
-  const card = seat.hand.at(-1)!;
-  match.lastAction = { type: 'draw', seatId };
-  if (matches(match, card)) turn.drawnCardId = card.id;
-  else advance(match, seatId, now);
+  if (move.deep && !mayDrawDeep(match, seat.hand)) return 'Deep Draw needs a blocked hand and at least two available cards.';
+  const before = seat.hand.length;
+  const limit = move.deep ? 3 : 1;
+  while (seat.hand.length - before < limit && hasDraw(match)) {
+    takeCards(match, seat, 1);
+    const card = seat.hand.at(-1)!;
+    if (!matches(match, card)) continue;
+    turn.drawnCardId = card.id;
+    break;
+  }
+  const count = seat.hand.length - before;
+  match.lastAction = count > 1 ? { type: 'draw', seatId, count } : { type: 'draw', seatId };
+  if (turn.drawnCardId === undefined) advance(match, seatId, now);
   return null;
 }
 
@@ -291,6 +304,7 @@ export function matchView(match: Match, seatId: string): MatchView {
     playableIds: myTurn ? hand.filter((card) => (drawnCardId === undefined || card.id === drawnCardId) &&
       matches(match, card)).map(({ id }) => id) : [],
     canDraw: myTurn && drawnCardId === undefined && hasDraw(match),
+    canDeepDraw: myTurn && drawnCardId === undefined && mayDrawDeep(match, hand),
     canPass: myTurn && drawnCardId !== undefined,
     pounce: match.pounce && { ...match.pounce, canGive: match.pounce.targetSeatId === seatId && hand.length > 1 },
     turn: match.turn ? { seatId: match.turn.seatId, deadline: match.turn.deadline } : null,

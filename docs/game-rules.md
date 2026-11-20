@@ -86,7 +86,7 @@ To ensure high reliability, clean architecture, and independent verification by 
    - *Phase 3B:* Take the first numbered card from the shuffled remainder as the opening discard, keeping all other cards in their existing order. The supported deck and seat counts guarantee a numbered opening card.
 4. **Opening Seat and Direction:** The room host opens the game (Seat 0). Play proceeds **clockwise** (increasing seat index in lobby order).
 
-The host can add or remove bots in the lobby. Bots occupy ordinary game seats with private hands. After a brief pause, a bot usually plays from its strongest suit and saves wild cards. When the next opponent has two cards or fewer, it favors an available skip, penalty, or reversal that steers the turn away from that opponent. Pounce targets the opponent with the fewest cards, breaking ties in turn order. When a bot cannot play, it draws once and plays the drawn card if it matches. The bot sees its own hand and public hand counts. The server validates bot and human moves through the same rules.
+The host can add or remove bots in the lobby. Bots occupy ordinary game seats with private hands. After a brief pause, a bot usually plays from its strongest suit and saves wild cards. When the next opponent has two cards or fewer, it favors an available skip, penalty, or reversal that steers the turn away from that opponent. Pounce targets the opponent with the fewest cards, breaking ties in turn order. A blocked bot normally draws once, but will choose Deep Draw if it has four cards or fewer and the next opponent has two or fewer. The bot plays a drawn match. It sees its own hand and public hand counts, and the server validates bot and human moves through the same rules.
 
 ---
 
@@ -108,11 +108,9 @@ When played:
 
 ### Path B: Draw from the Pile
 
-If the active player has no legal card to play—or elects voluntarily not to play any card currently in hand:
-1. The player draws **exactly 1 card** from the draw pile into their hand.
-2. **Immediate Play Window:**
-   - If the drawn card is legal to play against the current discard, the player may **play that card** or **pass** and keep it. This window uses the original turn deadline.
-   - If the drawn card is unplayable, the turn concludes automatically and passes to the next player.
+- **Draw:** Take one card, even if you have a legal play.
+- **Deep Draw:** If your hand has no legal play and at least two cards are available, search up to three cards deep. Stop at the first playable card or when the available cards run out. Every card drawn stays in your hand unless you play it.
+- **After drawing:** Play the matching card or pass and keep it. The play window uses the original turn deadline. If no match was drawn, the turn advances. The table shows how many cards were drawn.
 
 ### Draw Pile Exhaustion and Recycling
 
@@ -162,6 +160,10 @@ If the active player has no legal card to play—or elects voluntarily not to pl
 | **Pounce (Signature Card)** | Active player | Chosen non-forfeited opponent | Target draws up to 2 cards or gives 1 random card to the actor. Giving a card requires at least 2 cards in the target's hand. Keep the current active suit. | Everyone sees seat names and hand counts. Only the actor and target see the transferred card. | Resolve the response, then advance from the actor in the current direction if the match continues. The target keeps their turn in the normal order. |
 
 The arrows around the piles show the server's current direction. Tail Spin reverses the arrows and the order of future turns. For example, with A, B, C, and D seated clockwise, A playing Tail Spin sends the turn to D. With only two seats left, A plays again. A new match starts clockwise, including a rematch.
+
+Action faces use short effect labels such as **Skip** and **Reverse**. Draw penalties put **+2** or **+4** in the center. The table explains the top action card beside the discard.
+
+The **Card guide** compares Meow Table cards with their closest counterparts in the reference game. **Read rules** opens the original publisher's PDF in a new tab. Meow Table matches follow the rules on this page. [Official reference PDF](https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf)
 
 ### Special Resolution: Pounce as Final Card
 - If a player plays **Pounce** as their last card:
@@ -289,7 +291,7 @@ These scenarios specify expected behaviors for the server match engine in `backe
 
 ## 9. Rules Decisions and Playtest Topics
 
-The local deck uses single draws, timed turns and responses, and host-started rematches. Playtesting can tune the deck and timing.
+The local deck uses single draws and the optional Deep Draw, timed turns and responses, and host-started rematches. Playtesting can tune the deck and timing.
 
 - Check turn length and draw frequency at two and six seats.
 - See how often Pounce delays a last-card win and how clear its target prompt feels.

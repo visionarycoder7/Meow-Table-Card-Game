@@ -59,6 +59,41 @@ test('recycles beneath the discard and advances on an unplayable draw', () => {
   assert.equal(match.turn?.seatId, 'b');
 });
 
+test('Deep Draw stops at the first match and offers only that card', () => {
+  const match = startMatch(players, 'a', 0);
+  match.discards = [paw(1)];
+  match.seats[0].hand = [fish(6)];
+  match.drawPile = [fish(8), paw(4), fish(7)];
+  assert.equal(matchView(match, 'a').canDeepDraw, true);
+  assert.equal(applyTurn(match, 'a', { type: 'draw', deep: true }, 1), null);
+  const view = matchView(match, 'a');
+  assert.deepEqual(view.hand, [fish(6), fish(8), paw(4)]);
+  assert.deepEqual(view.playableIds, [4]);
+  assert.equal(view.canPass, true);
+  assert.equal(view.canDeepDraw, false);
+  assert.deepEqual(matchView(match, 'b').lastAction, { type: 'draw', seatId: 'a', count: 2 });
+  assert.equal(view.turn?.deadline, 30_000);
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 4 }, 2), null);
+  assert.equal(match.turn?.seatId, 'b');
+});
+
+test('Deep Draw caps misses, recycles an exhausted pile, and rejects a playable hand', () => {
+  const match = startMatch(players, 'a', 0);
+  match.discards = [fish(3), fish(4), paw(1)];
+  match.seats[0].hand = [paw(6)];
+  match.seats[1].hand = [paw(5)];
+  match.drawPile = [fish(8)];
+  const initial = structuredClone(match);
+  assert.match(applyTurn(match, 'a', { type: 'draw', deep: true }, 1) ?? '', /blocked hand/);
+  assert.deepEqual(match, initial);
+  match.seats[0].hand = [fish(6)];
+  assert.equal(applyTurn(match, 'a', { type: 'draw', deep: true }, 2), null);
+  assert.equal(match.seats[0].hand.length, 4);
+  assert.equal(match.turn?.seatId, 'b');
+  assert.deepEqual(match.discards, [paw(1)]);
+  assert.deepEqual(matchView(match, 'b').lastAction, { type: 'draw', seatId: 'a', count: 3 });
+});
+
 test('an exhausted draw skips a blocked seat or ends the match if nobody can play', () => {
   const match = startMatch(players, 'a', 0);
   match.discards = [paw(1)];
@@ -131,6 +166,19 @@ test('a bot plays a matching draw and keeps an unplayable draw private', () => {
       assert.deepEqual(view.lastAction, { type: 'draw', seatId: 'cpu' });
     }
   }
+});
+
+test('a blocked bot uses Deep Draw when a near-winner threatens and plays the first match', () => {
+  const bot = { id: 'cpu', name: 'Bot 1', bot: true as const };
+  const match = startMatch([players[0], bot], 'cpu', 0);
+  match.discards = [paw(1)];
+  match.seats[0].hand = [fish(3), fish(7)];
+  match.seats[1].hand = [fish(6)];
+  match.drawPile = [fish(8), paw(4), fish(9)];
+  assert.equal(expireTurn(match, 900), true);
+  assert.deepEqual(match.discards.at(-1), paw(4));
+  assert.deepEqual(match.seats[1].hand, [fish(6), fish(8)]);
+  assert.equal(match.turn?.seatId, 'a');
 });
 
 test('a bot saves a wild against a full hand and uses Double Treat against the next near-winner', () => {

@@ -5,13 +5,16 @@ import { Lobby } from '../features/rooms/Lobby';
 import { RoomEntry } from '../features/rooms/RoomEntry';
 import { useLobby } from '../features/rooms/useLobby';
 import { DeckMark } from './DeckMark';
+import { GameToolbar } from './GameToolbar';
 
 export function App() {
   const [invitedCode] = useState(() => new URLSearchParams(location.search).get('room') ?? '');
   const { room, seatId, connection, error, enter, send, reconnect } = useLobby(invitedCode);
 
   return (
-    <main className={`mx-auto min-h-dvh w-full px-4 sm:px-6 ${room?.match ? 'max-w-5xl py-5' : 'max-w-md py-10 sm:py-14'}`}>
+    <>
+    <GameToolbar />
+    <main className={`mx-auto w-full px-4 sm:px-6 ${room?.match ? 'max-w-5xl py-5' : 'max-w-md py-8 sm:py-10'}`}>
       <header className="text-center">
         {!room?.match && <DeckMark />}
         <h1 className={room?.match ? 'text-2xl font-semibold tracking-tight' : 'mt-4 text-4xl font-semibold tracking-tight'}>Meow Table</h1>
@@ -39,5 +42,6 @@ export function App() {
         <a className="underline underline-offset-4" href={licenseUrl} download="LICENSE">License</a>
       </footer>
     </main>
+    </>
   );
 }
