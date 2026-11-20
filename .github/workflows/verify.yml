@@ -1,11 +1,10 @@
 name: Verify static app
 
 on:
-  workflow_call:
   pull_request:
     branches: [main, dev]
   push:
-    branches: [dev]
+    branches: [main, dev]
 
 permissions:
   contents: read
