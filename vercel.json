@@ -1,6 +1,5 @@
 {
-  "framework": null,
-  "installCommand": "",
-  "buildCommand": "mkdir -p dist/prototype && cp index.html LICENSE dist/prototype/",
-  "outputDirectory": "dist/prototype"
+  "git": {
+    "deploymentEnabled": false
+  }
 }

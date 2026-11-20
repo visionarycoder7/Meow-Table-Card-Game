@@ -49,27 +49,27 @@ Player-visible states include lobby, active turn, pending player choice, match f
 | `lock` or `leave` | Only the host can change admission, and locking requires at least two connected players. An explicit leave releases the seat and transfers host control if needed. |
 | Room updates | Each accepted change increases the revision. A lobby snapshot carries the host, roster, and lock state. The private token is sent only in the owning socket’s session message. |
 
-### Match contract for later phases
+### Match contract
 
-| Topic | Proposed contract |
+| Topic | Contract |
 | --- | --- |
 | Room identity | Generate an unambiguous room code on the server and retry collisions. Normalize case when joining. Give each seat a separate opaque resume credential generated with cryptographic randomness. Store it per room in session storage so a refresh in the same tab can recover. |
-| Commands | Create, join, and resume establish the room or seat. Once joined, mutating commands carry a command ID and expected room revision. Validate payloads at the boundary. Authorize against the current seat, phase, and match rules. |
-| Ordering and retries | Process player commands and timers in one sequence per room. Check connection identity before looking up a prior command result. Deduplicate by seat and command ID before checking revision, and bind a reused ID to its original payload. |
+| Commands | Create, join, and resume establish the room or seat. Game moves carry the expected match revision. Lobby roster and match lifecycle commands carry the expected room revision. The server validates authorization and turn rules. |
+| Ordering and retries | Process player commands and timers in one sequence per room. An accepted move advances the match revision, so a duplicate using the old revision is rejected. Presence changes only advance the room revision. |
 | Responses | Successful changes advance the room revision. Rejections leave game state intact and give a stable reason, such as room full, wrong turn, stale revision, or expired seat. On a stale revision or reconnect, fetch a fresh view before enabling input. |
 | Privacy | Public views contain seat names, hand sizes, turn and discard state, and approved public events. Private views contain only the receiving seat’s cards and choices. Cut down the snapshot before emitting it, including any activity messages. |
 | Disconnects | While a seat is within its grace period, the player can reclaim it with the resume credential. An explicit leave forfeits immediately. At grace expiry, remove the seat in the lobby or forfeit it in a match. Resolve pending choices through a server-owned default from the approved rules, then advance play. Timers check the current room and action state before applying an expiry. |
-| Lifecycle defaults | Use the lobby’s 60-second reconnect grace period as a starting point. Transfer host control to the earliest joined connected player when the host leaves or expires. Agree on match turn, choice, and rematch deadlines before gameplay ships. |
+| Lifecycle defaults | Hold disconnected seats for 60 seconds. Transfer host control to the earliest joined connected player when the host leaves or expires. The rules define turn and choice deadlines and rematch behavior. |
 
 ## Repository layout
 
 - **`frontend/`** — Vite entry HTML, React screens, styles, branding, and the browser lobby WebSocket client.
-- **`backend/`** — Worker entry point, the room Durable Object, and Wrangler configuration. Keep future rule transitions and tests together in `backend/src/game/`.
+- **`backend/`** — Worker entry point, room Durable Object, game engine, rule tests, and Wrangler configuration.
 - **`packages/protocol/`** — Shared lobby commands, views, normalization, and validation tests.
-- **`tests/e2e/`** — Planned for multiplayer browser flows and reconnect checks.
+- **`assets/`** — Branding, card art, and table assets used by the frontend.
 - **`docs/`** — Product decisions, game rules, architecture, and contributor workflow.
 
-Use npm workspaces from the repository root. Keep the root `index.html` and `vercel.json` as the live prototype build contract during local development. The upgraded Vite entry is `frontend/index.html`. Codex retires the root file and updates the deployment configuration together at the [cutover gate](implementation-phases.md#codex-only-prototype-cutover). Git history retains the prototype for reference and rollback.
+Use npm workspaces from the repository root. The Vite entry is `frontend/index.html`. The root `index.html` is ignored local reference material. Use `git show 0e78756:index.html` to inspect the prototype in a clean checkout.
 
 ### Component-first frontend
 
@@ -81,7 +81,7 @@ Use npm workspaces from the repository root. Keep the root `index.html` and `ver
 | `frontend/src/components/` | Shared controls used across features, such as buttons, fields, and dialogs. |
 | `frontend/src/styles/` | Tailwind v4 CSS entry and semantic theme tokens for palette, spacing, typography, focus, and motion. Put component-specific styles next to their components. |
 
-Build and review the individual controls and game pieces before composing the full screens. Keep feature components with their feature and extract a shared component when another feature has the same need. Give visual components typed props and callbacks so they can render representative states without a live server. A feature controller handles the authorized snapshot, connection state, and command submission. The game engine stays in `backend/src/game/`.
+Build and review the individual controls and game pieces before composing the full screens. Keep feature components with their feature and extract a shared component when another feature has the same need. Give visual components typed props and callbacks so they can render representative states without a live server. A feature controller handles the authorized snapshot, connection state, and command submission. The game engine stays in `backend/src/game.ts`.
 
 Follow the [frontend playbook](frontend-playbook.md) for Tailwind setup, component design, motion, and verification. The [Meow Table visual baseline](product-and-gameplay.md#visual-baseline) supplies the project palette.
 
@@ -94,14 +94,17 @@ Run these commands from the repository root. Node.js tooling is pinned in `.nvmr
 | `npm ci` | Installs the root workspace from the committed lockfile. |
 | `npm run dev` | Runs Vite and the local Worker runtime together at `http://localhost:5173`. |
 | `npm run check` | Generates binding types and checks TypeScript across the workspace. |
-| `npm test` | Runs protocol tests. Gameplay tests land with the rules engine. |
+| `npm test` | Runs the protocol and gameplay tests. |
 | `npm run build` | Builds browser assets and the Worker into `frontend/dist/`. |
 | `npm start` | Runs a local preview of the built Worker and assets at `http://localhost:4173`. |
+| `npm run build:hosted` | Requires the public site and source URLs, then builds the hosted Worker and client. |
+| `npm run deploy:dry-run` | Checks the generated Cloudflare package after the build. |
+| `npm run deploy` | Builds the hosted app and publishes through Wrangler. |
 
-1. **Development.** Use the upgraded app on localhost. Vercel still publishes the root static prototype through its Git integration. GitHub Actions verifies the static input while it is live. [Prototype deployment guide](../.github/vercel-autodeploy-general-guide.md)
-2. **Release candidate.** Once local release checks pass and the owner is ready, use an approved Cloudflare Free candidate. Build through the Cloudflare Vite plugin so Wrangler deploys the matching Worker and assets. Record the candidate revision and verify that invites and WebSockets work across networks. [Build and preview guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/)
-3. **Public URL decision.** When the hosted candidate passes, Codex prepares the agreed switch and records the rollback point. If the old URL should forward to the new service, prepare that change with the root prototype retirement.
+1. **Development.** Use localhost. GitHub Actions verifies the workspace and prepares a Worker dry run. The existing Vercel deployment remains the prototype reference while automatic Vercel Git deployments are disabled.
+2. **Release candidate.** The owner builds through the Cloudflare Vite plugin and deploys the Worker and assets together. Test invitations and WebSockets across networks. [Deployment steps](deployment.md) [Cloudflare Vite guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/)
+3. **Public URL decision.** After the hosted candidate passes, agree on the public URL and record the rollback point.
 
 Vercel’s WebSocket support is in public beta. Connections are pinned to a function instance and close when it reaches its maximum duration. Vercel’s own multi-client example uses Redis to coordinate instances. The pilot uses one long-running process so room state and sockets can stay together. [Vercel WebSocket announcement](https://vercel.com/changelog/websocket-support-is-now-in-public-beta) · [Vercel multi-client example](https://vercel.com/kb/guide/real-time-chat-websockets)
 
-The owner’s local `deployment.local.md`, if present, has the release setup steps. The current deployment target remains the static prototype until Codex verifies the replacement.
+The ignored `deployment.local.md` records the owner's account subdomain, candidate URL, and playtest evidence.

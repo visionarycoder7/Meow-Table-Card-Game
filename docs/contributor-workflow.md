@@ -6,7 +6,7 @@ Keep personal rulebook PDFs and comparison notes under `references/local/` or us
 
 ## Before implementation
 
-Review the [product](product-and-gameplay.md) and [architecture](architecture.md) with the owner. Pin the working branch and milestone for each task before editing. Build and test the upgraded workspace on localhost while Vercel serves the root prototype. The workspace and lobby can proceed while the owner reviews the original rules. Full gameplay needs the approved rules reference.
+Review the [product](product-and-gameplay.md) and [architecture](architecture.md) with the owner. Pin the working branch and milestone before editing. Use the ignored root prototype or `git show 0e78756:index.html` for reference and test the tracked app on localhost.
 
 ## Milestones
 
@@ -49,7 +49,7 @@ Start a handoff with a self-contained brief. Use exact file paths and commands o
 
 ## Hosted playtest
 
-Run this during release preparation after local checks pass and the owner is ready to test the production candidate. Codex owns the verification and cutover. Antigravity can provide local evidence from its assigned phase.
+Run this after the owner publishes the candidate using the [deployment guide](deployment.md). Codex owns verification before any public URL cutover. Antigravity can provide local evidence from its assigned phase.
 
 1. Open the same pilot URL on a laptop over Wi-Fi and a phone on mobile data. Create a room on one device and join it from the other using the invite. Repeat once with a typed code.
 2. Start a match, take turns on both devices, and confirm the discard, order, and hand counts agree after each move. Confirm each browser sees its own cards and that a full or started room rejects new guests.

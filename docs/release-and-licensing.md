@@ -22,12 +22,12 @@ The upgraded app serves its [original SVG mark](../assets/branding/mark.svg), [e
 
 When exporting icons, keep the square canvas. Fill the touch and app icon backgrounds with `#0e1a14`. Leave generous space inside the maskable icon so platform crops preserve the mark. Inspect the favicon at 16 px and the social card at thumbnail size before replacing the exports. Keep image dimensions and references in `site.webmanifest` and the HTML head in sync. [Web app icon guidance](https://web.dev/learn/pwa/web-app-manifest)
 
-For the upgraded app's public build, set `VITE_PUBLIC_SITE_URL` to its final HTTPS origin before running `npm run build`. Vite writes the canonical and absolute social-image URLs into the HTML. Local builds include the branding assets, title, and description. At cutover, verify the public page and PNG URLs can be fetched by a signed-out visitor. [Open Graph protocol](https://ogp.me/)
+For a hosted build, set `VITE_PUBLIC_SITE_URL` to its HTTPS origin and `VITE_PUBLIC_SOURCE_URL` to the public source for the deployed commit. Run `npm run build:hosted`. Vite writes the canonical and absolute social-image URLs into the HTML. Verify the public page and PNG while signed out. [Deployment guide](deployment.md) [Open Graph protocol](https://ogp.me/)
 
 ## Applying AGPLv3
 
 The [LICENSE file](../LICENSE) contains GNU AGPL version 3. Before publishing the licensed release, the repository owner should confirm that the existing contributors and any other copyright holders have authorized distribution of their work under these terms. Dependencies keep their upstream licenses and required notices. [GNU licensing guidance](https://www.gnu.org/licenses/gpl-howto.html)
 
-Keep **Source** and **License** links visible in the hosted game. The static prototype serves its editable HTML directly. When the server-backed app ships, the Source link should lead to the exact deployed revision or a source archive that includes the game server, browser app, and scripts needed to build and run that version. Check those links from a signed-out browser. Modified versions used over a network must prominently offer the corresponding source under Section 13. [GNU AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html#section13)
+Keep **Source** and **License** visible in the hosted game. The Source link should lead to the exact deployed revision or a source archive that includes the game server, browser app, and scripts needed to build and run that version. The License link downloads the bundled repository license. Check both links in a signed-out browser. Modified versions used over a network must prominently offer the corresponding source under Section 13. [GNU AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html#section13)
 
 Keep personal reference notes in `*.local.md` files and discuss implementation and playtest results in public pull requests using the Meow Table terminology.

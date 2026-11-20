@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import licenseUrl from '../../../LICENSE?url';
 import { MatchTable } from '../features/match/MatchTable';
 import { Lobby } from '../features/rooms/Lobby';
 import { RoomEntry } from '../features/rooms/RoomEntry';
@@ -32,6 +33,11 @@ export function App() {
         {!room && <button type="button" className="ui-button" onClick={reconnect}>Reconnect</button>}
       </div>}
       {error && !room?.match && <p className="mt-4 rounded-lg border border-red-300/25 bg-red-400/10 px-3 py-2 text-sm text-red-200" role="alert">{error}</p>}
+      <footer className="mt-8 flex justify-center gap-4 text-sm text-muted">
+        {import.meta.env.VITE_PUBLIC_SOURCE_URL && <a className="underline underline-offset-4"
+          href={import.meta.env.VITE_PUBLIC_SOURCE_URL} target="_blank" rel="noopener noreferrer">Source</a>}
+        <a className="underline underline-offset-4" href={licenseUrl} download="LICENSE">License</a>
+      </footer>
     </main>
   );
 }

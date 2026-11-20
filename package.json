@@ -14,6 +14,9 @@
     "dev": "npm run dev --workspace @meow-table/web",
     "check": "npm run types && npm run check --workspaces",
     "build": "npm run build --workspace @meow-table/web",
+    "build:hosted": "npm run build --workspace @meow-table/web -- --mode hosted",
+    "deploy:dry-run": "npm exec --workspace @meow-table/web -- wrangler deploy --dry-run",
+    "deploy": "npm run build:hosted && npm exec --workspace @meow-table/web -- wrangler deploy",
     "start": "npm run start --workspace @meow-table/web",
     "types": "wrangler types backend/worker-configuration.d.ts --config backend/wrangler.jsonc --include-runtime=false",
     "test": "node --test packages/protocol/src/index.test.ts backend/src/game.test.ts"

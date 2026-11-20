@@ -52,9 +52,9 @@ A brief connection drop triggers a few automatic retries. Use **Reconnect** or r
 
 ## Hosting and release
 
-The upgraded app targets **Cloudflare Workers Free**. It serves static files and the room backend on the same origin. Hibernating sockets and one Durable Object per room keep independent lobbies from sharing state. Capacity is still subject to free daily quotas and must be measured before release. [Architecture and free-tier plan](docs/architecture.md)
+The game deploys to **Cloudflare Workers Free** as one app with static frontend files and the room backend on the same origin. Use the [first hosted playtest guide](docs/deployment.md) for account setup, the exact commands, and the two-network test. [Architecture and free-tier plan](docs/architecture.md)
 
-Test the upgraded app on localhost during development. The existing Vercel project still serves the [root prototype](index.html) using [`vercel.json`](vercel.json). Codex verifies and prepares the eventual switch. The owner pushes manually. The owner's ignored `deployment.local.md`, if present, contains the dashboard settings and release checklist. [Cutover gate](docs/implementation-phases.md#codex-only-prototype-cutover)
+The root prototype is kept as a local reference and ignored by Git. The tracked app starts at `frontend/index.html`. New Vercel Git deployments are disabled in [`vercel.json`](vercel.json) while the existing static deployment remains available. The owner pushes and publishes the playtest manually.
 
 ## Contribute
 

@@ -1,4 +1,4 @@
-name: Verify static app
+name: Verify Meow Table
 
 on:
   pull_request:
@@ -13,26 +13,21 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Check inline JavaScript
-        run: |
-          node <<'NODE'
-          const { readFileSync } = require('node:fs');
-          const { Script } = require('node:vm');
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
 
-          const html = readFileSync('index.html', 'utf8');
-          const inlineScripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
-            .map(([, script]) => script.trim())
-            .filter(Boolean);
-
-          if (inlineScripts.length === 0) {
-            throw new Error('No inline JavaScript found in index.html');
-          }
-
-          for (const [index, script] of inlineScripts.entries()) {
-            new Script(script, { filename: `index.html (inline script ${index + 1})` });
-          }
-          NODE
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - name: Build hosted app
+        env:
+          VITE_PUBLIC_SITE_URL: https://meow-table.example.com
+          VITE_PUBLIC_SOURCE_URL: https://example.com/meow-table-source
+        run: npm run build:hosted
+      - run: npm run deploy:dry-run

@@ -2,7 +2,16 @@ import type { HtmlTagDescriptor, Plugin } from 'vite';
 
 const imageAlt = 'Meow Table wordmark next to a gold cat-shaped playing card on green felt.';
 
-export function shareMetadata(siteUrl: string | undefined): Plugin {
+export function shareMetadata(siteUrl: string | undefined, sourceUrl: string | undefined, hosted: boolean): Plugin {
+  if (hosted && (!siteUrl || !sourceUrl)) {
+    throw new Error('Set VITE_PUBLIC_SITE_URL and VITE_PUBLIC_SOURCE_URL before building for hosting.');
+  }
+  if (sourceUrl) {
+    const source = new URL(sourceUrl);
+    if (source.protocol !== 'https:' || source.username || source.password) {
+      throw new Error('VITE_PUBLIC_SOURCE_URL must be a public HTTPS URL to the deployed revision.');
+    }
+  }
   return {
     name: 'meow-table-share-metadata',
     transformIndexHtml() {

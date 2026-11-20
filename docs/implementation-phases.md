@@ -16,7 +16,8 @@ If a prerequisite is missing, finish independent work and name the blocker.
 Write straightforward TypeScript. Reuse existing components and helpers.
 Keep rules and complete state on the server. Render approved views in React.
 Follow the Meow Table palette and keep emoji out of product-authored UI.
-Test the upgraded app on localhost. Preserve root index.html and vercel.json.
+Test the app on localhost. Use frontend/index.html as the entry point.
+Read the ignored root prototype or git show 0e78756:index.html for reference.
 If you are Antigravity, leave the prototype cutover to Codex.
 Do not push or deploy. Report changed files, commands actually run,
 results, and anything Codex still needs to verify.
@@ -26,7 +27,7 @@ results, and anything Codex still needs to verify.
 
 1. Check Git status and the base commit. If both agents work at once, use separate branches or worktrees and agree on path ownership. Merge changes to the shared protocol before assigning dependent UI and server work.
 2. Read the files and contracts for the phase. Use the project’s current scripts and versions. Verify configuration syntax in official documentation when changing it.
-3. Keep the diff in the phase. Prefer concrete modules, descriptive names, and simple component props. Add tests where a rule, privacy boundary, or failure case needs proof. Test the upgraded app on localhost, and keep the root prototype and its Vercel build in place until the Codex-only cutover.
+3. Keep the diff in the phase. Prefer concrete modules, descriptive names, and simple component props. Add tests where a rule, privacy boundary, or failure case needs proof. Test the app on localhost and keep the prototype as local reference material.
 4. Report changed files, exercised paths, commands and results, assumptions, and remaining issues. An Antigravity handoff is ready for Codex review once it has that evidence.
 5. **Codex verifies independently.** Read the diff, check normal entry points, and rerun the phase checks. Reproduce behavior rather than relying on screenshots or a written handoff. Mark only verified rows complete. Update `progress.local.md` if present. Otherwise put the same tracker ID and evidence in the handoff.
 6. **Commit after verification.** Use one local commit per phase, or at most two when a clean split helps review. If Antigravity already made a phase commit, Codex uses the remaining slot for corrections and evidence. The owner pushes manually. Keep any authorized hosting changes separate.
@@ -76,22 +77,22 @@ results, and anything Codex still needs to verify.
 
 **Tracker:** A10. **Commit:** `ci: verify the Meow Table multiplayer release`
 
-1. Add workspace checks to the existing CI workflow. Run type checks, the build, rule and room tests, and the relevant browser flows. Preserve the root prototype verification while Vercel serves it.
-2. Verify the compiled app locally with independent browser sessions. Document restarts, room expiry, rollback, and how the Source and License links point to the shipped release. Test the chosen Cloudflare Free architecture with simultaneous rooms, repeated reconnects, and idle hibernation. Measure request, duration, and storage use and set the initial lobby admission limits accordingly. The owner's `deployment.local.md` contains provider steps if present.
+1. Run tests, type checks, a hosted build, and Wrangler's dry run in the existing verification workflow. Verify relevant browser flows on the locally compiled candidate.
+2. Follow the [deployment guide](deployment.md) for release setup, source and license links, and rollback. Test the chosen Cloudflare Free architecture with simultaneous rooms, reconnects, and idle hibernation. Measure request, duration, and storage use. The ignored `deployment.local.md` records provider settings and pilot evidence.
 3. Once local release checks pass and the owner is ready to test hosting, Codex validates the production target with the [hosted playtest](contributor-workflow.md#hosted-playtest). Record the build revision, devices, networks, and results. Local readiness and hosted verification can be recorded separately.
 
 **Codex checks:** Finish, reconnect, and rematch on localhost first. Repeat these checks across two different networks on the owner-approved release target. Check a larger table and signed-out Source and License links. Mark the phase verified once the hosted evidence is recorded.
 
 ### Codex-only prototype cutover
 
-The root `index.html` is Vercel's live input, and `frontend/index.html` is the upgraded Vite entry. Antigravity leaves the root `index.html`, `vercel.json`, and live project settings in place. It can implement and test assigned work in the workspace.
+The root `index.html` is ignored local reference material. `frontend/index.html` is the tracked Vite entry. The repository disables automatic Vercel Git builds for the prototype while the owner tests the Workers release. Codex handles a later public URL cutover after the owner signs off.
 
 Codex decides when the prototype can be retired based on evidence:
 
 1. The compiled localhost build passes the complete release flow. Verify room creation, joining by code and link, a full match under the approved rules, private hands, reconnect, and rematch. Record any prototype-only modes the owner approved deferring.
 2. The replacement has a verified production target that actually runs or reaches the multiplayer service. Agree on the public URL and rollback path with the owner. A static frontend needs a reachable production socket endpoint. Use the last working prototype deployment or commit as the rollback reference.
-3. Once those gates pass, remove the **root** `index.html` and update `vercel.json` for the agreed public target in the same change. Keep `frontend/index.html`. Update the GitHub verification job and documentation that reference the root prototype. Replace any historical reference links in the local tracker with links to the preserved Git revision.
-4. Verify the replacement build, deploy configuration, CI entry points, and user-facing Source and License links. Prepare the cutover for the owner's manual push. If any gate is open, retain the root prototype and its current Vercel configuration and record the missing evidence.
+3. Verify the deployed build, CI, and the user-facing Source and License links. Record the hosted smoke test before moving any public URL.
+4. When the owner approves the change, update the public link or agreed domain and record how to return to the previous URL. Use the preserved prototype revision `0e78756` as a source reference.
 
 ## Phase status
 
@@ -101,4 +102,4 @@ Codex decides when the prototype can be retired based on evidence:
 | 2. Rooms | Verified locally | Clean `npm ci`, protocol tests, type checks, and build passed. Dev and preview verified room isolation, six-seat capacity, host-only locking, and private sessions. Independent Chrome contexts verified copied invites, typed codes, live rosters, and refresh. The room alarm expired a disconnected seat and removed empty state. |
 | 3. Match | Verified locally | Numbered cards, six action effects, private hands, bots, and rematches are available for playtesting. |
 | 4. Recovery and UI | Verified locally | Seat recovery, lobby reopening, direction, solo rematch, and keyboard choices are checked. A 13-card hand with long names fits a phone viewport. Motion effects are gated by the user's preference. |
-| 5. Release and cutover | Planned | Requires local release evidence, an approved production target, and Codex verification. |
+| 5. Release and cutover | Hosted playtest pending | Cloudflare release commands and the workspace CI workflow are prepared. The owner publishes the first candidate and records cross-network results. |

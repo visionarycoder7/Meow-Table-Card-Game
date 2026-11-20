@@ -41,6 +41,7 @@ Desktop.ini
 *.swp
 
 # Personal reference material
+/index.html
 /references/local/
 *.local.pdf
 Nomercy-Eng.pdf
