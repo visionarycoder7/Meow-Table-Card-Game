@@ -3,6 +3,7 @@ import { normalizeDisplayName, normalizeRoomCode } from '@meow-table/protocol';
 import type { RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
 
 const seatKey = (code: string) => `meow-table:seat:${code}`;
+type ReceivedRoom = RoomView & { receivedAt: number };
 
 function saveSeat(code: string, token: string | null) {
   try {
@@ -31,7 +32,7 @@ function showRoomInUrl(code?: string) {
 export function useLobby(invitedCode: string) {
   const socket = useRef<WebSocket | null>(null);
   const seat = useRef<{ code: string; token: string } | null>(null);
-  const [room, setRoom] = useState<RoomView | null>(null);
+  const [room, setRoom] = useState<ReceivedRoom | null>(null);
   const [seatId, setSeatId] = useState('');
   const [connection, setConnection] = useState<'idle' | 'connecting' | 'connected' | 'disconnected'>('idle');
   const [error, setError] = useState('');
@@ -58,17 +59,19 @@ export function useLobby(invitedCode: string) {
     next.addEventListener('message', ({ data }) => {
       if (socket.current !== next) return;
       const event = JSON.parse(String(data)) as RoomEvent;
+      const receivedAt = performance.now();
       switch (event.type) {
         case 'session':
           seat.current = { code: event.room.code, token: event.token };
           saveSeat(event.room.code, event.token);
           showRoomInUrl(event.room.code);
           setSeatId(event.seatId);
-          setRoom(event.room);
+          setRoom({ ...event.room, receivedAt });
           setConnection('connected');
           break;
         case 'room':
-          setRoom((current) => current && event.room.revision > current.revision ? event.room : current);
+          setRoom((current) => current && event.room.revision > current.revision
+            ? { ...event.room, receivedAt } : current);
           break;
         case 'error':
           setError(event.message);

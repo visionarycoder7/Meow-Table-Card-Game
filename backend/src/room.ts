@@ -1,9 +1,12 @@
 import { DurableObject } from 'cloudflare:workers';
 import { parseRoomCommand, roomCapacity } from '@meow-table/protocol';
 import type { RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
+import { applyTurn, expireTurn, forfeitSeats, matchView, rematchOpener, startMatch } from './game';
+import type { Match } from './game';
 
 type Seat = { id: string; name: string; token: string; expiresAt: number | null };
-type Lobby = { code: string; hostSeatId: string; locked: boolean; revision: number; players: Seat[] };
+type BotSeat = { id: string; name: string; bot: true };
+type Lobby = { code: string; hostSeatId: string; locked: boolean; revision: number; players: Seat[]; bots?: BotSeat[]; match?: Match; matchRevision?: number };
 type Attachment =
   | { type: 'pending'; create: boolean; code: string; expiresAt: number }
   | { type: 'seat'; seatId: string };
@@ -20,13 +23,19 @@ function send(socket: WebSocket, event: RoomEvent) {
   if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(event));
 }
 
-function view(lobby: Lobby): RoomView {
+function view(lobby: Lobby, seatId: string): RoomView {
   return {
     code: lobby.code,
     hostSeatId: lobby.hostSeatId,
     locked: lobby.locked,
     revision: lobby.revision,
-    players: lobby.players.map(({ id, name, expiresAt }) => ({ id, name, connected: expiresAt === null })),
+    matchRevision: lobby.match && (lobby.matchRevision ?? lobby.revision),
+    serverTime: Date.now(),
+    players: [
+      ...lobby.players.map(({ id, name, expiresAt }) => ({ id, name, connected: expiresAt === null })),
+      ...(lobby.bots ?? []).map((bot) => ({ ...bot, connected: true })),
+    ],
+    match: lobby.match && matchView(lobby.match, seatId),
   };
 }
 
@@ -63,16 +72,19 @@ export class Room extends DurableObject<Env> {
 
       if (command.type === 'leave') {
         lobby.players = lobby.players.filter(({ id }) => id !== peer.seatId);
+        if (lobby.match) forfeitSeats(lobby.match, [peer.seatId], Date.now());
         socket.serializeAttachment(null);
-        await this.saveAndBroadcast(lobby);
+        await this.saveAndBroadcast(lobby, undefined, Boolean(lobby.match));
         send(socket, { type: 'left' });
         socket.close(1000);
         return;
       }
+      if ('revision' in command) return this.applyMatchAction(socket, lobby, peer.seatId, command);
       if (command.type !== 'lock') return this.reject(socket, 'You already have a seat.');
+      if (lobby.match) return this.reject(socket, 'Room access is locked during the match and rematch.');
       if (lobby.hostSeatId !== peer.seatId) return this.reject(socket, 'Only the host can change lobby access.');
-      if (command.locked && lobby.players.filter(({ expiresAt }) => expiresAt === null).length < 2) {
-        return this.reject(socket, 'At least two connected players are needed.');
+      if (command.locked && lobby.players.filter(({ expiresAt }) => expiresAt === null).length + (lobby.bots?.length ?? 0) < 2) {
+        return this.reject(socket, 'Invite a player or add a bot first.');
       }
       if (lobby.locked === command.locked) return;
 
@@ -103,17 +115,63 @@ export class Room extends DurableObject<Env> {
 
       const lobby = await this.ctx.storage.get<Lobby>(lobbyKey);
       if (lobby) {
-        const active = lobby.players.filter(({ expiresAt }) => expiresAt === null || expiresAt > now);
-        if (active.length !== lobby.players.length) {
-          lobby.players = active;
-          await this.saveAndBroadcast(lobby);
-        }
-        for (const { expiresAt } of active) {
+        if (this.expireMatchAndSeats(lobby, now)) await this.saveAndBroadcast(lobby, undefined, Boolean(lobby.match));
+        for (const { expiresAt } of lobby.players) {
           if (expiresAt !== null) deadlines.push(expiresAt);
         }
+        if (lobby.match?.turn) deadlines.push(lobby.match.turn.deadline);
       }
       if (deadlines.length) await this.scheduleCleanup(Math.min(...deadlines));
     });
+  }
+
+  private expireMatchAndSeats(lobby: Lobby, now: number) {
+    const expired = lobby.players.filter(({ expiresAt }) => expiresAt !== null && expiresAt <= now);
+    if (expired.length) {
+      lobby.players = lobby.players.filter((seat) => !expired.includes(seat));
+      if (lobby.match) forfeitSeats(lobby.match, expired.map(({ id }) => id), now);
+    }
+    const turnExpired = lobby.match ? expireTurn(lobby.match, now) : false;
+    return expired.length > 0 || turnExpired;
+  }
+
+  private async applyMatchAction(socket: WebSocket, lobby: Lobby, seatId: string,
+    command: Extract<RoomCommand, { revision: number }>) {
+    const now = Date.now();
+    const isMove = command.type === 'play' || command.type === 'draw' || command.type === 'pass' || command.type === 'respond-pounce';
+    const turnExpired = isMove && lobby.match?.turn?.seatId === seatId && lobby.match.turn.deadline <= now;
+    if (this.expireMatchAndSeats(lobby, now)) await this.saveAndBroadcast(lobby, undefined, Boolean(lobby.match));
+    if (turnExpired) return this.reject(socket, 'Time ran out before that move reached the table.');
+    const revision = isMove ? lobby.matchRevision ?? lobby.revision : lobby.revision;
+    if (command.revision !== revision) return this.reject(socket, 'The table changed. Try again.');
+
+    if (command.type === 'add-bot' || command.type === 'remove-bot') {
+      if (lobby.hostSeatId !== seatId || lobby.match) return this.reject(socket, 'Only the host can change bots before a match.');
+      const bots = lobby.bots ??= [];
+      if (command.type === 'add-bot') {
+        if (lobby.players.length + bots.length >= roomCapacity) return this.reject(socket, 'This room is full.');
+        bots.push({ id: crypto.randomUUID(), name: `Bot ${bots.length + 1}`, bot: true });
+      } else if (!bots.pop()) {
+        return this.reject(socket, 'There are no bots to remove.');
+      }
+    } else if (command.type === 'start' || command.type === 'rematch') {
+      if (lobby.hostSeatId !== seatId) return this.reject(socket, 'Only the host can start a match.');
+      const previous = lobby.match;
+      if (command.type === 'start' ? previous : !previous?.result) {
+        return this.reject(socket, 'A match cannot start from this table state.');
+      }
+      const connected = lobby.players.filter(({ expiresAt }) => expiresAt === null);
+      const roster = [...connected, ...(lobby.bots ?? [])];
+      if (roster.length < 2) return this.reject(socket, 'Invite a player or add a bot first.');
+      lobby.players = connected;
+      lobby.locked = true;
+      lobby.match = startMatch(roster, previous ? rematchOpener(previous, roster) : seatId, now);
+    } else if (isMove) {
+      if (!lobby.match) return this.reject(socket, 'Start a match first.');
+      const error = applyTurn(lobby.match, seatId, command, now);
+      if (error) return this.reject(socket, error);
+    }
+    await this.saveAndBroadcast(lobby, undefined, Boolean(lobby.match));
   }
 
   private async admit(
@@ -142,7 +200,9 @@ export class Room extends DurableObject<Env> {
     if (command.type !== 'enter') return this.reject(socket, 'Your seat has expired.', true);
     if (!peer.create && !lobby) return this.reject(socket, 'Room not found.', true);
     if (lobby?.locked) return this.reject(socket, 'This lobby is locked.', true);
-    if (lobby && lobby.players.length >= roomCapacity) return this.reject(socket, 'This room is full.', true);
+    if (lobby && lobby.players.length + (lobby.bots?.length ?? 0) >= roomCapacity) {
+      return this.reject(socket, 'This room is full.', true);
+    }
 
     const seat: Seat = { id: crypto.randomUUID(), name: command.name, token: crypto.randomUUID(), expiresAt: null };
     const current = lobby ?? { code: peer.code, hostSeatId: seat.id, locked: false, revision: 0, players: [] };
@@ -153,7 +213,7 @@ export class Room extends DurableObject<Env> {
   private async establishSession(socket: WebSocket, lobby: Lobby, seat: Seat) {
     socket.serializeAttachment({ type: 'seat', seatId: seat.id } satisfies Attachment);
     await this.saveAndBroadcast(lobby, socket);
-    send(socket, { type: 'session', seatId: seat.id, token: seat.token, room: view(lobby) });
+    send(socket, { type: 'session', seatId: seat.id, token: seat.token, room: view(lobby, seat.id) });
   }
 
   private disconnect(socket: WebSocket): Promise<void> {
@@ -170,7 +230,7 @@ export class Room extends DurableObject<Env> {
     });
   }
 
-  private async saveAndBroadcast(lobby: Lobby, except?: WebSocket) {
+  private async saveAndBroadcast(lobby: Lobby, except?: WebSocket, matchChanged = false) {
     const remaining = lobby.players[0];
     if (!remaining) {
       await this.ctx.storage.delete(lobbyKey);
@@ -179,11 +239,15 @@ export class Room extends DurableObject<Env> {
     if (!lobby.players.some(({ id }) => id === lobby.hostSeatId)) {
       lobby.hostSeatId = (lobby.players.find(({ expiresAt }) => expiresAt === null) ?? remaining).id;
     }
+    if (lobby.match) lobby.matchRevision = matchChanged ? lobby.revision + 1 : lobby.matchRevision ?? lobby.revision;
     lobby.revision++;
     await this.ctx.storage.put(lobbyKey, lobby);
-    const update: RoomEvent = { type: 'room', room: view(lobby) };
+    if (lobby.match?.turn) await this.scheduleCleanup(lobby.match.turn.deadline);
     for (const socket of this.ctx.getWebSockets()) {
-      if (socket !== except && attachment(socket)?.type === 'seat') send(socket, update);
+      const peer = attachment(socket);
+      if (socket !== except && peer?.type === 'seat') {
+        send(socket, { type: 'room', room: view(lobby, peer.seatId) });
+      }
     }
   }
 

@@ -16,7 +16,7 @@
     "build": "npm run build --workspace @meow-table/web",
     "start": "npm run start --workspace @meow-table/web",
     "types": "wrangler types backend/worker-configuration.d.ts --config backend/wrangler.jsonc --include-runtime=false",
-    "test": "node --test packages/protocol/src/index.test.ts"
+    "test": "node --test packages/protocol/src/index.test.ts backend/src/game.test.ts"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.70.1",

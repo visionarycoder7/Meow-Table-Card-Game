@@ -20,3 +20,16 @@ test('room commands validate types, names, and message size', () => {
   }
   assert.equal(parseRoomCommand(new ArrayBuffer(8)), null);
 });
+
+test('effect choices require a valid suit, target, and match revision', () => {
+  const parse = (command: object) => parseRoomCommand(JSON.stringify(command));
+  const targetSeatId = '00000000-0000-4000-8000-000000000001';
+  assert.deepEqual(parse({ type: 'play', revision: 8, cardId: 100, targetSeatId }),
+    { type: 'play', revision: 8, cardId: 100, suit: undefined, targetSeatId });
+  assert.equal(parse({ type: 'play', revision: 8, cardId: 100, suit: 'purple' }), null);
+  assert.equal(parse({ type: 'play', revision: 8, cardId: 100, targetSeatId: 'other' }), null);
+  assert.equal(parse({ type: 'respond-pounce', revision: 8, choice: 'pass' }), null);
+  assert.equal(parse({ type: 'respond-pounce', revision: -1, choice: 'draw' }), null);
+  assert.deepEqual(parse({ type: 'respond-pounce', revision: 8, choice: 'give' }),
+    { type: 'respond-pounce', revision: 8, choice: 'give' });
+});

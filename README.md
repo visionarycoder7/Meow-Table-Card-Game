@@ -1,4 +1,4 @@
-<p align="center"><img src="frontend/public/branding/mark.svg" width="104" height="104" alt="" /></p>
+<p align="center"><img src="assets/branding/mark.svg" width="104" height="104" alt="" /></p>
 <h1 align="center">Meow Table</h1>
 <p align="center">An open-source card table for friends.</p>
 <p align="center">
@@ -11,7 +11,7 @@
 
 ## What works now
 
-Create a private lobby, share an invite link or room code, and see who joins in real time. Each lobby accepts up to six players, and only the host can lock or reopen it. A refreshed tab can reclaim its seat during the lobby grace period. Gameplay and rematches are later phases.
+Create a private room for up to six seats. Share an invite to play with friends, or add bots to play solo or fill empty seats. Match the discard by suit, rank, or action and try to empty your hand. The deck includes six original action cards. A refreshed tab can reclaim its seat during the reconnect grace period, and the host can start a rematch once a game ends.
 
 ## Run locally
 
@@ -24,11 +24,13 @@ npm run dev
 
 Open [localhost:5173](http://localhost:5173). Vite runs the React frontend and local Cloudflare runtime on the same origin. Local development needs no Cloudflare login or secrets.
 
-To try the lobby, enter a name and select **Create room**. Copy the invite into a private window or another browser profile, enter a different name, and select **Join room**. Try a second room to see that its player list stays separate.
+Enter a name and select **Create room**. Copy the invite into a private window or another browser profile, enter a different name, and select **Join room**. In the host window, select **Start match**. Play a highlighted card or click the face-down draw pile. When a drawn card matches, you can play it or select **Pass and keep card**. Try a rematch to see the opening turn rotate.
+
+For a solo game, select **Add bot** in the lobby and then **Start match**. A host can mix bots and friends in the same room, up to six seats total. **Remove bot** removes the last bot added before the match starts.
 
 | Command | What it does |
 | --- | --- |
-| `npm test` | Runs the shared room protocol tests. |
+| `npm test` | Runs the room protocol and server match tests. |
 | `npm run check` | Generates Worker binding types and checks TypeScript in all workspaces. |
 | `npm run build` | Builds the frontend assets and Worker together in `frontend/dist/`. |
 | `npm start` | Previews the built app locally at [localhost:4173](http://localhost:4173). Run the build first. |
@@ -40,6 +42,7 @@ To try the lobby, enter a name and select **Create room**. Copy the invite into 
 | `frontend/` | React screens, Tailwind v4 styles, and the client WebSocket connection. |
 | `backend/` | Worker routing, a Durable Object per room, and SQLite-backed lobby state. |
 | `packages/protocol/` | Shared messages and validation. |
+| `assets/` | Reusable branding exports, app metadata, and card artwork. |
 
 ## Hosting and release
 
@@ -51,6 +54,7 @@ Test the upgraded app on localhost during development. The existing Vercel proje
 
 - [Phase guide](docs/implementation-phases.md) — scopes, agent handoffs, and verification.
 - [Product and gameplay](docs/product-and-gameplay.md) — original rules direction and release scope.
+- [Game rules](docs/game-rules.md) — playable rules, test cases, and proposed effects.
 - [Frontend playbook](docs/frontend-playbook.md) — components, styling, and accessibility.
 - [Contributor workflow](docs/contributor-workflow.md) — development sequence and playtest checks.
 - [Branding and release notes](docs/release-and-licensing.md) — asset sources, metadata, and licensing.

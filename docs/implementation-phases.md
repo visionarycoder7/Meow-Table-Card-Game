@@ -56,8 +56,8 @@ results, and anything Codex still needs to verify.
 
 **Tracker:** A05–A07. **Commit:** `feat: add the server-authoritative match loop`. A second commit can be `feat: add approved card effects and match outcomes`.
 
-1. Start after A01 has an owner-approved original rules reference. Implement one complete deal, turn, play or draw, and result loop. Add the remaining approved effects with deterministic tests.
-2. Process commands in order per room. Validate turn, match, card ownership, and pending decisions. Apply one change, enforce command IDs and expected revisions, and derive per-seat views after accepting the action.
+1. Use the [original rules](game-rules.md#9-rules-decisions-and-playtest-topics). Phase 3A covers the numbered-card loop. Phase 3B covers original effects and choices after review of the baseline and effect rules. Add deterministic tests for each slice.
+2. Process commands in order per room. Validate turn, match, card ownership, and pending decisions. Moves carry the expected match revision and each accepted move advances it once. Presence changes only advance the room revision. Send only the view for the receiving seat.
 3. Connect the table, hand, turn status, and choices to those views. Show the result and allow a rematch with a fresh deck and hands for the expected seats.
 
 **Codex checks:** Finish and rematch a game in two independent sessions. Test two-player turns, deck exhaustion, approved effects, choice expiry, and match endings. Verify wrong-turn, stale, invalid, duplicate, and simultaneous commands. Inspect client payloads for leakage of hidden hands, deck order, or credentials.
@@ -99,6 +99,6 @@ Codex decides when the prototype can be retired based on evidence:
 | --- | --- | --- |
 | 1. Workspace | Verified | The original scaffold passed clean install and runtime checks. Phase 2 rechecked the workspace with the Cloudflare dev runtime and production preview. |
 | 2. Rooms | Verified locally | Clean `npm ci`, protocol tests, type checks, and build passed. Dev and preview verified room isolation, six-seat capacity, host-only locking, and private sessions. Independent Chrome contexts verified copied invites, typed codes, live rosters, and refresh. The room alarm expired a disconnected seat and removed empty state. |
-| 3. Match | Planned | Requires the lobby and approved original rules. |
+| 3. Match | Verified locally | Numbered cards, six action effects, private hands, bots, and rematches are available for playtesting. |
 | 4. Recovery and UI | Planned | Requires the match loop. |
 | 5. Release and cutover | Planned | Requires local release evidence, an approved production target, and Codex verification. |

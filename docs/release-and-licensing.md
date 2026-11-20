@@ -6,9 +6,11 @@ Use **Meow Table** in the UI, project descriptions, release notes, screenshots, 
 
 Use the brand as a working name until the owner checks similar names and logos in the markets where the game will be offered. Review the public repository name, live domain, and older public artifacts at release. The existing remote and domain are managed by the owner.
 
+The local match uses original full-color card faces with a thin cream border, large ranks, and four cat-themed suit illustrations. Card backs use the Meow Table wordmark and cat mark. The editable sources are the match components and their styles. Familiar mechanics such as matching a suit or rank are expressed with Meow Table's own visuals and wording. Brand and visual similarity still require review before a public release. [U.S. Copyright Office guidance on games](https://www.copyright.gov/register/tx-games.html) [USPTO guidance on likelihood of confusion](https://www.uspto.gov/trademarks/search/likelihood-confusion)
+
 ### Branding files and share metadata
 
-The upgraded app serves its [original SVG mark](../frontend/public/branding/mark.svg), [editable social card](../frontend/public/branding/social-card.svg), and their raster exports from `frontend/public/branding/`. The artwork ships with the project under [AGPLv3](../LICENSE). It uses original geometry and system type with no bundled font files. Use the SVGs as the editable sources.
+The upgraded app serves its [original SVG mark](../assets/branding/mark.svg), [editable social card](../assets/branding/social-card.svg), and raster exports from `assets/branding/`. Keep reusable suit marks in `assets/cards/suits/`, effect symbols in `assets/cards/actions/`, and card-back art in `assets/cards/backs/`. The browser combines the back pattern with the primary mark and the Meow Table name. Numbered and action faces share a React component and use these SVGs for the symbols. The artwork ships under [AGPLv3](../LICENSE). Vite serves the files from the site root and copies them into the production client output. [Vite public directory](https://vite.dev/config/shared-options.html#publicdir)
 
 | Asset | Export |
 | --- | --- |

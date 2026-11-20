@@ -19,7 +19,7 @@ export function RoomEntry({ invitedCode, busy, onEnter }: Props) {
           maxLength={displayNameLimit} autoComplete="nickname" placeholder="How friends will see you" required />
       </div>
       <button type="button" onClick={() => onEnter(name)} disabled={busy}
-        className="w-full rounded-lg bg-accent px-4 py-3 text-base font-semibold text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60">
+        className="ui-button ui-button-primary w-full">
         Create room
       </button>
       <div className="border-t border-ink/15 pt-5">
@@ -27,7 +27,7 @@ export function RoomEntry({ invitedCode, busy, onEnter }: Props) {
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <input id="room-code" className={`${inputStyle} min-w-0 uppercase tracking-wide`} value={code}
             onChange={(event) => setCode(event.target.value)} maxLength={8} autoComplete="off" spellCheck={false} />
-          <button disabled={busy} className="rounded-lg border border-ink/30 px-4 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60">
+          <button disabled={busy} className="ui-button">
             Join room
           </button>
         </div>

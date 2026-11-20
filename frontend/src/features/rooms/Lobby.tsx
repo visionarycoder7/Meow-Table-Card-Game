@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import { roomCapacity } from '@meow-table/protocol';
 import type { RoomView } from '@meow-table/protocol';
+import { LeaveRoomButton } from '../../components/LeaveRoomButton';
 
 type Props = {
   room: RoomView;
   seatId: string;
   connected: boolean;
+  onStart: () => void;
+  onBot: (action: 'add-bot' | 'remove-bot') => void;
   onLock: (locked: boolean) => void;
   onLeave: () => void;
   onReconnect: () => void;
 };
-const buttonStyle = 'rounded-lg border border-ink/25 px-3 py-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50';
+const buttonStyle = 'ui-button';
 
-export function Lobby({ room, seatId, connected, onLock, onLeave, onReconnect }: Props) {
+export function Lobby({ room, seatId, connected, onStart, onBot, onLock, onLeave, onReconnect }: Props) {
   const [copyStatus, setCopyStatus] = useState('');
   const isHost = seatId === room.hostSeatId;
   const canLock = room.players.filter((player) => player.connected).length >= 2;
@@ -43,7 +46,7 @@ export function Lobby({ room, seatId, connected, onLock, onLeave, onReconnect }:
 
       <div>
         <div className="flex items-center justify-between gap-2 border-b border-ink/15 pb-2">
-          <h2 className="font-medium">Players</h2>
+          <h2 className="font-medium">Seats</h2>
           <p className="text-sm tabular-nums text-muted">{room.players.length} / {roomCapacity}</p>
         </div>
         <ul className="divide-y divide-ink/15">
@@ -51,22 +54,30 @@ export function Lobby({ room, seatId, connected, onLock, onLeave, onReconnect }:
             <li key={player.id} className="flex items-center justify-between gap-3 py-3">
               <span className="min-w-0 wrap-anywhere">{player.name}{player.id === seatId ? ' (you)' : ''}</span>
               <span className="shrink-0 text-sm text-muted">
-                {player.connected ? player.id === room.hostSeatId ? 'Host' : 'Connected' : 'Reconnecting'}
+                {player.bot ? 'Computer' : player.connected ? player.id === room.hostSeatId ? 'Host' : 'Connected' : 'Reconnecting'}
               </span>
             </li>
           ))}
         </ul>
+        {isHost && <div className="mt-2 flex flex-wrap gap-2">
+          <button type="button" className={buttonStyle} disabled={!connected || room.players.length >= roomCapacity}
+            onClick={() => onBot('add-bot')}>Add bot</button>
+          {room.players.some(({ bot }) => bot) && <button type="button" className={buttonStyle} disabled={!connected}
+            onClick={() => onBot('remove-bot')}>Remove bot</button>}
+        </div>}
       </div>
 
       <p className="text-sm text-muted" role="status">
         {room.locked ? 'Lobby locked.' : 'Lobby open.'}
-        {isHost && !room.locked && !canLock ? ' Invite one more player to lock it.' : ''}
+        {isHost && !canLock ? ' Invite a friend or add a bot to play solo.' : ''}
       </p>
       <div className="flex flex-wrap gap-2">
+        {isHost && <button type="button" className="ui-button ui-button-primary"
+          disabled={!connected || !canLock} onClick={onStart}>Start match</button>}
         {isHost && <button type="button" className={buttonStyle} disabled={!connected || (!room.locked && !canLock)}
           onClick={() => onLock(!room.locked)}>{room.locked ? 'Unlock lobby' : 'Lock lobby'}</button>}
         {!connected && <button type="button" className={buttonStyle} onClick={onReconnect}>Reconnect</button>}
-        <button type="button" className={buttonStyle} onClick={onLeave}>Leave room</button>
+        <LeaveRoomButton onLeave={onLeave} />
       </div>
     </section>
   );

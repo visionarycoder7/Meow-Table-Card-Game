@@ -23,6 +23,10 @@ Cloudflare Free has separate daily limits for Worker invocations and Durable Obj
 
 The browser sends an intent such as “play this card.” The server looks up the seat attached to that socket and checks the active match, turn, requested card, and any pending choice. It commits an accepted change once, then sends a tailored snapshot to each seat. Your browser renders your hand and the shared table. A second browser can receive the same table with a different private hand.
 
+The room revision orders snapshots. The match revision orders moves. Joining, resuming, and connection updates advance the room revision while leaving an unchanged match revision valid. A move, timeout, or forfeit advances the match revision. The client derives its remaining time from the server snapshot and uses the browser’s monotonic clock to count down from receipt.
+
+Bots occupy seats in the same match state as human players and count toward capacity. They have no sockets or session credentials. The room's existing alarm wakes the Worker for a bot turn, and the engine validates its move through the same functions used for humans. Bot decisions use their own hand and the public discard. [Durable Objects Alarms API](https://developers.cloudflare.com/durable-objects/api/alarms/)
+
 Keep the game engine separate from sockets and browser code. It computes rules from state and a command. The room handler owns authentication, serialization, timers, and delivery. The React client owns display, input, and animation. A failed animation or a dropped browser connection cannot advance a turn.
 
 ## Room and match state

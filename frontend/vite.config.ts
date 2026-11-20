@@ -5,6 +5,7 @@ import { defineConfig, loadEnv } from 'vite';
 import { shareMetadata } from './share-metadata';
 
 export default defineConfig(({ mode }) => ({
+  publicDir: '../assets',
   plugins: [
     react(),
     tailwindcss(),

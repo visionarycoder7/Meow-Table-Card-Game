@@ -24,14 +24,49 @@ export type RoomView = {
   hostSeatId: string;
   locked: boolean;
   revision: number;
-  players: { id: string; name: string; connected: boolean }[];
+  matchRevision?: number;
+  serverTime: number;
+  players: { id: string; name: string; connected: boolean; bot?: true }[];
+  match?: MatchView;
+};
+
+export const suits = ['PAW', 'BELL', 'NIP', 'FISH'] as const;
+export type Suit = (typeof suits)[number];
+export const suitedActions = ['hiss', 'tail-spin', 'double-treat'] as const;
+export const wildActions = ['curious-cat', 'catnap', 'pounce'] as const;
+export type ActionName = (typeof suitedActions)[number] | (typeof wildActions)[number];
+export type NumberCard = { id: number; suit: Suit; rank: number };
+export type Card = NumberCard
+  | { id: number; suit: Suit; action: (typeof suitedActions)[number] }
+  | { id: number; suit: null; action: (typeof wildActions)[number] };
+export type MatchMove = { type: 'play'; cardId: number; suit?: Suit; targetSeatId?: string }
+  | { type: 'draw' | 'pass' }
+  | { type: 'respond-pounce'; choice: 'draw' | 'give' };
+export type MatchAction = MatchMove | { type: 'start' | 'rematch' };
+export type MatchView = {
+  discard: Card;
+  activeSuit: Suit;
+  direction: 1 | -1;
+  drawCount: number;
+  seats: { id: string; name: string; cardCount: number; forfeited: boolean; bot?: true }[];
+  hand: Card[];
+  playableIds: number[];
+  canDraw: boolean;
+  canPass: boolean;
+  pounce?: { actorSeatId: string; targetSeatId: string; canGive: boolean };
+  turn: { seatId: string; deadline: number } | null;
+  result: { winnerSeatId: string | null } | null;
+  lastAction?: { seatId: string; type: 'draw' } | { seatId: string; type: 'pass' } | { seatId: string; type: 'play'; card: Card }
+    | { seatId: string; type: 'pounce-response'; choice: 'draw' | 'give' | 'forfeit' };
 };
 
 export type RoomCommand =
   | { type: 'enter'; name: string }
   | { type: 'resume'; token: string }
   | { type: 'lock'; locked: boolean }
-  | { type: 'leave' };
+  | { type: 'leave' }
+  | { type: 'add-bot' | 'remove-bot'; revision: number }
+  | (MatchAction & { revision: number });
 
 export type RoomEvent =
   | { type: 'session'; seatId: string; token: string; room: RoomView }
@@ -62,6 +97,29 @@ export function parseRoomCommand(message: string | ArrayBuffer): RoomCommand | n
       return 'locked' in input && typeof input.locked === 'boolean' ? { type: 'lock', locked: input.locked } : null;
     case 'leave':
       return { type: 'leave' };
+    case 'start':
+    case 'rematch':
+    case 'draw':
+    case 'pass':
+    case 'add-bot':
+    case 'remove-bot':
+    case 'respond-pounce':
+    case 'play': {
+      if (!('revision' in input) || typeof input.revision !== 'number' ||
+        !Number.isSafeInteger(input.revision) || input.revision < 0) return null;
+      if (input.type === 'respond-pounce') {
+        return 'choice' in input && (input.choice === 'draw' || input.choice === 'give')
+          ? { type: input.type, choice: input.choice, revision: input.revision } : null;
+      }
+      if (input.type !== 'play') return { type: input.type, revision: input.revision };
+      if (!('cardId' in input) || typeof input.cardId !== 'number' ||
+        !Number.isSafeInteger(input.cardId) || input.cardId < 0) return null;
+      const suit = 'suit' in input ? suits.find((candidate) => candidate === input.suit) : undefined;
+      if ('suit' in input && !suit) return null;
+      const targetSeatId = 'targetSeatId' in input ? input.targetSeatId : undefined;
+      if (targetSeatId !== undefined && (typeof targetSeatId !== 'string' || !/^[\da-f-]{36}$/i.test(targetSeatId))) return null;
+      return { type: 'play', cardId: input.cardId, revision: input.revision, suit, targetSeatId };
+    }
     default:
       return null;
   }
