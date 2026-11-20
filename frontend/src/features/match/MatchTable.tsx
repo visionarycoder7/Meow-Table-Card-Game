@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { suits } from '@meow-table/protocol';
-import type { Card, MatchAction, MatchView, RoomView } from '@meow-table/protocol';
+import { useEffect, useRef, useState } from 'react';
+import type { Card, MatchAction, MatchMove, MatchView, RoomView } from '@meow-table/protocol';
 import { LeaveRoomButton } from '../../components/LeaveRoomButton';
 import { actionDetails, CardFace, cardName, suitNames } from './CardFace';
+import { CardChoice } from './CardChoice';
+import { PlayerHand } from './PlayerHand';
 import { TableSeat } from './TableSeat';
 
 function useRemainingTime(deadline: number | undefined, serverTime: number, receivedAt: number) {
@@ -29,6 +30,8 @@ type Props = {
 
 export function MatchTable({ room, match, seatId, connected, receivedAt, error, onAction, onReconnect, onLeave }: Props) {
   const [selection, setSelection] = useState<{ cardId: number; revision: number } | null>(null);
+  const choiceTrigger = useRef<HTMLButtonElement>(null);
+  const handHeading = useRef<HTMLHeadingElement>(null);
   const myTurn = match.turn?.seatId === seatId;
   const remainingTime = useRemainingTime(match.turn?.deadline, room.serverTime, receivedAt);
   const canAct = connected && myTurn && remainingTime > 0;
@@ -55,12 +58,27 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
       : last.type === 'pass' ? 'kept the drawn card' : last.choice === 'give' ? 'gave a card'
         : last.choice === 'draw' ? 'took the Pounce draw' : 'left during Pounce'}.`;
 
-  function play(card: Card) {
+  useEffect(() => {
+    if (selection && !selected && document.activeElement === document.body) handHeading.current?.focus();
+  }, [selection, selected]);
+
+  function submit(move: MatchMove, keyboard: boolean) {
+    if (keyboard) handHeading.current?.focus({ preventScroll: true });
+    onAction(move);
+  }
+
+  function play(card: Card, button: HTMLButtonElement, keyboard: boolean) {
     if ('action' in card && card.suit === null) {
+      choiceTrigger.current = button;
       setSelection({ cardId: card.id, revision: moveRevision });
     } else {
-      onAction({ type: 'play', cardId: card.id });
+      submit({ type: 'play', cardId: card.id }, keyboard);
     }
+  }
+
+  function cancelChoice() {
+    setSelection(null);
+    choiceTrigger.current?.focus();
   }
 
   return (
@@ -86,7 +104,8 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
             <img className="turn-track" src="/table/turn-track.svg" alt="" aria-hidden="true" />
             <div className="text-center">
               <button type="button" className="card-back" aria-label={`Draw card, ${match.drawCount} in draw pile`}
-                disabled={!canAct || !match.canDraw || !!selected} onClick={() => onAction({ type: 'draw' })}>
+                disabled={!canAct || !match.canDraw || !!selected}
+                onClick={(event) => submit({ type: 'draw' }, event.detail === 0)}>
                 <span className="card-back-brand">
                   <img src="/branding/mark.svg" width="48" height="48" alt="" />
                   <span>Meow Table</span>
@@ -95,7 +114,10 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
               <p className="mt-2 text-sm font-medium">Draw · {match.drawCount}</p>
             </div>
             <div className="text-center">
-              <div role="img" aria-label={cardName(match.discard)}><CardFace card={match.discard} /></div>
+              <div role="img" aria-label={cardName(match.discard)}
+                aria-description={'action' in match.discard ? actionDetails[match.discard.action].rule : undefined}>
+                <CardFace card={match.discard} />
+              </div>
               <p className="mt-2 text-sm font-medium">Discard</p>
             </div>
           </div>
@@ -110,45 +132,24 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
               : match.playableIds.length ? 'Match the suit, rank, or action.' : 'Draw a card to continue.'}
           </p>}
           {match.canPass && <button type="button" className="ui-button" disabled={!canAct || !!selected}
-            onClick={() => onAction({ type: 'pass' })}>Pass and keep card</button>}
+            onClick={(event) => submit({ type: 'pass' }, event.detail === 0)}>Pass and keep card</button>}
           {canRespond && <div className="flex flex-wrap justify-center gap-2">
-            <button type="button" className="ui-button ui-button-primary" onClick={() => onAction({ type: 'respond-pounce', choice: 'draw' })}>Draw two</button>
+            <button type="button" className="ui-button ui-button-primary"
+              onClick={(event) => submit({ type: 'respond-pounce', choice: 'draw' }, event.detail === 0)}>Draw two</button>
             <button type="button" className="ui-button" disabled={!match.pounce?.canGive}
-              onClick={() => onAction({ type: 'respond-pounce', choice: 'give' })}>Give a random card</button>
+              onClick={(event) => submit({ type: 'respond-pounce', choice: 'give' }, event.detail === 0)}>Give a random card</button>
           </div>}
         </div>
         {self && <div className="table-self"><TableSeat seat={self} active={myTurn} away={!connected} local /></div>}
       </div>
       {activity && <p className="text-center text-sm text-muted wrap-anywhere">{activity}</p>}
 
-      <div className="text-center">
-        <h2 className="font-semibold">Your hand <span className="ml-1 text-sm font-normal text-muted">{match.hand.length}</span></h2>
+      <PlayerHand cards={match.hand} playableIds={match.playableIds} canAct={canAct && !match.pounce}
+        headingRef={handHeading} chosenCardId={selected?.id} onPlay={play} controls={<>
         {error && <p className="mt-2 text-sm text-red-200" role="alert">{error}</p>}
-        {selected && 'action' in selected && <div className="mt-3 grid justify-items-center gap-2" aria-label="Card choice">
-          <p className="text-sm">{selected.action === 'pounce' ? 'Choose an opponent for Pounce.' : 'Choose the next active suit.'}</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {selected.action === 'pounce'
-              ? opponents.filter(({ forfeited }) => !forfeited).map((opponent) =>
-                <button key={opponent.id} type="button" className="ui-button ui-button-primary"
-                  onClick={() => onAction({ type: 'play', cardId: selected.id, targetSeatId: opponent.id })}>{opponent.name}</button>)
-              : suits.map((suit) => <button key={suit} type="button" className="ui-button ui-button-primary"
-                onClick={() => onAction({ type: 'play', cardId: selected.id, suit })}>{suitNames[suit]}</button>)}
-            <button type="button" className="ui-button" onClick={() => setSelection(null)}>Cancel choice</button>
-          </div>
-        </div>}
-        <ul className="flex flex-wrap justify-center gap-2 py-3">
-          {match.hand.map((card) => (
-            <li key={card.id}>
-              <button type="button" aria-label={`Play ${cardName(card)}`} className="hand-card"
-                disabled={!canAct || !match.playableIds.includes(card.id)}
-                onClick={() => play(card)}>
-                <CardFace card={card} />
-              </button>
-            </li>
-          ))}
-        </ul>
-        {!match.hand.length && <p className="text-sm text-muted">No cards left.</p>}
-      </div>
+        {selected && 'action' in selected && <CardChoice cardId={selected.id} pounce={selected.action === 'pounce'}
+          opponents={opponents} onPlay={submit} onCancel={cancelChoice} />}
+      </>} />
 
       <div className="flex flex-wrap items-center gap-2 border-t border-ink/15 pt-4">
         {match.result && host && <button type="button" className="ui-button ui-button-primary" disabled={!connected || !canRematch}

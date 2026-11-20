@@ -1,5 +1,6 @@
 import { suitedActions, suits, wildActions } from '@meow-table/protocol';
 import type { Card, MatchMove, MatchView, Suit } from '@meow-table/protocol';
+import { chooseBotMove, strongestSuit } from './bot.ts';
 
 type SeatIdentity = { id: string; name: string; bot?: true };
 type MatchSeat = SeatIdentity & { hand: Card[]; forfeitedCount?: number };
@@ -204,14 +205,12 @@ export function expireTurn(match: Match, now: number) {
   const turn = match.turn;
   if (!turn || now < turn.deadline) return false;
   const seat = match.seats.find(({ id }) => id === turn.seatId)!;
-  if (match.pounce) {
-    const actor = match.seats.find(({ id }) => id === match.pounce?.actorSeatId)!;
-    const choice = seat.bot && seat.hand.length > 1 && actor.hand.length === 0 ? 'give' : 'draw';
-    resolvePounce(match, choice, now);
-    return true;
-  }
   if (seat.bot) {
     playBotTurn(match, seat, now);
+    return true;
+  }
+  if (match.pounce) {
+    resolvePounce(match, 'draw', now);
     return true;
   }
   if (turn.drawnCardId === undefined && hasDraw(match)) {
@@ -228,36 +227,27 @@ export function expireTurn(match: Match, now: number) {
   return true;
 }
 
-function countSuit(hand: Card[], suit: Suit | null) {
-  return suit ? hand.filter((card) => card.suit === suit).length : 0;
-}
-
 function automaticPlay(match: Match, seat: MatchSeat, card: Card): MatchMove {
   if ('action' in card && card.action === 'pounce') {
     return { type: 'play', cardId: card.id, targetSeatId: seatsFrom(match, seat.id, 1)[0].id };
   }
   if (card.suit === null) {
-    const suit = suits.reduce((best, candidate) =>
-      countSuit(seat.hand, candidate) > countSuit(seat.hand, best) ? candidate : best);
-    return { type: 'play', cardId: card.id, suit };
+    return { type: 'play', cardId: card.id, suit: strongestSuit(seat.hand) };
   }
   return { type: 'play', cardId: card.id };
 }
 
 function playBotTurn(match: Match, seat: MatchSeat, now: number) {
-  const playable = seat.hand.filter((card) => matches(match, card));
-  const preferred = playable.reduce<Card | undefined>((best, card) =>
-    !best || countSuit(seat.hand, card.suit) > countSuit(seat.hand, best.suit) ? card : best, undefined);
-  if (preferred) {
-    applyTurn(match, seat.id, automaticPlay(match, seat, preferred), now);
-    return;
-  }
-  applyTurn(match, seat.id, { type: 'draw' }, now);
-  const drawn = match.turn?.seatId === seat.id ? match.turn.drawnCardId : undefined;
-  if (drawn !== undefined) {
-    const card = seat.hand.find(({ id }) => id === drawn)!;
-    applyTurn(match, seat.id, automaticPlay(match, seat, card), now);
-  }
+  const opponents = seatsFrom(match, seat.id, 1).filter(({ id }) => id !== seat.id)
+    .map(({ id, hand }) => ({ id, cardCount: hand.length }));
+  const move = chooseBotMove(matchView(match, seat.id), opponents);
+  if (!move) return;
+  const turn = match.turn;
+  applyTurn(match, seat.id, move, now);
+  // A playable draw keeps this turn open. An unplayable draw already advanced it.
+  if (move.type !== 'draw' || match.turn !== turn || turn?.drawnCardId === undefined) return;
+  const followUp = chooseBotMove(matchView(match, seat.id), opponents);
+  if (followUp) applyTurn(match, seat.id, followUp, now);
 }
 
 export function forfeitSeats(match: Match, departed: string[], now: number) {

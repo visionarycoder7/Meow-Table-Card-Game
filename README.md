@@ -29,6 +29,7 @@ Open [localhost:5173](http://localhost:5173). Vite runs the React frontend and l
 - **Solo:** Enter a name, choose **Create room**, add at least one bot, then choose **Start match**.
 - **With friends:** Create a room and share its invite link or code. For a two-player test on one computer, open the invite in a private window or a different browser profile. Join under another name, then start from the host window.
 - **On your turn:** Play a highlighted card that matches the active suit, rank, or action. You can also use the face-down pile to draw once. If the card matches, play it or select **Pass and keep card**. The arrows beside the piles show turn direction. Tail Spin reverses them. The table’s **Action card guide** explains the six effects.
+- **With a large hand:** Cards are grouped by suit and rank. When you have more than ten cards on your turn, **Playable only** shows your legal cards. Press **Escape** to close a wild-card choice and return to the card.
 - **After the result:** The host can select **Rematch** with the current seats or **Back to lobby** to invite more people or change the bots.
 
 A brief connection drop triggers a few automatic retries. Use **Reconnect** or refresh the same tab while the seat is held, up to 60 seconds. The turn or choice clock continues on the server during that time.

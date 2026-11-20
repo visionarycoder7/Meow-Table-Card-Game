@@ -86,7 +86,7 @@ To ensure high reliability, clean architecture, and independent verification by 
    - *Phase 3B:* Take the first numbered card from the shuffled remainder as the opening discard, keeping all other cards in their existing order. The supported deck and seat counts guarantee a numbered opening card.
 4. **Opening Seat and Direction:** The room host opens the game (Seat 0). Play proceeds **clockwise** (increasing seat index in lobby order).
 
-The host can add or remove bots in the lobby. Bots occupy ordinary game seats with private hands. After a brief pause on its turn, a bot picks a legal card from the suit it holds most often, with ties resolved in hand order. If it cannot play, it draws once and plays the drawn card if it matches. The server uses the same play and draw validation for bots and humans.
+The host can add or remove bots in the lobby. Bots occupy ordinary game seats with private hands. After a brief pause, a bot usually plays from its strongest suit and saves wild cards. When the next opponent has two cards or fewer, it favors an available skip, penalty, or reversal that steers the turn away from that opponent. Pounce targets the opponent with the fewest cards, breaking ties in turn order. When a bot cannot play, it draws once and plays the drawn card if it matches. The bot sees its own hand and public hand counts. The server validates bot and human moves through the same rules.
 
 ---
 

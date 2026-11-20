@@ -100,5 +100,5 @@ Codex decides when the prototype can be retired based on evidence:
 | 1. Workspace | Verified | The original scaffold passed clean install and runtime checks. Phase 2 rechecked the workspace with the Cloudflare dev runtime and production preview. |
 | 2. Rooms | Verified locally | Clean `npm ci`, protocol tests, type checks, and build passed. Dev and preview verified room isolation, six-seat capacity, host-only locking, and private sessions. Independent Chrome contexts verified copied invites, typed codes, live rosters, and refresh. The room alarm expired a disconnected seat and removed empty state. |
 | 3. Match | Verified locally | Numbered cards, six action effects, private hands, bots, and rematches are available for playtesting. |
-| 4. Recovery and UI | In progress | Seat recovery, lobby reopening, and the turn-direction display are verified locally. Full phone rematch and remaining accessibility checks are open. |
+| 4. Recovery and UI | Verified locally | Seat recovery, lobby reopening, direction, solo rematch, and keyboard choices are checked. A 13-card hand with long names fits a phone viewport. Motion effects are gated by the user's preference. |
 | 5. Release and cutover | Planned | Requires local release evidence, an approved production target, and Codex verification. |

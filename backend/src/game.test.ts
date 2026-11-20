@@ -133,6 +133,44 @@ test('a bot plays a matching draw and keeps an unplayable draw private', () => {
   }
 });
 
+test('a bot saves a wild against a full hand and uses Double Treat against the next near-winner', () => {
+  const bot = { id: 'cpu', name: 'Bot 1', bot: true as const };
+  const roster = [bot, ...players];
+  const opening = (danger: boolean) => {
+    const match = startMatch(roster, 'cpu', 0, makeDeck(true));
+    match.discards = [paw(1)];
+    match.seats[0].hand = [paw(4), wild('catnap'), effect('double-treat'), paw(5)];
+    if (danger) match.seats[1].hand = [fish(5), fish(6)];
+    assert.equal(expireTurn(match, 900), true);
+    return match;
+  };
+  const ordinary = opening(false);
+  assert.deepEqual(ordinary.discards.at(-1), paw(4));
+  const urgent = opening(true);
+  assert.deepEqual(urgent.discards.at(-1), effect('double-treat'));
+  assert.equal(urgent.seats[1].hand.length, 4);
+  assert.equal(urgent.turn?.seatId, 'b');
+});
+
+test('a bot chooses a Pounce target with one card, and a bot target can prevent an immediate loss', () => {
+  const bot = { id: 'cpu', name: 'Bot 1', bot: true as const };
+  const match = startMatch([bot, ...players], 'cpu', 0);
+  match.seats[0].hand = [wild('pounce')];
+  match.seats[2].hand = [fish(6)];
+  assert.equal(expireTurn(match, 900), true);
+  assert.equal(match.pounce?.targetSeatId, 'b');
+  assert.equal(matchView(match, 'b').pounce?.canGive, false);
+
+  const againstBot = startMatch([players[0], bot], 'a', 0);
+  againstBot.seats[0].hand = [wild('pounce')];
+  againstBot.seats[1].hand = [fish(3), fish(4)];
+  assert.equal(applyTurn(againstBot, 'a', { type: 'play', cardId: 100, targetSeatId: 'cpu' }, 1), null);
+  assert.equal(expireTurn(againstBot, 901), true);
+  assert.equal(againstBot.result, null);
+  assert.equal(againstBot.seats[0].hand.length, 1);
+  assert.equal(againstBot.seats[1].hand.length, 1);
+});
+
 test('the action deck deals 112 unique cards with a numbered opener', () => {
   const deck = makeDeck(true);
   assert.equal(new Set(deck.map(({ id }) => id)).size, 112);
