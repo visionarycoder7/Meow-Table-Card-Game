@@ -2,7 +2,7 @@
 
 Read [README.md](README.md) for the current project state. Use [product and gameplay](docs/product-and-gameplay.md) for scope and theme, [architecture](docs/architecture.md) for boundaries and build commands, and the [phase implementation guide](docs/implementation-phases.md) for assignments, acceptance checks, and Codex verification. Use one local commit per verified phase, or two when a clean split helps review. The owner pushes manually.
 
-Start by checking Git status and reading the files the task touches. Keep your changes within the assigned slice. The root `index.html` is the existing prototype. The workspace uses `frontend/` and `backend/`. Add `packages/protocol/` when the first shared room messages are defined.
+Start by checking Git status and reading the files the task touches. Keep your changes within the assigned slice. The root `index.html` is the existing prototype. The upgraded app uses `frontend/`, `backend/`, and `packages/protocol/`. Cloudflare Workers Free is the target. Use one SQLite-backed Durable Object per room and the hibernating WebSocket API. Keep state and idle work within the free-tier design in [architecture.md](docs/architecture.md#free-tier-budget).
 
 Test the upgraded workspace on localhost. Keep the root `index.html` and `vercel.json` in place for Vercel until the [Codex-only prototype cutover](docs/implementation-phases.md#codex-only-prototype-cutover). Antigravity leaves those files and the prototype-serving Vercel settings alone. Codex verifies readiness and handles the removal and configuration switch together. The owner pushes manually.
 

@@ -1,0 +1,9 @@
+{
+  "name": "@meow-table/protocol",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "check": "tsc --noEmit --strict --target ES2023 --module NodeNext --allowImportingTsExtensions src/index.ts src/index.test.ts"
+  }
+}

@@ -2,7 +2,7 @@
 
 The production site uses Vercel’s native Git integration on `main` for owner and contributor pushes. GitHub Actions runs **Verify static app** on pushes to `main` or `dev` and on pull requests targeting either branch. The intended checks on production pushes are **Verify static app** and the deployment status from the Vercel project that owns the live domain. [Vercel for GitHub](https://vercel.com/docs/git/vercel-for-github)
 
-The root [Vercel configuration](../vercel.json) publishes the root prototype and its license from `dist/prototype`. Run the upgraded `frontend/` and `backend/` workspaces on localhost until the [Codex-only cutover](../docs/implementation-phases.md#codex-only-prototype-cutover). Keep the root prototype and its Vercel configuration together until then. For a future Vercel frontend, use the candidate project settings in the owner's local `deployment.local.md` if present.
+The root [Vercel configuration](../vercel.json) publishes the root prototype and its license from `dist/prototype`. Run the upgraded Cloudflare Worker and React frontend on localhost until the [Codex-only cutover](../docs/implementation-phases.md#codex-only-prototype-cutover). Keep the root prototype and its Vercel configuration together until then. The owner’s local `deployment.local.md`, if present, covers the Cloudflare candidate.
 
 ## Multiple Vercel checks on a commit
 

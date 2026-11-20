@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "vite",
     "check": "tsc --noEmit",
-    "build": "vite build"
+    "build": "vite build",
+    "start": "vite preview --port 4173 --strictPort"
   },
   "dependencies": {
+    "@meow-table/protocol": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

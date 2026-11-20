@@ -37,20 +37,20 @@ results, and anything Codex still needs to verify.
 
 1. Use the root npm workspaces `frontend/` and `backend/` and the root lockfile. Record the Node version. Provide root `dev`, `check`, `build`, and `start` scripts that run the actual apps.
 2. Build a small React/Vite shell with Tailwind v4 and the existing green and gold palette. Start with a visual component and a screen that composes it. Add room controls in Phase 2 when they work.
-3. Attach Socket.IO to the Express HTTP listener. Add `GET /healthz` returning `{"status":"ok"}`. Configure Vite to proxy health and socket requests locally. Serve the compiled web app from the production server.
+3. Establish a local backend with `GET /healthz` returning `{"status":"ok"}`. Phase 1 used an Express and Socket.IO scaffold. Phase 2 replaces that runtime with the Worker and preserves the local health and WebSocket checks.
 4. Keep the root prototype and its publish path available. Introduce `packages/protocol/` in Phase 2 when the first room messages need it.
 
-**Codex checks:** Run `npm ci`, `npm run check`, and `npm run build`. Run `npm start` and confirm the compiled app, its JS/CSS, the health endpoint, and a Socket.IO handshake work through one URL. Run `npm run dev` and confirm Vite serves the app and proxies health and the socket path. Check the shell at phone and desktop widths.
+**Codex checks:** Run `npm ci`, `npm run check`, and `npm run build`. Run `npm start` and confirm the compiled app, its JS/CSS, health, and the current WebSocket endpoint work through one URL. Check the shell at phone and desktop widths.
 
 ## Phase 2 — Rooms and lobby
 
 **Tracker:** A03–A04. **Commit:** `feat: add private rooms and lobby presence`
 
 1. Define the room commands and lobby snapshots needed now. Validate input on the server. Generate room codes and private seat credentials on the server. Keep credentials out of invites and public snapshots.
-2. Implement create, join, presence, leave, and host-controlled start eligibility. Keep room state in memory. Use the same admission logic for typed codes and invite links.
+2. Implement create, join, presence, leave, and host-controlled admission. Route the native WebSocket to a SQLite-backed Durable Object by room code. Use hibernating sockets, persist accepted state, and let alarms expire disconnected seats. Only the host can lock or open the lobby. Actual match start belongs to Phase 3.
 3. Compose guest entry, create and join forms, roster, and invite controls. Cover loading, invalid input, full rooms, and lost connections. Run the upgraded app locally and leave the Vercel prototype available.
 
-**Codex checks:** Use independent browser contexts on localhost to create and join by invite and by code. Verify two to six seats, full and unknown rooms, unauthorized start, and isolation between two rooms. Hosted checks belong to release preparation.
+**Codex checks:** Use independent browser contexts on localhost to create and join by invite and by code. Verify two to six seats, full and unknown rooms, host-only locking, and isolation between two rooms. Verify the local production preview and protect private session tokens from public snapshots. Hosted checks belong to release preparation.
 
 ## Phase 3 — Complete match and original card effects
 
@@ -66,7 +66,7 @@ results, and anything Codex still needs to verify.
 
 **Tracker:** A08–A09. **Commit:** `feat: restore player seats and refine the match UI`
 
-1. Rebind an authorized reconnect to its seat. Send the latest revision and pending choice. Invalidate any previous connection for that seat.
+1. Extend the verified lobby resume flow to matches. Rebind the authorized seat and return the latest revision, private hand, and pending choice. Invalidate any previous connection for that seat.
 2. Handle host transfer, explicit leave, expired seats, and unavailable rooms. Check timers against reconnects and rematches so stale callbacks cannot affect newer state.
 3. Finish the responsive table, large hands, long names, keyboard focus, reduced motion, original card visuals, and optional audio controls. Review the rendered UI with Impeccable and Unslop where available.
 
@@ -77,7 +77,7 @@ results, and anything Codex still needs to verify.
 **Tracker:** A10. **Commit:** `ci: verify the Meow Table multiplayer release`
 
 1. Add workspace checks to the existing CI workflow. Run type checks, the build, rule and room tests, and the relevant browser flows. Preserve the root prototype verification while Vercel serves it.
-2. Verify the compiled app locally with independent browser sessions. Document process restarts, room expiry, rollback, and how the Source and License links point to the shipped release. Choose the hosting target with the owner. If the owner chooses split hosting or Cloudflare Workers, verify the required transport and room-state changes before public cutover. The owner's `deployment.local.md` contains provider steps if present.
+2. Verify the compiled app locally with independent browser sessions. Document restarts, room expiry, rollback, and how the Source and License links point to the shipped release. Test the chosen Cloudflare Free architecture with simultaneous rooms, repeated reconnects, and idle hibernation. Measure request, duration, and storage use and set the initial lobby admission limits accordingly. The owner's `deployment.local.md` contains provider steps if present.
 3. Once local release checks pass and the owner is ready to test hosting, Codex validates the production target with the [hosted playtest](contributor-workflow.md#hosted-playtest). Record the build revision, devices, networks, and results. Local readiness and hosted verification can be recorded separately.
 
 **Codex checks:** Finish, reconnect, and rematch on localhost first. Repeat these checks across two different networks on the owner-approved release target. Check a larger table and signed-out Source and License links. Mark the phase verified once the hosted evidence is recorded.
@@ -97,8 +97,8 @@ Codex decides when the prototype can be retired based on evidence:
 
 | Phase | State | Evidence |
 | --- | --- | --- |
-| 1. Workspace | Verified | Clean install, type checks, and build passed after moving to `frontend/` and `backend/`. `npm start` served the app, its assets, health, and Socket.IO. `npm run dev` served the app and proxied health and WebSockets. The Phase 1 shell was reviewed at 390 and 1280 CSS pixels. |
-| 2. Rooms | Planned | Requires Phase 1. |
+| 1. Workspace | Verified | The original scaffold passed clean install and runtime checks. Phase 2 rechecked the workspace with the Cloudflare dev runtime and production preview. |
+| 2. Rooms | Verified locally | Clean `npm ci`, protocol tests, type checks, and build passed. Dev and preview verified room isolation, six-seat capacity, host-only locking, and private sessions. Independent Chrome contexts verified copied invites, typed codes, live rosters, and refresh. The room alarm expired a disconnected seat and removed empty state. |
 | 3. Match | Planned | Requires the lobby and approved original rules. |
 | 4. Recovery and UI | Planned | Requires the match loop. |
 | 5. Release and cutover | Planned | Requires local release evidence, an approved production target, and Codex verification. |

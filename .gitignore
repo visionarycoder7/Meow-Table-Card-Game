@@ -21,6 +21,8 @@ test-results/
 !.env.example
 !.env.*.example
 .vercel/
+.wrangler/
+backend/worker-configuration.d.ts
 *.local.md
 *.pem
 *.key

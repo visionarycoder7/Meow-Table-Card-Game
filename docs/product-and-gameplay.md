@@ -42,7 +42,7 @@ Use text and consistent icons for buttons, card actions, alerts, activity messag
 
 | Decision | Proposed starting point |
 | --- | --- |
-| Hosting and persistence | Use one WebSocket-capable service for a friends-only pilot. Rooms ride through a player's refresh or network drop while the service is running. Add durable storage if matches must survive a service restart or deployment. |
+| Hosting and persistence | Use Cloudflare Workers Free, Static Assets, and a SQLite-backed Durable Object per room. Reclaim a lobby seat after refresh during its grace period. Verify match persistence and concurrent-room capacity before a public launch. |
 | First-release game modes | Ship complete online rooms first. Schedule bots and same-device play as follow-ups unless either is required for launch. |
 | Disconnected players | Give players a short grace period to reclaim the same seat in the same tab. In the lobby, transfer host controls if needed. During a match, resolve an expired seat and any pending choice according to the approved rules. |
 | Gameplay and voice | Approve the original card set and signature mechanic. Confirm how prominent the Meow theme should be and provide a pronunciation reference if the game will use spoken audio. |

@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2023",
-    "module": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023"],
+    "types": ["@cloudflare/workers-types"],
     "strict": true,
-    "rootDir": "src",
-    "outDir": "dist"
+    "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "worker-configuration.d.ts"]
 }
