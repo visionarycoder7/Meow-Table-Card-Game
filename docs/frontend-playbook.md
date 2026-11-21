@@ -89,11 +89,11 @@ Use CSS transitions for simple feedback. Reach for a motion library when shared 
 
 ### Meow Table home motion
 
-The existing deck mark settles in once when the home screen appears. Its 440 ms entrance uses a small translation, rotation, and scale on the existing image. Focusing a room entry field raises the mark by 2 px and highlights the active field. The form remains usable throughout.
+The deck mark uses the existing artwork as inline SVG so its eyes can move independently. On the home screen the mark settles once over 520 ms. The eyes blink after about 1.5 seconds and then every 5.8 seconds. Each blink scales the eyes vertically around their centers, keeping the rest of the mark still. Focusing a room entry field lifts the mark by 3 px and highlights the field.
 
 The `home-screen` selector limits the mark motion to the home view. The lobby, match, and card guide keep their existing behavior. The motion runs only when `prefers-reduced-motion` is `no-preference`. With reduced motion enabled, the mark remains still and the field highlight and focus ring appear immediately. [Reduced-motion media feature](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion)
 
-Verify the first paint, tab between the fields, create a room, and check that the lobby mark stays still. Repeat at phone width and with reduced motion enabled.
+Verify the entrance, two blink cycles, and field focus. Create a room and check that the lobby mark stays still. Repeat at phone width and with reduced motion enabled.
 
 
 ## Verify and hand off

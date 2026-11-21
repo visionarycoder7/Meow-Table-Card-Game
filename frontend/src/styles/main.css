@@ -379,11 +379,17 @@
 
   @media (prefers-reduced-motion: no-preference) {
     .home-screen .deck-mark {
-      animation: home-mark-settle 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: home-mark-settle 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
       transition: translate 180ms ease-out;
     }
 
-    .home-screen:has(.home-entry input:focus) .deck-mark { translate: 0 -2px; }
+    .home-screen .deck-mark-eye {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: home-mark-blink 5.8s ease-in-out 1.45s infinite;
+    }
+
+    .home-screen:has(.home-entry input:focus) .deck-mark { translate: 0 -3px; }
     .home-entry input { transition: background-color 150ms ease-out, border-color 150ms ease-out; }
 
     .ui-button { transition: filter 150ms ease-out; }
@@ -397,8 +403,13 @@
   }
 
   @keyframes home-mark-settle {
-    from { transform: translateY(5px) rotate(-4deg) scale(0.96); }
+    from { transform: translateY(8px) rotate(-5deg) scale(0.94); }
     to { transform: none; }
+  }
+
+  @keyframes home-mark-blink {
+    0%, 4%, 100% { transform: scaleY(1); }
+    1.6% { transform: scaleY(0.18); }
   }
 
   @keyframes confirm-in {
