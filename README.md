@@ -55,7 +55,7 @@ A brief connection drop triggers a few automatic retries. Use **Reconnect** or r
 
 **Cloudflare Workers Free is the only host needed** for the frontend and multiplayer backend. Workers Builds pulls the source from GitHub and deploys both parts together. Use the [first hosted playtest guide](docs/deployment.md) for the Cloudflare dashboard setup, exact build fields, and a multiplayer test. [Architecture and free-tier plan](docs/architecture.md)
 
-The root prototype is kept as a local reference and ignored by Git. The tracked app starts at `frontend/index.html`. The owner publishes a release by merging it into the Cloudflare-connected `playtest` branch.
+The root prototype is kept as a local reference and ignored by Git. The tracked app starts at `frontend/index.html`. Every push or merge to `main` triggers a Cloudflare production build. Successful builds deploy automatically.
 
 ## Contribute
 

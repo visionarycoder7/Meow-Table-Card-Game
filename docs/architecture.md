@@ -102,7 +102,7 @@ Run these commands from the repository root. Node.js tooling is pinned in `.nvmr
 | `npm run deploy` | Builds the hosted app and publishes through Wrangler. |
 
 1. **Development.** Use localhost. GitHub Actions runs tests, type checks, the hosted build, and a Worker dry run.
-2. **Release candidate.** The owner selects a release in GitHub. Cloudflare Workers Builds uses the Vite plugin to build the Worker and assets together from the `playtest` branch. Test invitations and WebSockets across networks. [Deployment steps](deployment.md) [Cloudflare Vite guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/)
+2. **Production deployment.** Each push or merge to `main` triggers a Cloudflare production build. Workers Builds uses the Vite plugin to build the Worker and assets together and deploys after a successful build. Test invitations and WebSockets across networks. [Deployment steps](deployment.md) [Cloudflare Vite guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/)
 3. **Public URL decision.** After the hosted candidate passes, agree on the public URL and record the rollback point.
 
 The ignored `deployment.local.md` records the owner's account subdomain, candidate URL, and playtest evidence.

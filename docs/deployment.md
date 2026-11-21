@@ -1,6 +1,6 @@
 # Deploy Meow Table from the Cloudflare website
 
-**Cloudflare Workers Free is the only hosting platform you need.** One Worker serves the React frontend and multiplayer endpoints from one HTTPS address. Cloudflare Durable Objects store room state. GitHub stores the source code and sends the selected release branch to Cloudflare.
+**Cloudflare Workers Free is the only hosting platform you need.** One Worker serves the React frontend and multiplayer endpoints from one HTTPS address. Cloudflare Durable Objects store room state. Connect GitHub to Cloudflare Workers Builds with `main` as the production branch. Each push to `main`, including a merged pull request, triggers a build. A successful build deploys automatically. [Cloudflare branch control](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/#change-production-branch)
 
 In Cloudflare, choose the **GitHub** import option. You enter the build settings in your browser. Cloudflare runs the commands on its own servers, so you can publish without opening a terminal. [Cloudflare dashboard guide](https://developers.cloudflare.com/workers/get-started/dashboard/)
 
@@ -8,8 +8,7 @@ In Cloudflare, choose the **GitHub** import option. You enter the build settings
 
 1. Open the Meow Table repository on [GitHub](https://github.com/visionarycoder7/Meow-Table-Card-Game). If you are deploying from your own fork, use that repository for every step below.
 2. Select **main** in the branch picker. On the **Actions** tab, look for a green **Verify Meow Table** run for the commit you intend to publish.
-3. Return to the **Code** tab. Open the branch picker, type **playtest**, and choose **Create branch: playtest from main**. If `playtest` already exists, check its latest commit before connecting it to Cloudflare. This guide uses `playtest` as the deployment branch so you decide when to publish from GitHub.
-4. Copy the repository's browser address from its **Code** tab. Keep the base URL, such as `https://github.com/your-account/your-repository`, with no trailing slash or `.git`. Open it in a signed-out window to confirm the source is public. The game links players to the exact deployed commit. [Release and licensing notes](release-and-licensing.md)
+3. Copy the repository's browser address from its **Code** tab. Keep the base URL, such as `https://github.com/your-account/your-repository`, with no trailing slash or `.git`. Open it in a signed-out window to confirm the source is public. The game links players to the exact deployed commit. [Release and licensing notes](release-and-licensing.md)
 
 ## 2. Set up your Cloudflare Free account
 
@@ -66,10 +65,10 @@ Scroll the form itself, then expand **Advanced settings** if present. For a Work
 | Dashboard field | Value |
 | --- | --- |
 | **Root directory** or **Path** | `backend`. Both commands above assume this starting directory. |
-| **Production branch** | `playtest`. In the Worker's settings, find it under **Branch control**. |
+| **Production branch** | `main`. On an existing Worker, go to **Settings → Build → Branch control**, select `main`, and save. |
 | **API token** | Keep the default generated token or select **Create new token** if prompted |
 | **Framework preset**, if shown | **None** or the custom option |
-| **Build watch paths**, if shown | Leave the defaults so changes anywhere in the repository can trigger a build |
+| **Build watch paths** | Under **Settings → Build → Build watch paths**, include `*` and leave excludes empty. This covers every file, including documentation. [Cloudflare watch paths](https://developers.cloudflare.com/workers/ci-cd/builds/build-watch-paths/#configure-paths) |
 
 The `backend` setting lets Workers Builds find the committed Wrangler configuration and match its Worker name. Both commands then go up to the repository root, where the npm workspace and lockfile live. The build generates one Worker package containing the frontend assets and backend. On the first deployment, Wrangler applies the SQLite-backed `Room` migration and configures `ROOMS`, `LOBBY_LIMIT`, and the asset routing from the repo. [Worker name requirement](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement) · [Durable Object migrations](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/)
 
@@ -88,7 +87,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 5. Deploy and find the game URL
 
-1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, the production branch is `playtest`, both toggles are off, and all four build variables are saved. Then select **Save and Deploy** or **Deploy**. If the Worker already exists and no build starts, merge a release into `playtest` from GitHub. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
+1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, the production branch is `main`, both toggles are off, and all four build variables are saved. Then select **Save and Deploy** or **Deploy**. If the Worker already exists and no build starts, the next push or pull request merge to `main` will trigger one. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
 2. Open **Workers & Pages → meow-table → Deployments**. Select **View build history** to follow the build and inspect errors. Confirm there is an **Active Deployment** for the intended commit.
 3. From the Worker overview, use **Visit** or copy the address under **Settings → Domains & Routes**. Confirm it matches `VITE_PUBLIC_SITE_URL`. If the `workers.dev` route is inactive, check the account subdomain and enable the route.
 4. Record the public URL, Git commit, and active version ID in your ignored `deployment.local.md`. [Build history](https://developers.cloudflare.com/workers/ci-cd/builds/#view-build-and-preview-url) · [Workers routes](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
@@ -103,9 +102,9 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 7. Publish another version from the websites
 
-1. On GitHub, open **Pull requests → New pull request**. Select **base: playtest** and **compare: main**.
-2. Review the commits, open the pull request, and merge it when you want to publish. Changes merged into `playtest` trigger the Cloudflare build. Keep **Enable Preview Builds** off under **Settings → Build → Branch control** if you only want release-branch builds.
-3. Confirm the new deployment is active in Cloudflare and repeat the health and multiplayer checks. [Cloudflare branch control](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/)
+1. Open a pull request into `main`. Review the changes and confirm the **Verify Meow Table** check passes before merging.
+2. Merge when the change is ready to go live. Cloudflare starts a production build for the merge or any direct push to `main`. Keep **Enable Preview Builds** off under **Settings → Build → Branch control** to limit Cloudflare builds to `main`.
+3. In **Deployments → View build history**, confirm the build succeeded and its commit is active. Repeat the health and multiplayer checks. [Cloudflare branch control](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/)
 
 ## Troubleshooting
 
