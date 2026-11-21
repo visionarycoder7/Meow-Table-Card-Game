@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Card } from '@meow-table/protocol';
+import licenseUrl from '../../../LICENSE?url';
 import { actionDetails, CardFace, cardName } from '../features/match/CardFace';
 
 const rulesPdf = 'https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf';
@@ -67,6 +68,12 @@ export function GameToolbar() {
           onClick={() => void toggleFullscreen()}>
           {fullscreen ? 'Exit fullscreen' : 'Fullscreen'} <kbd aria-hidden="true">{fullscreen ? 'Esc' : 'F11'}</kbd>
         </button>
+        {import.meta.env.VITE_PUBLIC_SOURCE_URL && (
+          <a className="ui-button game-tool" href={import.meta.env.VITE_PUBLIC_SOURCE_URL}
+            target="_blank" rel="noopener noreferrer">
+            Source <span className="sr-only">code (opens in a new tab)</span>
+          </a>
+        )}
       </nav>
       {error && <p className="mt-2 text-right text-sm text-red-200" role="status">{error}</p>}
       <dialog ref={guide} className="card-guide-dialog" aria-labelledby={guideTitle}>
@@ -77,7 +84,8 @@ export function GameToolbar() {
           </div>
           <button type="button" className="ui-button shrink-0" autoFocus onClick={() => guide.current?.close()}>Close</button>
         </header>
-        <div className="card-guide-scroll px-4 pb-4 sm:px-5" tabIndex={0} aria-label="Card comparison">
+        <div className="card-guide-scroll mx-2 my-2 px-2 pb-3 sm:mx-3 sm:px-3" role="region"
+          tabIndex={0} aria-label="Card comparison">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="text-muted">
@@ -105,9 +113,14 @@ export function GameToolbar() {
               })}
             </tbody>
           </table>
-          <a className="mt-3 inline-block text-accent underline underline-offset-4" href={rulesPdf}
-            target="_blank" rel="noopener noreferrer">Official reference PDF <span className="sr-only">(opens in a new tab)</span></a>
         </div>
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-ink/15 px-4 py-3 sm:px-5">
+          <a className="ui-button game-tool text-accent" href={rulesPdf} target="_blank" rel="noopener noreferrer">
+            Official reference PDF <span className="sr-only">(opens in a new tab)</span>
+          </a>
+          <a className="inline-flex min-h-11 items-center px-1 text-sm text-muted underline underline-offset-4 hover:text-ink"
+            href={licenseUrl} download="LICENSE">License</a>
+        </footer>
       </dialog>
     </div>
   );
