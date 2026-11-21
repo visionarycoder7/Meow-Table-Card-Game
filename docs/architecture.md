@@ -1,6 +1,6 @@
 # Architecture and stack
 
-**Status:** Cloudflare Workers Free is the sole hosting target. The game runs locally and the hosted playtest is pending.
+**Status:** Cloudflare Workers Free hosts the game. The hosted WebSocket smoke test passed. Verification across two networks is pending.
 
 ## Recommendation
 

@@ -5,6 +5,7 @@ import type { RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
 const seatKey = (code: string) => `meow-table:seat:${code}`;
 type ReceivedRoom = RoomView & { receivedAt: number };
 const retryDelays = [500, 1_000, 2_000, 4_000];
+const sessionTimeout = 12_000;
 
 function saveSeat(code: string, token: string | null) {
   try {
@@ -63,13 +64,42 @@ export function useLobby(invitedCode: string) {
     setError('');
     setConnection('connecting');
 
-    next.addEventListener('open', () => next.send(JSON.stringify(command)), { once: true });
+    function connectionEnded(code?: number) {
+      window.clearTimeout(sessionTimer);
+      if (socket.current !== next) return;
+      socket.current = null;
+      if (code === seatExpiredCode || code === seatReplacedCode) {
+        clearSeat();
+        setError(code === seatExpiredCode ? 'Your seat has expired.' : 'Your seat is now open in another tab.');
+        return;
+      }
+      const saved = seat.current;
+      setConnection(saved ? 'disconnected' : 'idle');
+      const delay = retryDelays[retry.current.attempts];
+      if (!saved || delay === undefined) return;
+      retry.current.attempts++;
+      retry.current.timer = window.setTimeout(() => {
+        if (seat.current === saved && !socket.current) connect(saved.code, { type: 'resume', token: saved.token });
+      }, delay);
+    }
+
+    const sessionTimer = window.setTimeout(() => {
+      if (socket.current !== next) return;
+      connectionEnded();
+      next.close();
+      setError('Connection timed out. Try again.');
+    }, sessionTimeout);
+
+    next.addEventListener('open', () => {
+      if (socket.current === next) next.send(JSON.stringify(command));
+    }, { once: true });
     next.addEventListener('message', ({ data }) => {
       if (socket.current !== next) return;
       const event = JSON.parse(String(data)) as RoomEvent;
       const receivedAt = performance.now();
       switch (event.type) {
         case 'session':
+          window.clearTimeout(sessionTimer);
           retry.current = { attempts: 0 };
           seat.current = { code: event.room.code, token: event.token };
           saveSeat(event.room.code, event.token);
@@ -94,23 +124,7 @@ export function useLobby(invitedCode: string) {
     next.addEventListener('error', () => {
       if (socket.current === next) setError('Could not connect. Check your connection or try again in a minute.');
     });
-    next.addEventListener('close', ({ code }) => {
-      if (socket.current !== next) return;
-      socket.current = null;
-      if (code === seatExpiredCode || code === seatReplacedCode) {
-        clearSeat();
-        setError(code === seatExpiredCode ? 'Your seat has expired.' : 'Your seat is now open in another tab.');
-        return;
-      }
-      const saved = seat.current;
-      setConnection(saved ? 'disconnected' : 'idle');
-      const delay = retryDelays[retry.current.attempts];
-      if (!saved || delay === undefined) return;
-      retry.current.attempts++;
-      retry.current.timer = window.setTimeout(() => {
-        if (seat.current === saved && !socket.current) connect(saved.code, { type: 'resume', token: saved.token });
-      }, delay);
-    });
+    next.addEventListener('close', ({ code }) => connectionEnded(code), { once: true });
   }, [clearSeat]);
 
   useEffect(() => {

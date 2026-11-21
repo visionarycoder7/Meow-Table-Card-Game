@@ -33,7 +33,7 @@ Open [localhost:5173](http://localhost:5173). Vite runs the React frontend and l
 - **With a large hand:** Cards are grouped by suit and rank. When you have more than ten cards on your turn, **Playable only** shows your legal cards. Press **Escape** to close a wild-card choice and return to the card.
 - **After the result:** The host can select **Rematch** with the current seats or **Back to lobby** to invite more people or change the bots.
 
-A brief connection drop triggers a few automatic retries. Use **Reconnect** or refresh the same tab while the seat is held, up to 60 seconds. The turn or choice clock continues on the server during that time.
+A brief connection drop triggers a few automatic retries. Each connection attempt allows up to 12 seconds for the server to confirm your seat. Use **Reconnect** or refresh the same tab while the seat is held, up to 60 seconds. The turn or choice clock continues on the server during that time.
 
 | Command | What it does |
 | --- | --- |
