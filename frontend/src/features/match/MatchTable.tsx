@@ -100,9 +100,7 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
             {match.turn && !activeSeat?.bot && remainingTime > 0 &&
               <span className="whitespace-nowrap text-sm tabular-nums">{Math.ceil(remainingTime / 1_000)} s</span>}
           </div>
-          <div className="table-piles flex items-start gap-5 sm:gap-8"
-            data-direction={clockwise ? 'clockwise' : 'counterclockwise'}>
-            <img className="turn-track" src="/table/turn-track.svg" alt="" aria-hidden="true" />
+          <div className="flex items-start gap-5 sm:gap-8">
             <div className="text-center">
               <button type="button" className="card-back" aria-label={`Draw card, ${match.drawCount} in draw pile`}
                 disabled={!canAct || !match.canDraw || !!selected}
@@ -124,8 +122,9 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
           </div>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">
             <p>Active suit <strong>{suitNames[match.activeSuit]}</strong></p>
-            <p className="text-[#ffe289]" aria-live="polite">
-              <span className="sr-only">Turn order </span>{clockwise ? 'Clockwise' : 'Counterclockwise'}
+            <p className="turn-direction" data-direction={clockwise ? 'clockwise' : 'counterclockwise'} aria-live="polite">
+              <img src="/table/turn-track.svg" width="14" height="14" alt="" />
+              <span><span className="sr-only">Turn order </span>{clockwise ? 'Clockwise' : 'Counterclockwise'}</span>
             </p>
           </div>
           {discardAction && <p className="max-w-64 text-center text-sm text-ink/90">{discardAction.rule}</p>}

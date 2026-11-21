@@ -159,7 +159,7 @@ When played:
 | **Catnap (Wild Draw Four)** | Active player | Next player in order | Submit the card with the new active suit. Target draws up to 4 cards and loses their turn. | Suit and counts are public. Drawn cards only appear in the recipient's hand. | After the draw resolves. |
 | **Pounce (Signature Card)** | Active player | Chosen non-forfeited opponent | Target draws up to 2 cards or gives 1 random card to the actor. Giving a card requires at least 2 cards in the target's hand. Keep the current active suit. | Everyone sees seat names and hand counts. Only the actor and target see the transferred card. | Resolve the response, then advance from the actor in the current direction if the match continues. The target keeps their turn in the normal order. |
 
-The arrows around the piles show the server's current direction. Tail Spin reverses the arrows and the order of future turns. For example, with A, B, C, and D seated clockwise, A playing Tail Spin sends the turn to D. With only two seats left, A plays again. A new match starts clockwise, including a rematch.
+The turn-order label below the piles shows the server's current direction. Tail Spin flips its arrow and reverses the order of future turns. For example, with A, B, C, and D seated clockwise, A playing Tail Spin sends the turn to D. With only two seats left, A plays again. A new match starts clockwise, including a rematch.
 
 Action faces use short effect labels such as **Skip** and **Reverse**. Draw penalties put **+2** or **+4** in the center. The table explains the top action card beside the discard.
 

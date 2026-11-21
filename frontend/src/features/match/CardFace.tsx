@@ -25,15 +25,19 @@ export function CardFace({ card }: { card: Card }) {
 
   return (
     <span className="card-face" data-suit={card.suit ?? 'wild'} data-action={action ? '' : undefined} aria-hidden="true">
-      <span className="card-index card-index-start">{corner}</span>
-      {'rank' in card ? <span className="card-rank">{card.rank}</span> :
-        penalty ? <span className="card-rank card-penalty">{penalty}</span> :
-          <span className="card-rank card-action-icon" style={{ maskImage: actionIcon || undefined }} />}
-      <span className="card-suit">
+      <span className="card-top">
+        <span className="card-index">{corner}</span>
         {suitIcon && <span className="card-suit-icon" style={{ maskImage: suitIcon }} />}
-        {action ? action.faceLabel : card.suit && suitNames[card.suit]}
       </span>
-      <span className="card-index card-index-end">{corner}</span>
+      <span className="card-art">
+        {'rank' in card ? <span className="card-rank">{card.rank}</span> :
+          penalty ? <span className="card-rank card-penalty">{penalty}</span> :
+            <span className="card-action-icon" style={{ maskImage: actionIcon || undefined }} />}
+      </span>
+      <span className="card-bottom">
+        <span>{action ? action.faceLabel : card.suit && suitNames[card.suit]}</span>
+        {!action && <span className="card-index card-index-end">{corner}</span>}
+      </span>
     </span>
   );
 }

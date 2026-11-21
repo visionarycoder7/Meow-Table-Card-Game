@@ -75,10 +75,6 @@
     --card-rank-size: 1.6rem;
   }
 
-  .guide-card .card-face::before { inset: 0.8rem 0.25rem 1.45rem; }
-  .guide-card .card-rank { position: absolute; inset: 42% auto auto 50%; translate: -50% -50%; padding-top: 0; }
-  .guide-card .card-suit { grid-row: 2; white-space: nowrap; font-size: 0.55rem; line-height: 1.15; }
-
   .confirm-dialog {
     margin: auto;
     width: min(25rem, calc(100% - 2rem));
@@ -120,24 +116,16 @@
   .table-center, .table-self { grid-column: 1 / -1; }
   .table-center { padding-block: 0.5rem; }
 
-  .table-piles {
-    position: relative;
-    isolation: isolate;
+  .turn-direction {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: #e0ede4;
   }
 
-  .turn-track {
-    position: absolute;
-    z-index: -1;
-    inset: -0.25rem -2rem auto;
-    width: calc(100% + 4rem);
-    max-width: none;
-    height: 100%;
-    pointer-events: none;
-  }
+  .turn-direction img { opacity: 0.85; }
 
-  .table-piles[data-direction="counterclockwise"] .turn-track {
-    transform: scaleX(-1);
-  }
+  .turn-direction[data-direction="counterclockwise"] img { transform: scaleX(-1); }
 
   .table-seat {
     display: grid;
@@ -216,20 +204,27 @@
   .card-face {
     --face-art: url('/cards/faces/number.svg');
     display: grid;
-    grid-template-rows: 1fr auto;
-    place-items: center;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.1875rem;
     overflow: hidden;
-    padding: 0.375rem 0.25rem 0.5rem;
+    padding: 0.25rem;
     border: 2px solid #fff5df;
     background: var(--suit-color);
     color: var(--card-ink, #fff8e8);
     box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   }
 
-  .card-face::before {
-    content: "";
-    position: absolute;
-    inset: 1.05rem 0.45rem 1.85rem;
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-block-size: 0.75rem;
+  }
+
+  .card-art {
+    display: grid;
+    place-items: center;
+    padding: 0.125rem 0.25rem;
     background: var(--face-art) center / 100% 100% no-repeat;
   }
 
@@ -246,19 +241,14 @@
   }
 
   .card-index {
-    position: absolute;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     line-height: 1;
   }
 
-  .card-index-start { inset: 0.35rem auto auto 0.35rem; }
-  .card-index-end { inset: auto 0.35rem 0.35rem auto; rotate: 180deg; }
+  .card-index-end { rotate: 180deg; }
 
   .card-rank {
-    z-index: 1;
-    align-self: center;
-    padding-top: 0.5rem;
     font-family: system-ui, sans-serif;
     font-size: var(--card-rank-size, 3rem);
     line-height: 1;
@@ -266,38 +256,28 @@
     color: var(--rank-ink);
   }
 
-  .card-suit {
-    z-index: 1;
+  .card-bottom {
     display: grid;
-    justify-items: center;
-    gap: 0.125rem;
+    align-items: center;
     font-size: 0.625rem;
     font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
   }
+
+  .card-bottom:has(.card-index-end) { grid-template-columns: 0.5rem 1fr 0.5rem; }
+  .card-bottom:has(.card-index-end) > :first-child { grid-column: 2; }
 
   .card-suit-icon,
   .card-action-icon {
     background: currentColor;
-    mask-position: center;
-    mask-size: contain;
-    mask-repeat: no-repeat;
+    mask: center / contain no-repeat;
     aspect-ratio: 1;
   }
 
-  .card-suit-icon {
-    inline-size: 0.875rem;
-  }
-
-  .card-action-icon { inline-size: var(--card-rank-size, 3rem); }
+  .card-suit-icon { inline-size: 0.75rem; }
+  .card-action-icon { inline-size: calc(var(--card-rank-size, 3rem) * 0.82); color: var(--rank-ink); }
   .card-penalty { font-size: calc(var(--card-rank-size, 3rem) * 0.82); }
-
-  .card-face[data-action] .card-suit-icon {
-    position: absolute;
-    inset: 0.35rem 0.35rem auto auto;
-  }
-
-  .card-face[data-action] .card-index-end { display: none; }
-  .hand-card .card-action-icon { inline-size: 1.5rem; }
 
   .card-back {
     display: grid;
@@ -322,9 +302,6 @@
   }
 
   .hand-card:disabled { filter: saturate(0.72); }
-  .hand-card .card-face::before { inset: 0.8rem 0.3rem 1.65rem; }
-  .hand-card .card-face[data-action]::before { inset-block-end: 1.75rem; }
-  .hand-card .card-rank { padding-top: 0; }
   .hand-card:enabled,
   .card-back:enabled {
     cursor: pointer;

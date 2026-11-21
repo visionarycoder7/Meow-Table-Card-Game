@@ -15,7 +15,7 @@ The upgraded app serves its [original SVG mark](../assets/branding/mark.svg), [e
 | Asset | Export |
 | --- | --- |
 | Browser favicon | `mark.svg` and `favicon.ico` with 16, 32, and 48 px entries |
-| Table direction track | `assets/table/turn-track.svg`, mirrored on a reverse turn |
+| Table direction icon | `assets/table/turn-track.svg`, mirrored on a reverse turn |
 | Apple touch icon | `apple-touch-icon.png` at 180 × 180 with a solid evergreen background |
 | Web app icons | 192 and 512 px PNGs, plus a 512 px maskable export with the mark scaled to 75% around the center |
 | Social card | `social-card.png` at 1200 × 630, exported from `social-card.svg` |
