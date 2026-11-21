@@ -14,7 +14,7 @@ In Cloudflare, choose the **GitHub** import option. You enter the build settings
 
 1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/), or create an account and verify your email.
 2. Select the account that will own the game. Open **Workers & Pages** and stay on **Workers Free**. Use its included `workers.dev` address for this playtest.
-3. On **Workers & Pages**, look for **Your subdomain**. If prompted to set one up, choose an available name. Cloudflare also documents the **Change** control next to **Your subdomain**. If the account subdomain is `example-player`, your game address will be `https://meow-table.example-player.workers.dev`. Copy your own address for the build settings. [Configure workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/#configure-workersdev)
+3. On **Workers & Pages**, look for **Your subdomain**. If prompted to set one up, choose an available name. Cloudflare also documents the **Change** control next to **Your subdomain**. The Meow Table account subdomain is `meow2004`. Use [meow-table.meow2004.workers.dev](https://meow-table.meow2004.workers.dev/) as the game address. For a separate deployment, substitute your account subdomain. [Configure workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/#configure-workersdev)
 
 ## 3. Import the GitHub repository as a Worker
 
@@ -65,10 +65,12 @@ Scroll the form itself, then expand **Advanced settings** if present. For a Work
 | Dashboard field | Value |
 | --- | --- |
 | **Root directory** or **Path** | `backend`. Both commands above assume this starting directory. |
-| **Production branch** | `main`. On an existing Worker, go to **Settings → Build → Branch control**, select `main`, and save. |
-| **API token** | Keep the default generated token or select **Create new token** if prompted |
+| **Production branch** | Select `main` if the import screen offers a branch picker. Otherwise, Cloudflare uses the GitHub repository's default branch. |
+| **API token** | Select **Create new token** if prompted. For **API token name**, enter `meow-table-builds`. Cloudflare generates the token automatically. |
 | **Framework preset**, if shown | **None** or the custom option |
 | **Build watch paths** | Under **Settings → Build → Build watch paths**, include `*` and leave excludes empty. This covers every file, including documentation. [Cloudflare watch paths](https://developers.cloudflare.com/workers/ci-cd/builds/build-watch-paths/#configure-paths) |
+
+**If you see no production branch field**, continue with the import if GitHub's default branch is `main`. Once the Worker exists, go to **Workers & Pages → meow-table → Settings → Build → Branch control** and verify `main`. Change it there if needed. [Cloudflare branch settings](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/#change-production-branch)
 
 The `backend` setting lets Workers Builds find the committed Wrangler configuration and match its Worker name. Both commands then go up to the repository root, where the npm workspace and lockfile live. The build generates one Worker package containing the frontend assets and backend. On the first deployment, Wrangler applies the SQLite-backed `Room` migration and configures `ROOMS`, `LOBBY_LIMIT`, and the asset routing from the repo. [Worker name requirement](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement) · [Durable Object migrations](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/)
 
@@ -78,7 +80,7 @@ Use **Build variables and secrets**, under **Settings → Build** if the form ha
 
 | Variable name | Value |
 | --- | --- |
-| `VITE_PUBLIC_SITE_URL` | Your real game address from step 2, such as `https://meow-table.example-player.workers.dev` |
+| `VITE_PUBLIC_SITE_URL` | `https://meow-table.meow2004.workers.dev` |
 | `MEOW_PUBLIC_SOURCE_REPO` | `https://github.com/visionarycoder7/Meow-Table-Card-Game`. Use your fork's public URL if deploying a fork. Leave off the trailing slash. |
 | `NODE_VERSION` | `24.22.1`, the version in the repo's `.nvmrc` |
 | `SKIP_DEPENDENCY_INSTALL` | `1`, because the build command installs from the root lockfile |
@@ -87,7 +89,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 5. Deploy and find the game URL
 
-1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, the production branch is `main`, both toggles are off, and all four build variables are saved. Then select **Save and Deploy** or **Deploy**. If the Worker already exists and no build starts, the next push or pull request merge to `main` will trigger one. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
+1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, both toggles are off, and all four build variables are saved. If the branch picker is visible, confirm `main`. Select **Save and Deploy** or **Deploy**, then verify `main` in **Branch control** if the picker was absent. If the Worker already exists and no build starts, the next push or pull request merge to `main` will trigger one. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
 2. Open **Workers & Pages → meow-table → Deployments**. Select **View build history** to follow the build and inspect errors. Confirm there is an **Active Deployment** for the intended commit.
 3. From the Worker overview, use **Visit** or copy the address under **Settings → Domains & Routes**. Confirm it matches `VITE_PUBLIC_SITE_URL`. If the `workers.dev` route is inactive, check the account subdomain and enable the route.
 4. Record the public URL, Git commit, and active version ID in your ignored `deployment.local.md`. [Build history](https://developers.cloudflare.com/workers/ci-cd/builds/#view-build-and-preview-url) · [Workers routes](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
