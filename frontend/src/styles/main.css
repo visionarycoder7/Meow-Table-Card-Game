@@ -24,6 +24,44 @@
     overflow: auto;
   }
 
+  .home-content {
+    max-inline-size: 28rem;
+    padding-block: clamp(0.5rem, calc(4dvh - 1rem), 2.5rem);
+  }
+
+  .home-content .deck-mark {
+    inline-size: clamp(4rem, calc(25dvh - 4.5rem), 9rem);
+    block-size: auto;
+  }
+
+  .home-title {
+    margin-block-start: clamp(0.5rem, 1.5dvh, 1rem);
+    font-size: clamp(1.75rem, 4.3dvh, 2.25rem);
+    line-height: 1.15;
+  }
+
+  .home-entry {
+    --home-entry-gap: clamp(0.625rem, calc(3dvh - 0.5rem), 1.25rem);
+    display: grid;
+    gap: var(--home-entry-gap);
+    margin-block-start: clamp(0.75rem, calc(7dvh - 1.625rem), 2rem);
+  }
+
+  .home-code-field { padding-block-start: var(--home-entry-gap); }
+
+  @media (orientation: landscape) and (min-width: 36rem) and (max-height: 32rem) {
+    .home-content {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      column-gap: 1.5rem;
+      max-inline-size: 48rem;
+    }
+
+    .home-entry { margin-block-start: 0; }
+    .home-content > :not(header, .home-entry) { grid-column: 1 / -1; }
+  }
+
   html:has(.card-guide-dialog[open]) .app-scroll { overflow: hidden; }
 
   .app-scroll,
@@ -95,6 +133,13 @@
     padding-inline: 0.25rem;
     color: currentColor;
     font-size: 0.7rem;
+  }
+
+  .fullscreen-tool-label { display: none; }
+
+  @media (min-width: 40rem) and (min-height: 32rem), (min-width: 40rem) and (pointer: fine) {
+    .fullscreen-tool-label { display: inline; }
+    .fullscreen-tool-icon { display: none; }
   }
 
   .guide-column-heading {

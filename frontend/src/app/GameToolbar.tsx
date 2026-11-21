@@ -70,12 +70,12 @@ export function GameToolbar() {
           title={fullscreenAvailable ? fullscreen ? 'Press Escape to exit fullscreen' : 'Press F11 to enter fullscreen'
             : 'App fullscreen is unavailable in this browser window'}
           onClick={() => void toggleFullscreen()}>
-          <svg className="size-5 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg className="fullscreen-tool-icon size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d={fullscreen ? 'M4 9h5V4m11 5h-5V4M4 15h5v5m11-5h-5v5' : 'M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5'} />
           </svg>
-          <span className="hidden sm:inline">{fullscreen ? 'Exit fullscreen' : 'Fullscreen'}</span>
-          <kbd className="hidden sm:inline" aria-hidden="true">{fullscreen ? 'Esc' : 'F11'}</kbd>
+          <span className="fullscreen-tool-label">{fullscreen ? 'Exit fullscreen' : 'Fullscreen'}</span>
+          <kbd className="fullscreen-tool-label" aria-hidden="true">{fullscreen ? 'Esc' : 'F11'}</kbd>
         </button>
       </nav>
       {error && <p className="mt-2 text-right text-sm text-red-200" role="status">{error}</p>}

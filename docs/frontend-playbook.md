@@ -98,7 +98,7 @@ Verify the entrance, two blink cycles, and field focus. Create a room and check 
 
 ### View centering
 
-The app scroll region uses block-axis auto margins to center home, lobby, and match content when it fits below the toolbar. Tall content starts at the top of that scroll region. Check a tall viewport and a short phone viewport so headings stay visible and the last controls remain reachable.
+The app scroll region uses block-axis auto margins to center home, lobby, and match content when it fits below the toolbar. Tall content starts at the top of that scroll region. The home screen scales its mark and spacing with viewport height. On short landscape screens, the brand and room form sit side by side. Verify the idle home fits on compact phones, tablets, and desktops. Keep overflow available for zoom, an on-screen keyboard, and taller messages so the last control stays reachable.
 
 ## Verify and hand off
 

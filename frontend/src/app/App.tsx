@@ -14,10 +14,10 @@ export function App() {
     <div className="app-shell">
       <GameToolbar />
       <div className={room ? 'app-scroll' : 'app-scroll home-screen'}>
-        <main className={`m-auto w-full shrink-0 px-4 sm:px-6 ${room?.match ? 'max-w-5xl py-5' : 'max-w-md py-8 sm:py-10'}`}>
+        <main className={`m-auto w-full shrink-0 px-4 sm:px-6 ${room?.match ? 'max-w-5xl py-5' : room ? 'max-w-md py-8 sm:py-10' : 'home-content'}`}>
           <header className="text-center">
             {!room?.match && <DeckMark />}
-            <h1 className={room?.match ? 'text-2xl font-semibold tracking-tight' : 'mt-4 text-4xl font-semibold tracking-tight'}>Meow Table</h1>
+            <h1 className={room?.match ? 'text-2xl font-semibold tracking-tight' : room ? 'mt-4 text-4xl font-semibold tracking-tight' : 'home-title font-semibold tracking-tight'}>Meow Table</h1>
             {!room && <p className="mt-2 text-base text-muted">Open a private room and invite your friends.</p>}
           </header>
           {room?.match ? <MatchTable room={room} match={room.match} seatId={seatId} connected={connection === 'connected'}

@@ -9,7 +9,7 @@ export function RoomEntry({ invitedCode, busy, onEnter }: Props) {
   const [code, setCode] = useState(invitedCode);
 
   return (
-    <form className="home-entry mt-8 space-y-5 text-left" onSubmit={(event) => {
+    <form className="home-entry text-left" onSubmit={(event) => {
       event.preventDefault();
       onEnter(name, code);
     }}>
@@ -22,7 +22,7 @@ export function RoomEntry({ invitedCode, busy, onEnter }: Props) {
         className="ui-button ui-button-primary w-full">
         Create room
       </button>
-      <div className="border-t border-ink/15 pt-5">
+      <div className="home-code-field border-t border-ink/15">
         <label className="mb-2 block text-sm font-medium" htmlFor="room-code">Room code</label>
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <input id="room-code" className={`${inputStyle} min-w-0 uppercase tracking-wide`} value={code}
