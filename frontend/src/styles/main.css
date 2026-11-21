@@ -60,36 +60,48 @@
   }
 
   .ui-button {
+    --button-border: #658574;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
     min-height: 2.75rem;
-    border: 1px solid #658574;
+    border: 1px solid var(--button-border);
     border-radius: 0.5rem;
     padding: 0.5rem 0.875rem;
     background: #294739;
+    box-shadow: 0 2px 3px rgb(0 0 0 / 24%);
     color: var(--color-ink);
     font-size: 0.875rem;
     font-weight: 650;
+    line-height: 1.25;
   }
 
-  .ui-button-primary { background: var(--color-accent); border-color: #ffe58b; color: #241b08; }
-  .ui-button-danger { background: #722d29; border-color: #bd7770; color: #fff1eb; }
-  .ui-button:enabled:hover { filter: brightness(1.14); }
-  .ui-button:disabled { opacity: 0.56; }
+  .ui-button-primary { --button-border: #ffe58b; background: var(--color-accent); color: #241b08; }
+  .ui-button-exit { --button-border: #a36967; background: #442b2b; color: #ffdbd5; }
+  .ui-button-danger { --button-border: #bd7770; background: #722d29; color: #fff1eb; }
+  .ui-button:is(a[href], :enabled):hover { filter: brightness(1.14); }
+  .ui-button:is(a[href], :enabled):active { box-shadow: inset 0 1px 3px rgb(0 0 0 / 28%); }
+  .ui-button:disabled { opacity: 0.56; box-shadow: none; }
   .ui-button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 
-  .game-tool {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    background: #192d23;
-  }
-
-  .game-tool:hover { color: var(--color-accent); }
-  .game-tool kbd {
-    border: 1px solid #658574;
+  .ui-button kbd {
+    border: 1px solid var(--button-border);
     border-radius: 0.25rem;
     padding-inline: 0.25rem;
-    color: var(--color-muted);
+    color: currentColor;
     font-size: 0.7rem;
+  }
+
+  .guide-column-heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-bottom: 1px solid #658574;
+    padding-block: 0.625rem;
+    background: #14271e;
+    color: var(--color-muted);
+    font-weight: 650;
   }
 
   .card-guide-dialog {
@@ -367,7 +379,7 @@
 
   @media (prefers-reduced-motion: no-preference) {
     .ui-button { transition: filter 150ms ease-out; }
-    .ui-button:enabled:active { scale: 0.97; }
+    .ui-button:is(a[href], :enabled):active { scale: 0.97; }
     .confirm-dialog[open] { animation: confirm-in 160ms ease-out; }
     .card-guide-dialog[open] { animation: confirm-in 160ms ease-out; }
     .hand-card:enabled { transition: translate 150ms ease-out; }

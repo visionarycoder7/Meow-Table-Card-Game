@@ -158,7 +158,7 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
       <div className="flex flex-wrap items-center gap-2 border-t border-ink/15 pt-4">
         {match.result && host && <button type="button" className="ui-button ui-button-primary" disabled={!connected || !canRematch}
           onClick={() => onAction({ type: 'rematch' })}>Rematch</button>}
-        {match.result && host && <button type="button" className="ui-button" disabled={!connected}
+        {match.result && host && <button type="button" className="ui-button ui-button-exit" disabled={!connected}
           onClick={() => onAction({ type: 'return-lobby' })}>Back to lobby</button>}
         {match.result && canRematch && !host && <p className="w-full text-sm text-muted">The host can start a rematch.</p>}
         {match.result && !canRematch && <p className="w-full text-sm text-muted">

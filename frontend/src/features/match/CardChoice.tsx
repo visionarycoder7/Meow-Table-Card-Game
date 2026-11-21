@@ -36,7 +36,7 @@ export function CardChoice({ cardId, pounce, opponents, onPlay, onCancel }: Prop
             </button>)
           : suits.map((suit) => <button key={suit} type="button" className="ui-button"
             onClick={(event) => onPlay({ type: 'play', cardId, suit }, event.detail === 0)}>{suitNames[suit]}</button>)}
-        <button type="button" className="ui-button" onClick={onCancel}>Cancel choice</button>
+        <button type="button" className="ui-button ui-button-exit" onClick={onCancel}>Cancel choice</button>
       </div>
     </div>
   );

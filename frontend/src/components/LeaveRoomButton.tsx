@@ -7,7 +7,7 @@ export function LeaveRoomButton({ onLeave, activeMatch = false }: { onLeave: () 
 
   return (
     <>
-      <button type="button" className="ui-button ui-button-danger" onClick={() => dialog.current?.showModal()}>
+      <button type="button" className="ui-button ui-button-exit" onClick={() => dialog.current?.showModal()}>
         Leave room
       </button>
       <dialog ref={dialog} className="confirm-dialog" aria-labelledby={heading} aria-describedby={description}>

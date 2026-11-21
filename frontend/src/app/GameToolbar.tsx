@@ -4,14 +4,14 @@ import licenseUrl from '../../../LICENSE?url';
 import { actionDetails, CardFace, cardName } from '../features/match/CardFace';
 
 const rulesPdf = 'https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf';
-const examples: { card: Card; reference: string }[] = [
-  { card: { id: 0, rank: 5, suit: 'NIP' }, reference: 'Number cards. The reference gives 0 and 7 extra effects.' },
-  { card: { id: 1, action: 'hiss', suit: 'PAW' }, reference: 'Skip' },
-  { card: { id: 2, action: 'tail-spin', suit: 'FISH' }, reference: 'Reverse' },
-  { card: { id: 3, action: 'double-treat', suit: 'BELL' }, reference: 'Draw Two. The reference also allows stacking.' },
-  { card: { id: 4, action: 'curious-cat', suit: null }, reference: 'Wild cards also change color. The reference has no standalone color-change card.' },
-  { card: { id: 5, action: 'catnap', suit: null }, reference: 'Closest effect is Draw Four. That reference card is colored rather than wild.' },
-  { card: { id: 6, action: 'pounce', suit: null }, reference: 'Meow Table original. No direct counterpart.' },
+const examples: { card: Card; counterpart: string; note?: string }[] = [
+  { card: { id: 0, rank: 5, suit: 'NIP' }, counterpart: 'Number cards', note: 'The reference gives 0 and 7 extra effects.' },
+  { card: { id: 1, action: 'hiss', suit: 'PAW' }, counterpart: 'Skip' },
+  { card: { id: 2, action: 'tail-spin', suit: 'FISH' }, counterpart: 'Reverse' },
+  { card: { id: 3, action: 'double-treat', suit: 'BELL' }, counterpart: 'Draw Two', note: 'The reference also allows stacking.' },
+  { card: { id: 4, action: 'curious-cat', suit: null }, counterpart: 'Wild cards', note: 'The reference has no standalone color-change card.' },
+  { card: { id: 5, action: 'catnap', suit: null }, counterpart: 'Draw Four', note: 'The closest reference card has a fixed color.' },
+  { card: { id: 6, action: 'pounce', suit: null }, counterpart: 'No direct counterpart', note: 'Pounce is a Meow Table original.' },
 ];
 
 export function GameToolbar() {
@@ -56,20 +56,20 @@ export function GameToolbar() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
       <nav className="flex flex-wrap justify-end gap-2" aria-label="Game tools">
-        <a className="ui-button game-tool" href={rulesPdf} target="_blank" rel="noopener noreferrer">
+        <a className="ui-button" href={rulesPdf} target="_blank" rel="noopener noreferrer">
           Read rules <span className="sr-only">(PDF, opens in a new tab)</span>
         </a>
-        <button type="button" className="ui-button game-tool" aria-haspopup="dialog" onClick={() => guide.current?.showModal()}>
+        <button type="button" className="ui-button" aria-haspopup="dialog" onClick={() => guide.current?.showModal()}>
           Card guide
         </button>
-        <button type="button" className="ui-button game-tool" aria-keyshortcuts={fullscreen ? 'F11 Escape' : 'F11'} disabled={!fullscreenAvailable}
+        <button type="button" className={fullscreen ? 'ui-button ui-button-exit' : 'ui-button'} aria-keyshortcuts={fullscreen ? 'F11 Escape' : 'F11'} disabled={!fullscreenAvailable}
           title={fullscreenAvailable ? fullscreen ? 'Press Escape to exit fullscreen' : 'Press F11 to enter fullscreen'
             : 'App fullscreen is unavailable in this browser window'}
           onClick={() => void toggleFullscreen()}>
           {fullscreen ? 'Exit fullscreen' : 'Fullscreen'} <kbd aria-hidden="true">{fullscreen ? 'Esc' : 'F11'}</kbd>
         </button>
         {import.meta.env.VITE_PUBLIC_SOURCE_URL && (
-          <a className="ui-button game-tool" href={import.meta.env.VITE_PUBLIC_SOURCE_URL}
+          <a className="ui-button" href={import.meta.env.VITE_PUBLIC_SOURCE_URL}
             target="_blank" rel="noopener noreferrer">
             Source <span className="sr-only">code (opens in a new tab)</span>
           </a>
@@ -80,34 +80,38 @@ export function GameToolbar() {
         <header className="flex items-start justify-between gap-3 border-b border-ink/15 p-4 sm:p-5">
           <div>
             <h2 id={guideTitle} className="text-xl font-semibold">Card guide</h2>
-            <p className="mt-1 text-sm text-muted">Use Meow Table rules in this game. The reference column shows the closest published counterpart.</p>
+            <p className="mt-1 text-sm text-muted">Compare Meow Table cards with their closest published counterparts.</p>
           </div>
-          <button type="button" className="ui-button shrink-0" autoFocus onClick={() => guide.current?.close()}>Close</button>
+          <button type="button" className="ui-button ui-button-exit shrink-0" autoFocus onClick={() => guide.current?.close()}>Close</button>
         </header>
         <div className="card-guide-scroll mx-2 my-2 px-2 pb-3 sm:mx-3 sm:px-3" role="region"
           tabIndex={0} aria-label="Card comparison">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="text-muted">
-                <th scope="col" className="py-3 pr-3 font-semibold">Meow Table</th>
-                <th scope="col" className="py-3 font-semibold">UNO Show ’Em No Mercy reference</th>
+          <table className="block w-full text-left text-sm sm:table sm:table-fixed" role="table">
+            <thead className="sr-only sm:not-sr-only sm:table-header-group" role="rowgroup">
+              <tr role="row">
+                <th scope="col" role="columnheader" className="guide-column-heading w-[54%] pr-4">Meow Table card</th>
+                <th scope="col" role="columnheader" className="guide-column-heading pl-4">UNO Show ’Em No Mercy reference</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-ink/15">
-              {examples.map(({ card, reference }) => {
+            <tbody className="block divide-y divide-ink/15 sm:table-row-group" role="rowgroup">
+              {examples.map(({ card, counterpart, note }) => {
                 const action = 'action' in card ? actionDetails[card.action] : undefined;
                 return (
-                  <tr key={card.id}>
-                    <td className="py-3 pr-3">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="guide-card shrink-0"><CardFace card={card} /></div>
-                        <div className="min-w-0 flex-1 basis-24">
+                  <tr className="block py-4 sm:table-row" role="row" key={card.id}>
+                    <td className="block sm:table-cell sm:border-r sm:border-ink/10 sm:py-4 sm:pr-4 sm:align-top" role="cell">
+                      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
+                        <div className="guide-card"><CardFace card={card} /></div>
+                        <div>
                           <p className="font-semibold">{action?.name ?? cardName(card)}</p>
-                          <p className="text-muted">{action?.rule ?? 'Match a suit or number. All ranks are ordinary cards.'}</p>
+                          <p className="mt-1 text-muted">{action?.rule ?? 'Match a suit or number. All ranks are ordinary cards.'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 align-middle">{reference}</td>
+                    <td className="mt-2 block pl-[4.25rem] sm:table-cell sm:py-4 sm:pl-4 sm:align-top" role="cell">
+                      <p className="mb-1 text-xs text-muted sm:hidden" aria-hidden="true">Published reference</p>
+                      <p className="font-semibold">{counterpart}</p>
+                      {note && <p className="mt-1 text-muted">{note}</p>}
+                    </td>
                   </tr>
                 );
               })}
@@ -115,10 +119,10 @@ export function GameToolbar() {
           </table>
         </div>
         <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-ink/15 px-4 py-3 sm:px-5">
-          <a className="ui-button game-tool text-accent" href={rulesPdf} target="_blank" rel="noopener noreferrer">
+          <a className="ui-button text-accent" href={rulesPdf} target="_blank" rel="noopener noreferrer">
             Official reference PDF <span className="sr-only">(opens in a new tab)</span>
           </a>
-          <a className="inline-flex min-h-11 items-center px-1 text-sm text-muted underline underline-offset-4 hover:text-ink"
+          <a className="ui-button"
             href={licenseUrl} download="LICENSE">License</a>
         </footer>
       </dialog>
