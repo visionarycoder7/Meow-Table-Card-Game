@@ -60,7 +60,7 @@ React and Tailwind CSS v4 render the table. The Cloudflare Worker handles room a
 | [`packages/protocol/`](packages/protocol/) | Shared message types and command validation. |
 | [`assets/`](assets/) | Reusable branding and card artwork. |
 
-Cloudflare Workers Free hosts both parts at the [live game URL](https://meow-table.meow2004.workers.dev/). Pushes to `main` trigger Workers Builds, and successful builds deploy automatically. The hosted toolbar’s **Source** link points to the deployed Git revision. [Browser deployment guide](docs/deployment.md) · [Architecture](docs/architecture.md) · [Product scope](docs/product-and-gameplay.md)
+Cloudflare Workers Free hosts both parts at the [live game URL](https://meow-table.meow2004.workers.dev/). Pushes to `main` trigger Workers Builds, and successful builds deploy automatically. The hosted **Card guide** has a **Project code** link to the deployed Git revision. [Browser deployment guide](docs/deployment.md) · [Architecture](docs/architecture.md) · [Product scope](docs/product-and-gameplay.md)
 
 ## Contribute and report issues
 

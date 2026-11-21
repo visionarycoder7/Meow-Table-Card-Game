@@ -17,7 +17,9 @@
   }
 
   .app-scroll {
+    display: flex;
     flex: 1;
+    flex-direction: column;
     min-height: 0;
     overflow: auto;
   }
@@ -30,6 +32,8 @@
     --scroll-track: #102219;
     scrollbar-gutter: stable;
   }
+
+  .app-scroll { scrollbar-gutter: stable both-edges; }
 
   @supports not selector(::-webkit-scrollbar) {
     .app-scroll,

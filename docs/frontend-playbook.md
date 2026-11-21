@@ -96,6 +96,10 @@ The `home-screen` selector limits the mark motion to the home view. The lobby, m
 Verify the entrance, two blink cycles, and field focus. Create a room and check that the lobby mark stays still. Repeat at phone width and with reduced motion enabled.
 
 
+### View centering
+
+The app scroll region uses block-axis auto margins to center home, lobby, and match content when it fits below the toolbar. Tall content starts at the top of that scroll region. Check a tall viewport and a short phone viewport so headings stay visible and the last controls remain reachable.
+
 ## Verify and hand off
 
 - Run the project’s build and relevant tests. Open the rendered UI on a narrow phone and a desktop. Check long content, scroll behavior, and the least common states as well as the normal path.
