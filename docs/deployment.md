@@ -25,31 +25,40 @@ In Cloudflare, choose the **GitHub** import option. You enter the build settings
 
 ## 4. Fill in the build and deploy settings
 
-Enter these values on the import screen. Open **Advanced settings** if the form groups any fields there. For an existing Worker, use **Settings → Build** or **Settings → Builds**. [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#build-settings)
+### Replace the three defaults on Create an app
 
-| Dashboard field | Value |
-| --- | --- |
-| Worker name / Project name | `meow-table` |
-| Production branch | `playtest` |
-| Root directory / Path | `backend` |
-| Build command | Paste the first line below |
-| Deploy command | Paste the second line below |
-| API token | Use the dashboard's default generated token, or select **Create new token** if prompted |
-| Enable Preview Builds | Off for this first playtest |
-| Framework preset, if shown | **None** or the custom option, then enter the commands below |
-| Build watch paths, if shown | Leave the defaults so changes anywhere in the repository can trigger a build |
+After selecting the GitHub repository, Cloudflare opens **Create an app**. Start with the three fields visible above the blue **Deploy** button. [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#build-settings)
 
-Paste this into **Build command**.
+| Field | Prefilled value you may see | What to enter |
+| --- | --- | --- |
+| **Project name** | `meow-table-card-game` | `meow-table` |
+| **Build command** | `npm run build` | Paste the hosted build command below, even though the form marks this field optional |
+| **Deploy command** | `npx wrangler deploy` | Paste the workspace deploy command below |
+
+**Build command**
 
 ```sh
 cd .. && npm ci && VITE_PUBLIC_SOURCE_URL="$MEOW_PUBLIC_SOURCE_REPO/tree/$WORKERS_CI_COMMIT_SHA" npm run build:hosted
 ```
 
-Paste this into **Deploy command**.
+**Deploy command**
 
 ```sh
 cd .. && npm exec --workspace @meow-table/web -- wrangler deploy
 ```
+
+### Scroll inside the setup panel for the other settings
+
+Scroll the form itself, then expand **Advanced settings** if present. For a Worker already created, open **Workers & Pages → meow-table → Settings → Build**. Some dashboards label the tab **Builds**. [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#build-settings)
+
+| Dashboard field | Value |
+| --- | --- |
+| **Root directory** or **Path** | `backend`. Both commands above assume this starting directory. |
+| **Production branch** | `playtest`. In the Worker's settings, find it under **Branch control**. |
+| **Enable Preview Builds** | Off under **Branch control** |
+| **API token** | Keep the default generated token or select **Create new token** if prompted |
+| **Framework preset**, if shown | **None** or the custom option |
+| **Build watch paths**, if shown | Leave the defaults so changes anywhere in the repository can trigger a build |
 
 The `backend` setting lets Workers Builds find the committed Wrangler configuration and match its Worker name. Both commands then go up to the repository root, where the npm workspace and lockfile live. The build generates one Worker package containing the frontend assets and backend. On the first deployment, Wrangler applies the SQLite-backed `Room` migration and configures `ROOMS`, `LOBBY_LIMIT`, and the asset routing from the repo. [Worker name requirement](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement) · [Durable Object migrations](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/)
 
@@ -60,7 +69,7 @@ Use **Build variables and secrets**, under **Settings → Build** if the form ha
 | Variable name | Value |
 | --- | --- |
 | `VITE_PUBLIC_SITE_URL` | Your real game address from step 2, such as `https://meow-table.example-player.workers.dev` |
-| `MEOW_PUBLIC_SOURCE_REPO` | Your public GitHub repository URL from step 1, with no trailing slash |
+| `MEOW_PUBLIC_SOURCE_REPO` | `https://github.com/visionarycoder7/Meow-Table-Card-Game`. Use your fork's public URL if deploying a fork. Leave off the trailing slash. |
 | `NODE_VERSION` | `24.22.1`, the version in the repo's `.nvmrc` |
 | `SKIP_DEPENDENCY_INSTALL` | `1`, because the build command installs from the root lockfile |
 
@@ -68,7 +77,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 5. Deploy and find the game URL
 
-1. Select **Save and Deploy** or **Deploy**. Cloudflare builds the selected branch and deploys the result. If you connected an existing Worker and no build starts, merge a release into `playtest` from GitHub to trigger one.
+1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, the production branch is `playtest`, and all four variables are saved. Then select **Save and Deploy** or **Deploy**. If the Worker already exists and no build starts, merge a release into `playtest` from GitHub. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
 2. Open **Workers & Pages → meow-table → Deployments**. Select **View build history** to follow the build and inspect errors. Confirm there is an **Active Deployment** for the intended commit.
 3. From the Worker overview, use **Visit** or copy the address under **Settings → Domains & Routes**. Confirm it matches `VITE_PUBLIC_SITE_URL`. If the `workers.dev` route is inactive, check the account subdomain and enable the route.
 4. Record the public URL, Git commit, and active version ID in your ignored `deployment.local.md`. [Build history](https://developers.cloudflare.com/workers/ci-cd/builds/#view-build-and-preview-url) · [Workers routes](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
