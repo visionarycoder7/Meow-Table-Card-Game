@@ -47,6 +47,18 @@ cd .. && npm ci && VITE_PUBLIC_SOURCE_URL="$MEOW_PUBLIC_SOURCE_REPO/tree/$WORKER
 cd .. && npm exec --workspace @meow-table/web -- wrangler deploy
 ```
 
+### Set the preview and access options
+
+Below **Deploy command** on the **Create an app** screen, set these options before selecting **Deploy**.
+
+| Dashboard field | Value |
+| --- | --- |
+| **Preview command** | Keep `npx wrangler preview`. Cloudflare only runs it when preview builds are enabled. |
+| **Enable Preview builds** | Turn it **off**. Only the production branch needs a build for this playtest. |
+| **Protect with Cloudflare Access** | Leave it **off** so friends can open the game link without a Cloudflare sign-in. |
+
+[Cloudflare preview build settings](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/#configure-preview-builds) · [Access on workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/#manage-access-to-workersdev)
+
 ### Scroll inside the setup panel for the other settings
 
 Scroll the form itself, then expand **Advanced settings** if present. For a Worker already created, open **Workers & Pages → meow-table → Settings → Build**. Some dashboards label the tab **Builds**. [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#build-settings)
@@ -55,7 +67,6 @@ Scroll the form itself, then expand **Advanced settings** if present. For a Work
 | --- | --- |
 | **Root directory** or **Path** | `backend`. Both commands above assume this starting directory. |
 | **Production branch** | `playtest`. In the Worker's settings, find it under **Branch control**. |
-| **Enable Preview Builds** | Off under **Branch control** |
 | **API token** | Keep the default generated token or select **Create new token** if prompted |
 | **Framework preset**, if shown | **None** or the custom option |
 | **Build watch paths**, if shown | Leave the defaults so changes anywhere in the repository can trigger a build |
@@ -77,7 +88,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 5. Deploy and find the game URL
 
-1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, the production branch is `playtest`, and all four variables are saved. Then select **Save and Deploy** or **Deploy**. If the Worker already exists and no build starts, merge a release into `playtest` from GitHub. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
+1. Before clicking **Deploy**, confirm that the project is named `meow-table`, the root is `backend`, the production branch is `playtest`, both toggles are off, and all four build variables are saved. Then select **Save and Deploy** or **Deploy**. If the Worker already exists and no build starts, merge a release into `playtest` from GitHub. If an earlier attempt failed because fields were missing, save the settings and retry the build for the intended branch from **Deployments → View build history**.
 2. Open **Workers & Pages → meow-table → Deployments**. Select **View build history** to follow the build and inspect errors. Confirm there is an **Active Deployment** for the intended commit.
 3. From the Worker overview, use **Visit** or copy the address under **Settings → Domains & Routes**. Confirm it matches `VITE_PUBLIC_SITE_URL`. If the `workers.dev` route is inactive, check the account subdomain and enable the route.
 4. Record the public URL, Git commit, and active version ID in your ignored `deployment.local.md`. [Build history](https://developers.cloudflare.com/workers/ci-cd/builds/#view-build-and-preview-url) · [Workers routes](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
