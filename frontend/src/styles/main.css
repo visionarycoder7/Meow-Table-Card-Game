@@ -378,6 +378,14 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
+    .home-screen .deck-mark {
+      animation: home-mark-settle 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      transition: translate 180ms ease-out;
+    }
+
+    .home-screen:has(.home-entry input:focus) .deck-mark { translate: 0 -2px; }
+    .home-entry input { transition: background-color 150ms ease-out, border-color 150ms ease-out; }
+
     .ui-button { transition: filter 150ms ease-out; }
     .ui-button:is(a[href], :enabled):active { scale: 0.97; }
     .confirm-dialog[open] { animation: confirm-in 160ms ease-out; }
@@ -386,6 +394,11 @@
     .hand-card:enabled:hover { translate: 0 -3px; }
     .hand-card:enabled:active,
     .card-back:enabled:active { scale: 0.97; }
+  }
+
+  @keyframes home-mark-settle {
+    from { transform: translateY(5px) rotate(-4deg) scale(0.96); }
+    to { transform: none; }
   }
 
   @keyframes confirm-in {

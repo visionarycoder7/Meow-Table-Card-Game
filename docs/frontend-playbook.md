@@ -87,6 +87,15 @@ Tie each motion to an action or state change. Use opacity and transforms for mos
 
 Use CSS transitions for simple feedback. Reach for a motion library when shared layout, interruption, or gesture physics genuinely needs it. Review rapid clicks, interruptions, and multiple animated items on a representative phone.
 
+### Meow Table home motion
+
+The existing deck mark settles in once when the home screen appears. Its 440 ms entrance uses a small translation, rotation, and scale on the existing image. Focusing a room entry field raises the mark by 2 px and highlights the active field. The form remains usable throughout.
+
+The `home-screen` selector limits the mark motion to the home view. The lobby, match, and card guide keep their existing behavior. The motion runs only when `prefers-reduced-motion` is `no-preference`. With reduced motion enabled, the mark remains still and the field highlight and focus ring appear immediately. [Reduced-motion media feature](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion)
+
+Verify the first paint, tab between the fields, create a room, and check that the lobby mark stays still. Repeat at phone width and with reduced motion enabled.
+
+
 ## Verify and hand off
 
 - Run the project’s build and relevant tests. Open the rendered UI on a narrow phone and a desktop. Check long content, scroll behavior, and the least common states as well as the normal path.

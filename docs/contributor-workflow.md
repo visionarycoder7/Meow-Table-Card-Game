@@ -4,6 +4,8 @@ Keep personal rulebook PDFs and comparison notes under `references/local/` or us
 
 **Status:** Proposed implementation sequence
 
+Start with the repository’s [contribution guide](../CONTRIBUTING.md), [Code of Conduct](../CODE_OF_CONDUCT.md), and [Security Policy](../SECURITY.md).
+
 ## Before implementation
 
 Review the [product](product-and-gameplay.md) and [architecture](architecture.md) with the owner. Pin the working branch and milestone before editing. Use the ignored root prototype or `git show 0e78756:index.html` for reference and test the tracked app on localhost.

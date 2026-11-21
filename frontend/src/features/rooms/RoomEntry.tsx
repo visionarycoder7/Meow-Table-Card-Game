@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { displayNameLimit } from '@meow-table/protocol';
 
 type Props = { invitedCode: string; busy: boolean; onEnter: (name: string, code?: string) => void };
-const inputStyle = 'w-full rounded-lg border border-ink/25 bg-ink/5 px-3.5 py-3 text-base text-ink placeholder:text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+const inputStyle = 'w-full rounded-lg border border-ink/25 bg-ink/5 px-3.5 py-3 text-base text-ink placeholder:text-muted focus:border-[#91ad99] focus:bg-[#1b3126] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
 export function RoomEntry({ invitedCode, busy, onEnter }: Props) {
   const [name, setName] = useState('');
   const [code, setCode] = useState(invitedCode);
 
   return (
-    <form className="mt-8 space-y-5 text-left" onSubmit={(event) => {
+    <form className="home-entry mt-8 space-y-5 text-left" onSubmit={(event) => {
       event.preventDefault();
       onEnter(name, code);
     }}>

@@ -96,7 +96,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 6. Verify the hosted game
 
-1. Open the Workers URL in a private browser window. Check that the game and favicon load. Open **Source** in the toolbar and compare the commit with the active deployment. In **Card guide**, use **License** and confirm it downloads the AGPL license.
+1. Open the Workers URL in a private browser window. Check that the game and favicon load. Open **Source** in the toolbar and compare the commit with the active deployment. In **Card guide**, use **License** and confirm it opens the repository's AGPL license tab on GitHub.
 2. Add `/healthz` to the game address. It should return `{"status":"ok"}`.
 3. Create a room and send its invite link to a friend on a different network, such as mobile data. Check that both players see the same roster, can play cards, and can finish a match and start a rematch. Refresh one player's tab during a match and confirm that their hand returns. Try a wild suit choice, Tail Spin, and Pounce.
 4. Keep that room open and start a separate room in another browser profile. Check that the rosters and moves stay independent. Try a solo match with bots and return to the lobby.

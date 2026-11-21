@@ -1,5 +1,7 @@
 # Release and licensing
 
+See the root [legal and licensing notice](../LEGAL.md) for project-wide terms and third-party references.
+
 ## Meow Table identity
 
 Use **Meow Table** in the UI, project descriptions, release notes, screenshots, and public links. Use original card faces, back designs, rules wording, names, and sounds. Keep a record of where third-party assets and dependencies came from, what licenses apply, and what attribution they require.
@@ -28,6 +30,6 @@ For a hosted build, set `VITE_PUBLIC_SITE_URL` to its HTTPS origin and `VITE_PUB
 
 The [LICENSE file](../LICENSE) contains GNU AGPL version 3. Before publishing the licensed release, the repository owner should confirm that the existing contributors and any other copyright holders have authorized distribution of their work under these terms. Dependencies keep their upstream licenses and required notices. [GNU licensing guidance](https://www.gnu.org/licenses/gpl-howto.html)
 
-Keep **Source** in the hosted toolbar and **License** in the Card guide. The Source link should lead to the exact deployed revision or a source archive that includes the game server, browser app, and scripts needed to build and run that version. The License link downloads the bundled repository license. Check both links in a signed-out browser. Modified versions used over a network must prominently offer the corresponding source under Section 13. [GNU AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html#section13)
+Keep **Source** in the hosted toolbar and **License** in the Card guide. The Source link should lead to the exact deployed revision or a source archive that includes the game server, browser app, and scripts needed to build and run that version. The License button opens the repository's license tab on GitHub. The HTML also declares the bundled license file. Check both links in a signed-out browser. Modified versions used over a network must prominently offer the corresponding source under Section 13. [GNU AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html#section13)
 
 Keep personal reference notes in `*.local.md` files and discuss implementation and playtest results in public pull requests using the Meow Table terminology.

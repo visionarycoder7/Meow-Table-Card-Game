@@ -1,9 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Card } from '@meow-table/protocol';
-import licenseUrl from '../../../LICENSE?url';
 import { actionDetails, CardFace, cardName } from '../features/match/CardFace';
 
 const rulesPdf = 'https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf';
+const licensePage = 'https://github.com/visionarycoder7/Meow-Table-Card-Game?tab=AGPL-3.0-1-ov-file';
 const examples: { card: Card; counterpart: string; note?: string }[] = [
   { card: { id: 0, rank: 5, suit: 'NIP' }, counterpart: 'Number cards', note: 'The reference gives 0 and 7 extra effects.' },
   { card: { id: 1, action: 'hiss', suit: 'PAW' }, counterpart: 'Skip' },
@@ -122,8 +122,9 @@ export function GameToolbar() {
           <a className="ui-button text-accent" href={rulesPdf} target="_blank" rel="noopener noreferrer">
             Official reference PDF <span className="sr-only">(opens in a new tab)</span>
           </a>
-          <a className="ui-button"
-            href={licenseUrl} download="LICENSE">License</a>
+          <a className="ui-button" href={licensePage} target="_blank" rel="noopener noreferrer">
+            License <span className="sr-only">(opens GitHub in a new tab)</span>
+          </a>
         </footer>
       </dialog>
     </div>

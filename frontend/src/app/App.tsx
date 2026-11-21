@@ -13,7 +13,7 @@ export function App() {
   return (
     <div className="app-shell">
       <GameToolbar />
-      <div className="app-scroll">
+      <div className={room ? 'app-scroll' : 'app-scroll home-screen'}>
         <main className={`mx-auto w-full px-4 sm:px-6 ${room?.match ? 'max-w-5xl py-5' : 'max-w-md py-8 sm:py-10'}`}>
           <header className="text-center">
             {!room?.match && <DeckMark />}
