@@ -29,7 +29,7 @@
 | Continue after a disconnect | Use **Reconnect** or refresh the same tab while your seat is held for up to 60 seconds. The server’s turn or choice timer continues. |
 | Play again | After a match, the host can choose **Rematch** or **Back to lobby** to change the seats. |
 
-Open **Card guide** to see the six original action cards and the publisher reference. On mobile, tap the fullscreen icon beside **Card guide**. On desktop, use **F11** to enter fullscreen and **Escape** to exit. Outside fullscreen, **Escape** closes the guide or cancels an open card choice. The home screen’s cat mark settles once, blinks periodically, and lifts slightly when you focus a field. Its motion follows the device’s reduced-motion preference. [Game rules](docs/game-rules.md) · [Motion details](docs/frontend-playbook.md#meow-table-home-motion)
+Open **Card guide** to see the six original action cards, the publisher’s **Rules PDF**, and the project **License**. On mobile, tap the fullscreen icon beside **Card guide**. On desktop, use **F11** to enter fullscreen and **Escape** to exit. Outside fullscreen, **Escape** closes the guide or cancels an open card choice. The home screen’s cat mark settles once, blinks periodically, and lifts slightly when you focus a field. Its motion follows the device’s reduced-motion preference. [Game rules](docs/game-rules.md) · [Motion details](docs/frontend-playbook.md#meow-table-home-motion)
 
 ## Run locally
 
@@ -60,7 +60,7 @@ React and Tailwind CSS v4 render the table. The Cloudflare Worker handles room a
 | [`packages/protocol/`](packages/protocol/) | Shared message types and command validation. |
 | [`assets/`](assets/) | Reusable branding and card artwork. |
 
-Cloudflare Workers Free hosts both parts at the [live game URL](https://meow-table.meow2004.workers.dev/). Pushes to `main` trigger Workers Builds, and successful builds deploy automatically. The hosted **Card guide** has a **Project code** link to the deployed Git revision. [Browser deployment guide](docs/deployment.md) · [Architecture](docs/architecture.md) · [Product scope](docs/product-and-gameplay.md)
+Cloudflare Workers Free hosts both parts at the [live game URL](https://meow-table.meow2004.workers.dev/). Pushes to `main` trigger Workers Builds, and successful builds deploy automatically. The hosted HTML records the deployed Git revision for release verification. [Browser deployment guide](docs/deployment.md) · [Architecture](docs/architecture.md) · [Product scope](docs/product-and-gameplay.md)
 
 ## Contribute and report issues
 

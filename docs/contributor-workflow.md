@@ -47,7 +47,7 @@ Start a handoff with a self-contained brief. Use exact file paths and commands o
 - Refresh and temporary network loss restore the same seat, hand, and pending choice. A departing host triggers a lobby handover or follows the same in-match disconnect rules as any other player.
 - Every approved card effect has rule coverage. The full-room flow reaches a result and starts a fresh rematch with the expected participants and fresh hands.
 - The hosted build works on a phone and a desktop on different networks. Expired rooms and service restarts show a clear recovery path.
-- The hosted Source and License links work from a signed-out browser and match the shipped version. Review branding and asset provenance against the [release notes](release-and-licensing.md).
+- The deployed source revision in the HTML and the License link resolve from a signed-out browser and match the shipped version. Review branding and asset provenance against the [release notes](release-and-licensing.md).
 
 ## Hosted playtest
 

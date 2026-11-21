@@ -85,7 +85,7 @@ Use **Build variables and secrets**, under **Settings → Build** if the form ha
 | `NODE_VERSION` | `24.22.1`, the version in the repo's `.nvmrc` |
 | `SKIP_DEPENDENCY_INSTALL` | `1`, because the build command installs from the root lockfile |
 
-Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to point the Card guide’s **Project code** link at the revision being deployed. The two example URLs above are public values. This app requires no runtime variables, application secrets, custom domain, or separate database setup for the playtest. [Default Workers Builds variables](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#default-variables)
+Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build records the source URL for that revision in the hosted HTML’s `meow-table-source` metadata field. The two example URLs above are public values. This app requires no runtime variables, application secrets, custom domain, or separate database setup for the playtest. [Default Workers Builds variables](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#default-variables)
 
 ## 5. Deploy and find the game URL
 
@@ -96,7 +96,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 ## 6. Verify the hosted game
 
-1. Open the Workers URL in a private browser window. Check that the game and favicon load. Open **Card guide**, select **Project code**, and compare the commit with the active deployment. Use **License** and confirm it opens the [LICENSE file on GitHub](https://github.com/visionarycoder7/Meow-Table-Card-Game/blob/main/LICENSE).
+1. Open the Workers URL in a private browser window. Check that the game and favicon load. Compare the commit in the page’s `meow-table-source` HTML metadata with the active deployment. In **Card guide**, check that **Rules PDF** opens the publisher’s PDF and **License** opens the [LICENSE file on GitHub](https://github.com/visionarycoder7/Meow-Table-Card-Game/blob/main/LICENSE).
 2. Add `/healthz` to the game address. It should return `{"status":"ok"}`.
 3. Create a room and send its invite link to a friend on a different network, such as mobile data. Check that both players see the same roster, can play cards, and can finish a match and start a rematch. Refresh one player's tab during a match and confirm that their hand returns. Try a wild suit choice, Tail Spin, and Pounce.
 4. Keep that room open and start a separate room in another browser profile. Check that the rosters and moves stay independent. Try a solo match with bots and return to the lobby.

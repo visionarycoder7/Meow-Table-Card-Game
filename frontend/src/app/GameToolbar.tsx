@@ -123,19 +123,11 @@ export function GameToolbar() {
         </div>
         <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-ink/15 px-4 py-3 sm:px-5">
           <a className="ui-button text-accent" href={rulesPdf} target="_blank" rel="noopener noreferrer">
-            Official reference PDF <span className="sr-only">(opens in a new tab)</span>
+            Rules PDF <span className="sr-only">(opens in a new tab)</span>
           </a>
-          <div className="flex flex-wrap items-center gap-3">
-            {import.meta.env.VITE_PUBLIC_SOURCE_URL && (
-              <a className="inline-flex min-h-11 items-center text-sm text-muted underline underline-offset-4 hover:text-ink"
-                href={import.meta.env.VITE_PUBLIC_SOURCE_URL} target="_blank" rel="noopener noreferrer">
-                Project code <span className="sr-only">(opens GitHub in a new tab)</span>
-              </a>
-            )}
-            <a className="ui-button" href={licensePage} target="_blank" rel="noopener noreferrer">
-              License <span className="sr-only">(opens GitHub in a new tab)</span>
-            </a>
-          </div>
+          <a className="ui-button" href={licensePage} target="_blank" rel="noopener noreferrer">
+            License <span className="sr-only">(opens GitHub in a new tab)</span>
+          </a>
         </footer>
       </dialog>
     </div>

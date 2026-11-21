@@ -81,7 +81,7 @@ results, and anything Codex still needs to verify.
 2. Follow the [deployment guide](deployment.md) for release setup, source and license links, and rollback. Test the chosen Cloudflare Free architecture with simultaneous rooms, reconnects, and idle hibernation. Measure request, duration, and storage use. The ignored `deployment.local.md` records provider settings and pilot evidence.
 3. Once local release checks pass and the owner is ready to test hosting, Codex validates the production target with the [hosted playtest](contributor-workflow.md#hosted-playtest). Record the build revision, devices, networks, and results. Local readiness and hosted verification can be recorded separately.
 
-**Codex checks:** Finish, reconnect, and rematch on localhost first. Repeat these checks across two different networks on the owner-approved release target. Check a larger table and signed-out Source and License links. Mark the phase verified once the hosted evidence is recorded.
+**Codex checks:** Finish, reconnect, and rematch on localhost first. Repeat these checks across two different networks on the owner-approved release target. Check a larger table and verify the deployed source revision and License link while signed out. Mark the phase verified once the hosted evidence is recorded.
 
 ### Hosted release verification
 
@@ -89,7 +89,7 @@ The root `index.html` is ignored local reference material. `frontend/index.html`
 
 1. The compiled localhost build passes the complete release flow. Verify room creation, joining by code and link, a full match under the approved rules, private hands, reconnect, and rematch. Record any prototype-only modes the owner approved deferring.
 2. Verify that the Cloudflare address serves the game and accepts WebSocket connections. Record the active Worker version and the Git commit.
-3. Verify the deployed build, CI, and the user-facing Source and License links. Record the hosted smoke test before sharing the public URL.
+3. Verify the deployed build, CI, and the deployed source revision and the user-facing License link. Record the hosted smoke test before sharing the public URL.
 4. After the first successful playtest, use its Cloudflare Worker version as the rollback point for later releases.
 
 ## Phase status

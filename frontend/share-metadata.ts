@@ -15,7 +15,10 @@ export function shareMetadata(siteUrl: string | undefined, sourceUrl: string | u
   return {
     name: 'meow-table-share-metadata',
     transformIndexHtml() {
-      if (!siteUrl) return [];
+      const revision: HtmlTagDescriptor[] = sourceUrl
+        ? [{ tag: 'meta', attrs: { name: 'meow-table-source', content: sourceUrl }, injectTo: 'head' }]
+        : [];
+      if (!siteUrl) return revision;
 
       const canonical = new URL(siteUrl);
       if (
@@ -44,7 +47,7 @@ export function shareMetadata(siteUrl: string | undefined, sourceUrl: string | u
         { tag: 'meta', attrs: { name: 'twitter:image', content: imageUrl } },
         { tag: 'meta', attrs: { name: 'twitter:image:alt', content: imageAlt } },
       ];
-      return tags.map((tag) => ({ ...tag, injectTo: 'head' }));
+      return [...revision, ...tags.map((tag): HtmlTagDescriptor => ({ ...tag, injectTo: 'head' }))];
     },
   };
 }

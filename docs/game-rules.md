@@ -163,7 +163,7 @@ The turn-order label below the piles shows the server's current direction. Tail 
 
 Action faces use short effect labels such as **Skip** and **Reverse**. Draw penalties put **+2** or **+4** in the center. The table explains the top action card beside the discard.
 
-The **Card guide** compares Meow Table cards with their closest counterparts in the reference game. **Read rules** opens the original publisher's PDF in a new tab. Meow Table matches follow the rules on this page. [Official reference PDF](https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf)
+The **Card guide** compares Meow Table cards with their closest counterparts in the reference game. **Read rules** and the guide’s **Rules PDF** button open the publisher’s PDF in a new tab. Meow Table matches follow the rules on this page. [Rules PDF](https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf)
 
 ### Special Resolution: Pounce as Final Card
 - If a player plays **Pounce** as their last card:
