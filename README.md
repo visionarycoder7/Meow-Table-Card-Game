@@ -29,7 +29,7 @@
 | Continue after a disconnect | Use **Reconnect** or refresh the same tab while your seat is held for up to 60 seconds. The server’s turn or choice timer continues. |
 | Play again | After a match, the host can choose **Rematch** or **Back to lobby** to change the seats. |
 
-Open **Card guide** to see the six original action cards and the publisher reference. Use **F11** to enter fullscreen and **Escape** to exit. Outside fullscreen, **Escape** closes the guide or cancels an open card choice. The home screen’s cat mark settles once, blinks periodically, and lifts slightly when you focus a field. Its motion follows the device’s reduced-motion preference. [Game rules](docs/game-rules.md) · [Motion details](docs/frontend-playbook.md#meow-table-home-motion)
+Open **Card guide** to see the six original action cards and the publisher reference. On mobile, tap the fullscreen icon beside **Card guide**. On desktop, use **F11** to enter fullscreen and **Escape** to exit. Outside fullscreen, **Escape** closes the guide or cancels an open card choice. The home screen’s cat mark settles once, blinks periodically, and lifts slightly when you focus a field. Its motion follows the device’s reduced-motion preference. [Game rules](docs/game-rules.md) · [Motion details](docs/frontend-playbook.md#meow-table-home-motion)
 
 ## Run locally
 

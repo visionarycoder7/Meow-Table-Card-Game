@@ -55,21 +55,32 @@ export function GameToolbar() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
-      <nav className="flex flex-wrap justify-end gap-2" aria-label="Game tools">
-        <a className="ui-button" href={rulesPdf} target="_blank" rel="noopener noreferrer">
-          Read rules <span className="sr-only">(PDF, opens in a new tab)</span>
-        </a>
-        <button type="button" className="ui-button" aria-haspopup="dialog" onClick={() => guide.current?.showModal()}>
-          Card guide
-        </button>
-        <button type="button" className={fullscreen ? 'ui-button ui-button-exit' : 'ui-button'} aria-keyshortcuts={fullscreen ? 'F11 Escape' : 'F11'} disabled={!fullscreenAvailable}
-          title={fullscreenAvailable ? fullscreen ? 'Press Escape to exit fullscreen' : 'Press F11 to enter fullscreen'
-            : 'App fullscreen is unavailable in this browser window'}
-          onClick={() => void toggleFullscreen()}>
-          {fullscreen ? 'Exit fullscreen' : 'Fullscreen'} <kbd aria-hidden="true">{fullscreen ? 'Esc' : 'F11'}</kbd>
-        </button>
+      <nav className="flex flex-wrap justify-end gap-1.5 sm:gap-2" aria-label="Game tools">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <a className="ui-button whitespace-nowrap px-2.5 sm:px-3.5" href={rulesPdf} target="_blank" rel="noopener noreferrer">
+            Read rules <span className="sr-only">(PDF, opens in a new tab)</span>
+          </a>
+          <button type="button" className="ui-button whitespace-nowrap px-2.5 sm:px-3.5"
+            aria-haspopup="dialog" onClick={() => guide.current?.showModal()}>
+            Card guide
+          </button>
+          <button type="button"
+            className={fullscreen ? 'ui-button ui-button-exit min-w-11 px-0 sm:px-3.5' : 'ui-button min-w-11 px-0 sm:px-3.5'}
+            aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            aria-keyshortcuts={fullscreen ? 'F11 Escape' : 'F11'} disabled={!fullscreenAvailable}
+            title={fullscreenAvailable ? fullscreen ? 'Press Escape to exit fullscreen' : 'Press F11 to enter fullscreen'
+              : 'App fullscreen is unavailable in this browser window'}
+            onClick={() => void toggleFullscreen()}>
+            <svg className="size-5 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d={fullscreen ? 'M4 9h5V4m11 5h-5V4M4 15h5v5m11-5h-5v5' : 'M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5'} />
+            </svg>
+            <span className="hidden sm:inline">{fullscreen ? 'Exit fullscreen' : 'Fullscreen'}</span>
+            <kbd className="hidden sm:inline" aria-hidden="true">{fullscreen ? 'Esc' : 'F11'}</kbd>
+          </button>
+        </div>
         {import.meta.env.VITE_PUBLIC_SOURCE_URL && (
-          <a className="ui-button" href={import.meta.env.VITE_PUBLIC_SOURCE_URL}
+          <a className="ui-button px-2.5 sm:px-3.5" href={import.meta.env.VITE_PUBLIC_SOURCE_URL}
             target="_blank" rel="noopener noreferrer">
             Source <span className="sr-only">code (opens in a new tab)</span>
           </a>
