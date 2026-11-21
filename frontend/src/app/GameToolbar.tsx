@@ -3,7 +3,7 @@ import type { Card } from '@meow-table/protocol';
 import { actionDetails, CardFace, cardName } from '../features/match/CardFace';
 
 const rulesPdf = 'https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf';
-const licensePage = 'https://github.com/visionarycoder7/Meow-Table-Card-Game?tab=AGPL-3.0-1-ov-file';
+const licensePage = 'https://github.com/visionarycoder7/Meow-Table-Card-Game/blob/main/LICENSE';
 const examples: { card: Card; counterpart: string; note?: string }[] = [
   { card: { id: 0, rank: 5, suit: 'NIP' }, counterpart: 'Number cards', note: 'The reference gives 0 and 7 extra effects.' },
   { card: { id: 1, action: 'hiss', suit: 'PAW' }, counterpart: 'Skip' },
