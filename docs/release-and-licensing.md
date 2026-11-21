@@ -21,6 +21,7 @@ The upgraded app serves its [original SVG mark](../assets/branding/mark.svg), [e
 | Apple touch icon | `apple-touch-icon.png` at 180 × 180 with a solid evergreen background |
 | Web app icons | 192 and 512 px PNGs, plus a 512 px maskable export with the mark scaled to 75% around the center |
 | Social card | `social-card.png` at 1200 × 630, exported from `social-card.svg` |
+| Meow Table mascot | [meow-mascot.png](../assets/branding/meow-mascot.png) at 1254 × 1254 with transparency. Crowned gold cat holding an evergreen card, developed from the project mark with ImageGen. |
 
 When exporting icons, keep the square canvas. Fill the touch and app icon backgrounds with `#0e1a14`. Leave generous space inside the maskable icon so platform crops preserve the mark. Inspect the favicon at 16 px and the social card at thumbnail size before replacing the exports. Keep image dimensions and references in `site.webmanifest` and the HTML head in sync. [Web app icon guidance](https://web.dev/learn/pwa/web-app-manifest)
 
