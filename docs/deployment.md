@@ -1,12 +1,12 @@
 # Deploy Meow Table from the Cloudflare website
 
-**Cloudflare Workers Free is the only hosting platform you need.** It hosts the React frontend, the multiplayer backend, and room state at one HTTPS address. GitHub stores the source code and sends the selected release branch to Cloudflare. The existing Vercel site is only the older prototype, so skip Vercel setup for this deployment.
+**Cloudflare Workers Free is the only hosting platform you need.** One Worker serves the React frontend and multiplayer endpoints from one HTTPS address. Cloudflare Durable Objects store room state. GitHub stores the source code and sends the selected release branch to Cloudflare.
 
 In Cloudflare, choose the **GitHub** import option. You enter the build settings in your browser. Cloudflare runs the commands on its own servers, so you can publish without opening a terminal. [Cloudflare dashboard guide](https://developers.cloudflare.com/workers/get-started/dashboard/)
 
 ## 1. Prepare the release in GitHub
 
-1. Open the Meow Table repository on [GitHub](https://github.com/visionarycoder7/UNO-NO-MERCY-WORKING-ALGORITHM-). If you are deploying from your own fork, use that repository for every step below.
+1. Open the Meow Table repository on [GitHub](https://github.com/visionarycoder7/Meow-Table-Card-Game). If you are deploying from your own fork, use that repository for every step below.
 2. Select **main** in the branch picker. On the **Actions** tab, look for a green **Verify Meow Table** run for the commit you intend to publish.
 3. Return to the **Code** tab. Open the branch picker, type **playtest**, and choose **Create branch: playtest from main**. If `playtest` already exists, check its latest commit before connecting it to Cloudflare. This guide uses `playtest` as the deployment branch so you decide when to publish from GitHub.
 4. Copy the repository's browser address from its **Code** tab. Keep the base URL, such as `https://github.com/your-account/your-repository`, with no trailing slash or `.git`. Open it in a signed-out window to confirm the source is public. The game links players to the exact deployed commit. [Release and licensing notes](release-and-licensing.md)
@@ -85,7 +85,7 @@ Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to 
 
 1. On GitHub, open **Pull requests → New pull request**. Select **base: playtest** and **compare: main**.
 2. Review the commits, open the pull request, and merge it when you want to publish. Changes merged into `playtest` trigger the Cloudflare build. Keep **Enable Preview Builds** off under **Settings → Build → Branch control** if you only want release-branch builds.
-3. Confirm the new deployment is active in Cloudflare and repeat the health and multiplayer checks. Keep the existing Vercel prototype address available until the hosted playtest passes. [Cloudflare branch control](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/)
+3. Confirm the new deployment is active in Cloudflare and repeat the health and multiplayer checks. [Cloudflare branch control](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/)
 
 ## Troubleshooting
 

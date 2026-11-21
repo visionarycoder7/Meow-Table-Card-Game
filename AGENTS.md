@@ -4,7 +4,7 @@ Read [README.md](README.md) for the current project state. Use [product and game
 
 Start by checking Git status and reading the relevant parts of the ignored root `index.html` prototype before each implementation. In a clean checkout, read it with `git show 0e78756:index.html`. Use [the Meow Table rules](docs/game-rules.md) and architecture to decide how to improve the interaction. Keep changes within the assigned slice. The app uses `frontend/`, `backend/`, and `packages/protocol/`. Cloudflare Workers Free is the target. Use one SQLite-backed Durable Object per room and the hibernating WebSocket API. Keep state and idle work within the free-tier design in [architecture.md](docs/architecture.md#free-tier-budget).
 
-Test the workspace on localhost. The tracked entry point is `frontend/index.html`. Keep the root prototype ignored and automatic Vercel Git deployments disabled while the owner tests the Cloudflare candidate. Codex owns any later [public cutover](docs/implementation-phases.md#codex-only-prototype-cutover). The owner pushes and deploys manually using the [deployment guide](docs/deployment.md).
+Test the workspace on localhost. The tracked entry point is `frontend/index.html`. Keep the root prototype ignored. The owner publishes to Cloudflare through the [deployment guide](docs/deployment.md). Codex verifies the [hosted release](docs/implementation-phases.md#hosted-release-verification).
 
 Put game rules on the server, render the authorized player view in the browser, and reuse the existing green, gold, and suit colors when building the new interface. Use the approved original rules when implementing the engine.
 

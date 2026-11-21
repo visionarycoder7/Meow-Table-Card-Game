@@ -18,7 +18,7 @@ Keep rules and complete state on the server. Render approved views in React.
 Follow the Meow Table palette and keep emoji out of product-authored UI.
 Test the app on localhost. Use frontend/index.html as the entry point.
 Read the ignored root prototype or git show 0e78756:index.html for reference.
-If you are Antigravity, leave the prototype cutover to Codex.
+If you are Antigravity, leave hosted release verification to Codex.
 Do not push or deploy. Report changed files, commands actually run,
 results, and anything Codex still needs to verify.
 ```
@@ -49,7 +49,7 @@ results, and anything Codex still needs to verify.
 
 1. Define the room commands and lobby snapshots needed now. Validate input on the server. Generate room codes and private seat credentials on the server. Keep credentials out of invites and public snapshots.
 2. Implement create, join, presence, leave, and host-controlled admission. Route the native WebSocket to a SQLite-backed Durable Object by room code. Use hibernating sockets, persist accepted state, and let alarms expire disconnected seats. Only the host can lock or open the lobby. Actual match start belongs to Phase 3.
-3. Compose guest entry, create and join forms, roster, and invite controls. Cover loading, invalid input, full rooms, and lost connections. Run the upgraded app locally and leave the Vercel prototype available.
+3. Compose guest entry, create and join forms, roster, and invite controls. Cover loading, invalid input, full rooms, and lost connections. Run the app locally through the Cloudflare Vite integration.
 
 **Codex checks:** Use independent browser contexts on localhost to create and join by invite and by code. Verify two to six seats, full and unknown rooms, host-only locking, and isolation between two rooms. Verify the local production preview and protect private session tokens from public snapshots. Hosted checks belong to release preparation.
 
@@ -73,7 +73,7 @@ results, and anything Codex still needs to verify.
 
 **Codex checks:** Refresh during a pending choice, drop and restore a network connection, let a seat expire, and leave as host. Confirm the shown hand stays correct and the room can continue or end under the approved rules. Finish and rematch on phone and desktop. Verify keyboard controls and reduced motion.
 
-## Phase 5 — Release readiness and cutover
+## Phase 5 — Release readiness
 
 **Tracker:** A10. **Commit:** `ci: verify the Meow Table multiplayer release`
 
@@ -83,16 +83,14 @@ results, and anything Codex still needs to verify.
 
 **Codex checks:** Finish, reconnect, and rematch on localhost first. Repeat these checks across two different networks on the owner-approved release target. Check a larger table and signed-out Source and License links. Mark the phase verified once the hosted evidence is recorded.
 
-### Codex-only prototype cutover
+### Hosted release verification
 
-The root `index.html` is ignored local reference material. `frontend/index.html` is the tracked Vite entry. The repository disables automatic Vercel Git builds for the prototype while the owner tests the Workers release. Codex handles a later public URL cutover after the owner signs off.
-
-Codex decides when the prototype can be retired based on evidence:
+The root `index.html` is ignored local reference material. `frontend/index.html` is the tracked Vite entry. The owner publishes the Cloudflare Worker using the [dashboard guide](deployment.md). Codex verifies the hosted release before the owner shares the public URL.
 
 1. The compiled localhost build passes the complete release flow. Verify room creation, joining by code and link, a full match under the approved rules, private hands, reconnect, and rematch. Record any prototype-only modes the owner approved deferring.
-2. The replacement has a verified production target that actually runs or reaches the multiplayer service. Agree on the public URL and rollback path with the owner. A static frontend needs a reachable production socket endpoint. Use the last working prototype deployment or commit as the rollback reference.
-3. Verify the deployed build, CI, and the user-facing Source and License links. Record the hosted smoke test before moving any public URL.
-4. When the owner approves the change, update the public link or agreed domain and record how to return to the previous URL. Use the preserved prototype revision `0e78756` as a source reference.
+2. Verify that the Cloudflare address serves the game and accepts WebSocket connections. Record the active Worker version and the Git commit.
+3. Verify the deployed build, CI, and the user-facing Source and License links. Record the hosted smoke test before sharing the public URL.
+4. After the first successful playtest, use its Cloudflare Worker version as the rollback point for later releases.
 
 ## Phase status
 
@@ -102,4 +100,4 @@ Codex decides when the prototype can be retired based on evidence:
 | 2. Rooms | Verified locally | Clean `npm ci`, protocol tests, type checks, and build passed. Dev and preview verified room isolation, six-seat capacity, host-only locking, and private sessions. Independent Chrome contexts verified copied invites, typed codes, live rosters, and refresh. The room alarm expired a disconnected seat and removed empty state. |
 | 3. Match | Verified locally | Numbered cards, six action effects, private hands, bots, and rematches are available for playtesting. |
 | 4. Recovery and UI | Verified locally | Seat recovery, lobby reopening, direction, solo rematch, and keyboard choices are checked. A 13-card hand with long names fits a phone viewport. Motion effects are gated by the user's preference. |
-| 5. Release and cutover | Hosted playtest pending | Cloudflare release commands and the workspace CI workflow are prepared. The owner publishes the first candidate and records cross-network results. |
+| 5. Release | Hosted playtest pending | Cloudflare release commands and the workspace CI workflow are prepared. The owner publishes the first candidate and records cross-network results. |

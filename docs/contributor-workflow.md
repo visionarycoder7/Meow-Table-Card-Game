@@ -16,7 +16,7 @@ Review the [product](product-and-gameplay.md) and [architecture](architecture.md
 | 2. Online room flow | Build guest entry, room creation, invites, presence, and host-controlled locking. Use the Worker and one Durable Object per room. | Independent browser sessions join the same localhost lobby. A second room stays isolated, admission and capacity are enforced, and the production preview runs locally. |
 | 3. Playable match | Implement one complete game loop first, including deal, legal play or draw, turn advance, result, and rematch. Then add each approved original card effect in a small change with its rule tests. | Two independent sessions finish a full game and rematch. The engine tests cover each approved action and edge case. Each browser receives only its own hand. |
 | 4. Recovery and Meow identity | Handle refresh, disconnect, seat expiry, and host transfer. Add original card visuals and owner-approved Meow touches. Check phone layout, keyboard use, and audio controls. | A reconnect restores the correct hand and any pending decision. Friends can finish a game on separate devices. |
-| 5. Release | Run workspace checks in CI and verify the compiled app locally. Document rollback and room lifecycle. Codex handles the [prototype cutover](implementation-phases.md#codex-only-prototype-cutover) after the owner is ready to verify the release target. | Local release checks pass first. Hosted checks and the public URL switch are verified by Codex after the production target is available. |
+| 5. Release | Run workspace checks in CI and verify the compiled app locally. Document rollback and room lifecycle. Codex handles [hosted release verification](implementation-phases.md#hosted-release-verification) after the owner publishes the candidate. | Local release checks pass first. Codex verifies the hosted checks before the owner shares the public URL. |
 
 Use focused branches and pull requests against `main`. Link each PR to the agreed milestone. Include reproduction steps and test results. For UI changes, add a short recording or screenshots of the affected flow. Ask the owner to review player-facing rule and theme decisions before merge.
 
@@ -49,7 +49,7 @@ Start a handoff with a self-contained brief. Use exact file paths and commands o
 
 ## Hosted playtest
 
-Run this after the owner publishes the candidate using the [deployment guide](deployment.md). Codex owns verification before any public URL cutover. Antigravity can provide local evidence from its assigned phase.
+Run this after the owner publishes the candidate using the [deployment guide](deployment.md). Codex owns verification before the owner shares the public URL. Antigravity can provide local evidence from its assigned phase.
 
 1. Open the same pilot URL on a laptop over Wi-Fi and a phone on mobile data. Create a room on one device and join it from the other using the invite. Repeat once with a typed code.
 2. Start a match, take turns on both devices, and confirm the discard, order, and hand counts agree after each move. Confirm each browser sees its own cards and that a full or started room rejects new guests.
