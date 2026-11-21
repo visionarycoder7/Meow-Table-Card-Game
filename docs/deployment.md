@@ -1,86 +1,102 @@
-# Deploy the first Meow Table playtest
+# Deploy Meow Table from the Cloudflare website
 
-Use **Cloudflare Workers Free** for the React frontend and the multiplayer Worker. Cloudflare serves the compiled Vite files and the WebSocket endpoint from one HTTPS origin. The first deploy creates the app's SQLite-backed `Room` Durable Object namespace from the committed Wrangler migration. One object per room holds that room's game state. [Cloudflare Vite guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/) [Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/)
+**Cloudflare Workers Free is the only hosting platform you need.** It hosts the React frontend, the multiplayer backend, and room state at one HTTPS address. GitHub stores the source code and sends the selected release branch to Cloudflare. The existing Vercel site is only the older prototype, so skip Vercel setup for this deployment.
 
-| Setting | Use for this release |
+In Cloudflare, choose the **GitHub** import option. You enter the build settings in your browser. Cloudflare runs the commands on its own servers, so you can publish without opening a terminal. [Cloudflare dashboard guide](https://developers.cloudflare.com/workers/get-started/dashboard/)
+
+## 1. Prepare the release in GitHub
+
+1. Open the Meow Table repository on [GitHub](https://github.com/visionarycoder7/UNO-NO-MERCY-WORKING-ALGORITHM-). If you are deploying from your own fork, use that repository for every step below.
+2. Select **main** in the branch picker. On the **Actions** tab, look for a green **Verify Meow Table** run for the commit you intend to publish.
+3. Return to the **Code** tab. Open the branch picker, type **playtest**, and choose **Create branch: playtest from main**. If `playtest` already exists, check its latest commit before connecting it to Cloudflare. This guide uses `playtest` as the deployment branch so you decide when to publish from GitHub.
+4. Copy the repository's browser address from its **Code** tab. Keep the base URL, such as `https://github.com/your-account/your-repository`, with no trailing slash or `.git`. Open it in a signed-out window to confirm the source is public. The game links players to the exact deployed commit. [Release and licensing notes](release-and-licensing.md)
+
+## 2. Set up your Cloudflare Free account
+
+1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/), or create an account and verify your email.
+2. Select the account that will own the game. Open **Workers & Pages** and stay on **Workers Free**. Use its included `workers.dev` address for this playtest.
+3. On **Workers & Pages**, look for **Your subdomain**. If prompted to set one up, choose an available name. Cloudflare also documents the **Change** control next to **Your subdomain**. If the account subdomain is `example-player`, your game address will be `https://meow-table.example-player.workers.dev`. Copy your own address for the build settings. [Configure workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/#configure-workersdev)
+
+## 3. Import the GitHub repository as a Worker
+
+1. In **Workers & Pages**, select **Create application** and choose **GitHub** or **Connect to GitHub** under the Worker creation options. If prompted to choose between **Workers** and **Pages**, select **Workers**. The project uses a Worker with static assets, WebSockets, and Durable Objects. [Connect a new Worker](https://developers.cloudflare.com/workers/ci-cd/builds/#connect-a-new-worker)
+2. Sign in to GitHub if prompted. For the **Cloudflare Workers & Pages** GitHub App, choose **Only select repositories** and grant access to the Meow Table repository. If the repository is missing, ask its owner to install or configure the GitHub App for that repository. Then return to Cloudflare and select the repository. [GitHub App permissions](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/github-integration/#manage-access)
+3. If you've already created the intended `meow-table` Worker in this account, open it and use **Settings → Builds → Connect** instead of creating a duplicate. The settings below apply to either route. [Connect an existing Worker](https://developers.cloudflare.com/workers/ci-cd/builds/#connect-an-existing-worker)
+
+## 4. Fill in the build and deploy settings
+
+Enter these values on the import screen. Open **Advanced settings** if the form groups any fields there. For an existing Worker, use **Settings → Build** or **Settings → Builds**. [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#build-settings)
+
+| Dashboard field | Value |
 | --- | --- |
-| Product and plan | **Workers & Pages**, **Workers Free** |
-| Worker name | `meow-table` from `backend/wrangler.jsonc` |
-| Public address | `https://meow-table.<your-subdomain>.workers.dev` |
-| Deploy method | Manual Wrangler CLI from the repository root |
-| Storage and rate limiting | Wrangler provisions the `Room` migration and uses the committed `LOBBY_LIMIT` binding |
-| GitHub integration and custom domain | Optional after the first hosted playtest |
+| Worker name / Project name | `meow-table` |
+| Production branch | `playtest` |
+| Root directory / Path | `backend` |
+| Build command | Paste the first line below |
+| Deploy command | Paste the second line below |
+| API token | Use the dashboard's default generated token, or select **Create new token** if prompted |
+| Enable Preview Builds | Off for this first playtest |
+| Framework preset, if shown | **None** or the custom option, then enter the commands below |
+| Build watch paths, if shown | Leave the defaults so changes anywhere in the repository can trigger a build |
 
-The repository tracks `frontend/index.html`, frontend and Worker source, public assets, the Wrangler config, package manifests and lockfile, CI, and the license. Git ignores the root prototype, local deployment records, credentials, dependencies, generated Worker types, and build output. The local build regenerates everything Wrangler uploads.
+Paste this into **Build command**.
 
-## 1. Prepare the release revision
-
-1. Install Node.js **24.22.1**, the version in `.nvmrc`, and open PowerShell in the repository root.
-2. Review the local release commit and push it to the public source repository. If the branch requires a pull request, merge it and build from the resulting commit. The hosted **Source** link must open the exact deployed revision in a signed-out window. The **License** link downloads the bundled AGPL license. [Release and licensing](release-and-licensing.md)
-3. Install and verify the workspace.
-
-   ```powershell
-   npm ci
-   npm test
-   npm run check
-   ```
-
-GitHub's **Verify Meow Table / verify** job runs the equivalent checks, hosted build, and Wrangler dry run. If a GitHub ruleset requires the old **Verify static app** or a Vercel status, have the repository owner replace that release check with the new verification job. The checked-in `vercel.json` disables new automatic Vercel Git deployments so the previous static deployment can remain available during this playtest. [Vercel Git configuration](https://vercel.com/docs/project-configuration/git-configuration#turning-off-all-automatic-deployments)
-
-## 2. Set up Cloudflare Free
-
-1. Sign in to the Cloudflare dashboard and select the account you intend to use. Open **Workers & Pages** and confirm that the account uses **Workers Free**.
-2. Set a **workers.dev** account subdomain if one has not been set. The page shows it beside **Your subdomain**.
-3. Check that **meow-table** is available, or that an existing Worker with that name is the intended Meow Table project. If it belongs to something else, select an unused name in `backend/wrangler.jsonc`, commit that change, and use the corresponding origin below.
-4. Sign in with the repository's Wrangler version and verify the active account.
-
-   ```powershell
-   npm exec --workspace @meow-table/web -- wrangler login
-   npm exec --workspace @meow-table/web -- wrangler whoami
-   ```
-
-The CLI creates the Worker on the first deploy. Use the CLI and committed bindings for this pilot. The dashboard is where you check the plan, name, route, and usage. [Configure workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/#configure-workersdev)
-
-## 3. Build, dry-run, and publish
-
-Run these PowerShell commands in the same terminal. Replace the example account subdomain and source repository URL.
-
-```powershell
-$env:VITE_PUBLIC_SITE_URL = 'https://meow-table.your-subdomain.workers.dev'
-$sourceRepo = 'https://github.com/your-account/your-public-repo'
-$releaseRevision = (git rev-parse HEAD).Trim()
-$env:VITE_PUBLIC_SOURCE_URL = "$sourceRepo/tree/$releaseRevision"
-
-npm run build:hosted
-npm run deploy:dry-run
+```sh
+cd .. && npm ci && VITE_PUBLIC_SOURCE_URL="$MEOW_PUBLIC_SOURCE_REPO/tree/$WORKERS_CI_COMMIT_SHA" npm run build:hosted
 ```
 
-Confirm that Wrangler selects the generated configuration in `frontend/dist/meow_table/` and lists `ROOMS`, `LOBBY_LIMIT`, and static assets. If the dry run fails, fix the problem before publishing. Then deploy from the same terminal:
+Paste this into **Deploy command**.
 
-```powershell
-npm run deploy
+```sh
+cd .. && npm exec --workspace @meow-table/web -- wrangler deploy
 ```
 
-This command builds the hosted bundle again with those two public values, then deploys it through Wrangler. They are baked into the frontend. The setup uses no application secrets. Wrangler prints the HTTPS URL and version ID. Save them with the Git revision in `deployment.local.md`.
+The `backend` setting lets Workers Builds find the committed Wrangler configuration and match its Worker name. Both commands then go up to the repository root, where the npm workspace and lockfile live. The build generates one Worker package containing the frontend assets and backend. On the first deployment, Wrangler applies the SQLite-backed `Room` migration and configures `ROOMS`, `LOBBY_LIMIT`, and the asset routing from the repo. [Worker name requirement](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement) · [Durable Object migrations](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/)
 
-To inspect the compiled candidate locally before publishing, run `npm start` after `npm run build:hosted` and open [localhost:4173](http://localhost:4173/).
+### Add the build variables
 
-## 4. Test the deployed game
+Use **Build variables and secrets**, under **Settings → Build** if the form has already closed. Add these as plain text values. They belong to the build because Vite reads them when compiling the frontend. [Cloudflare build variables](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/#overriding-default-versions)
 
-1. Open the printed HTTPS URL in a signed-out browser. Check that the game, favicon, **Source**, and **License** load and that `/healthz` returns `{"status":"ok"}`.
-2. Create a private room and invite a friend on another network, such as mobile data. Confirm that joining shows the same roster. DevTools **Network → WS** should show the socket connected on the same hostname.
-3. Play to a result and start a rematch. Exercise a wild suit choice, Tail Spin, and Pounce. Refresh one player's tab during a pending choice and check that their private hand returns.
-4. Start a separate room at the same time. Confirm the two rosters are independent. Run a solo game with bots and try **Back to lobby** after the result.
-5. Check **Workers & Pages → meow-table → Metrics** and note errors, Worker requests, and Durable Object usage. Free limits apply across the account. When a quota is exhausted, affected operations fail until the quota resets. [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) [Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/)
-
-Check these common failures before sharing the link widely:
-
-| Symptom | Check |
+| Variable name | Value |
 | --- | --- |
-| Wrong Cloudflare account | Run `wrangler whoami` and select the intended account. |
-| Wrong share address or Source link | Set the two `VITE_PUBLIC_*` values in the build terminal. Rebuild and deploy from the intended commit. |
-| Home loads but room creation fails | Check `/healthz`, the same-origin socket, and the `ROOMS` and `LOBBY_LIMIT` bindings. Confirm that Wrangler used the Vite-generated configuration. |
-| Empty or stale Source link | Check the commit URL while signed out and confirm the release commit is pushed to the source repository. |
-| A later release fails | Inspect **Deployments** for the last known-good Worker version. Rollback restores code, while Durable Object state has its own lifecycle. [Cloudflare rollback guide](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/) |
+| `VITE_PUBLIC_SITE_URL` | Your real game address from step 2, such as `https://meow-table.example-player.workers.dev` |
+| `MEOW_PUBLIC_SOURCE_REPO` | Your public GitHub repository URL from step 1, with no trailing slash |
+| `NODE_VERSION` | `24.22.1`, the version in the repo's `.nvmrc` |
+| `SKIP_DEPENDENCY_INSTALL` | `1`, because the build command installs from the root lockfile |
 
-Keep the existing Vercel URL available until the hosted playtest passes. Use the Workers URL for this round of testing before deciding on a custom domain or moving the old public address.
+Cloudflare supplies `WORKERS_CI_COMMIT_SHA` automatically. The build uses it to point the game's **Source** link at the revision being deployed. The two example URLs above are public values. This app requires no runtime variables, application secrets, custom domain, or separate database setup for the playtest. [Default Workers Builds variables](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#default-variables)
+
+## 5. Deploy and find the game URL
+
+1. Select **Save and Deploy** or **Deploy**. Cloudflare builds the selected branch and deploys the result. If you connected an existing Worker and no build starts, merge a release into `playtest` from GitHub to trigger one.
+2. Open **Workers & Pages → meow-table → Deployments**. Select **View build history** to follow the build and inspect errors. Confirm there is an **Active Deployment** for the intended commit.
+3. From the Worker overview, use **Visit** or copy the address under **Settings → Domains & Routes**. Confirm it matches `VITE_PUBLIC_SITE_URL`. If the `workers.dev` route is inactive, check the account subdomain and enable the route.
+4. Record the public URL, Git commit, and active version ID in your ignored `deployment.local.md`. [Build history](https://developers.cloudflare.com/workers/ci-cd/builds/#view-build-and-preview-url) · [Workers routes](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
+
+## 6. Verify the hosted game
+
+1. Open the Workers URL in a private browser window. Check that the game and favicon load. Open **Source** and compare the commit with the active deployment. Open **License** and confirm it loads the AGPL license.
+2. Add `/healthz` to the game address. It should return `{"status":"ok"}`.
+3. Create a room and send its invite link to a friend on a different network, such as mobile data. Check that both players see the same roster, can play cards, and can finish a match and start a rematch. Refresh one player's tab during a match and confirm that their hand returns. Try a wild suit choice, Tail Spin, and Pounce.
+4. Keep that room open and start a separate room in another browser profile. Check that the rosters and moves stay independent. Try a solo match with bots and return to the lobby.
+5. In Cloudflare, open the Worker's **Metrics** and check for errors. Check account usage under **Workers & Pages** during the test. Worker, Durable Object, and build quotas have separate Free limits. [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) · [Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/) · [Workers Builds limits](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/)
+
+## 7. Publish another version from the websites
+
+1. On GitHub, open **Pull requests → New pull request**. Select **base: playtest** and **compare: main**.
+2. Review the commits, open the pull request, and merge it when you want to publish. Changes merged into `playtest` trigger the Cloudflare build. Keep **Enable Preview Builds** off under **Settings → Build → Branch control** if you only want release-branch builds.
+3. Confirm the new deployment is active in Cloudflare and repeat the health and multiplayer checks. Keep the existing Vercel prototype address available until the hosted playtest passes. [Cloudflare branch control](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/)
+
+## Troubleshooting
+
+| Symptom | What to check |
+| --- | --- |
+| Repository is missing from the picker | In GitHub, check **Settings → Applications → Installed GitHub Apps → Cloudflare Workers & Pages → Configure**. The repository owner can grant the app access to this repository. |
+| Cloudflare suggests an automatic setup pull request, or reports a Worker name mismatch | Check **Root directory** is `backend` and the Worker name is `meow-table`. This repo already has a Wrangler configuration and Vite integration. |
+| npm cannot find the workspace or lockfile | Check both commands start with `cd .. &&` and that `SKIP_DEPENDENCY_INSTALL` is `1`. The build starts in `backend` and installs from the repository root. |
+| The build asks for public URLs | Put both URL inputs in **Build variables and secrets** as text. Verify the game origin starts with `https://` and the GitHub base URL has no trailing slash. |
+| The home page loads but rooms fail | Open `/healthz` and check the active deployment has the `ROOMS` and `LOBBY_LIMIT` bindings. In browser DevTools, inspect **Network → WS** for the socket on the same hostname. Check deployment logs for errors. |
+| You corrected a failed build setting | Open **Deployments → View build history**, select the failed build and choose **Retry build**. Check that it targets the intended revision before retrying. |
+| A release breaks the live game | In **Deployments**, choose the previous known-good version and use **Rollback** if available. This restores a Worker version. Room data has its own lifecycle, and a Durable Object migration can prevent rolling back to an older version. [Cloudflare rollback guide](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/) |
+
+[Cloudflare build troubleshooting](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/)

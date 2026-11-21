@@ -102,7 +102,7 @@ Run these commands from the repository root. Node.js tooling is pinned in `.nvmr
 | `npm run deploy` | Builds the hosted app and publishes through Wrangler. |
 
 1. **Development.** Use localhost. GitHub Actions verifies the workspace and prepares a Worker dry run. The existing Vercel deployment remains the prototype reference while automatic Vercel Git deployments are disabled.
-2. **Release candidate.** The owner builds through the Cloudflare Vite plugin and deploys the Worker and assets together. Test invitations and WebSockets across networks. [Deployment steps](deployment.md) [Cloudflare Vite guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/)
+2. **Release candidate.** The owner selects a release in GitHub. Cloudflare Workers Builds uses the Vite plugin to build the Worker and assets together from the `playtest` branch. Test invitations and WebSockets across networks. [Deployment steps](deployment.md) [Cloudflare Vite guide](https://developers.cloudflare.com/workers/vite-plugin/tutorial/)
 3. **Public URL decision.** After the hosted candidate passes, agree on the public URL and record the rollback point.
 
 Vercel’s WebSocket support is in public beta. Connections are pinned to a function instance and close when it reaches its maximum duration. Vercel’s own multi-client example uses Redis to coordinate instances. The pilot uses one long-running process so room state and sockets can stay together. [Vercel WebSocket announcement](https://vercel.com/changelog/websocket-support-is-now-in-public-beta) · [Vercel multi-client example](https://vercel.com/kb/guide/real-time-chat-websockets)

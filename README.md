@@ -53,9 +53,9 @@ A brief connection drop triggers a few automatic retries. Use **Reconnect** or r
 
 ## Hosting and release
 
-The game deploys to **Cloudflare Workers Free** as one app with static frontend files and the room backend on the same origin. Use the [first hosted playtest guide](docs/deployment.md) for account setup, the exact commands, and the two-network test. [Architecture and free-tier plan](docs/architecture.md)
+**Cloudflare Workers Free is the only host needed** for the frontend and multiplayer backend. GitHub provides the source for Cloudflare Builds, and Vercel serves the older prototype only. Use the [first hosted playtest guide](docs/deployment.md) for the Cloudflare dashboard setup, exact build fields, and a multiplayer test. [Architecture and free-tier plan](docs/architecture.md)
 
-The root prototype is kept as a local reference and ignored by Git. The tracked app starts at `frontend/index.html`. New Vercel Git deployments are disabled in [`vercel.json`](vercel.json) while the existing static deployment remains available. The owner pushes and publishes the playtest manually.
+The root prototype is kept as a local reference and ignored by Git. The tracked app starts at `frontend/index.html`. New Vercel Git deployments are disabled in [`vercel.json`](vercel.json) while the existing static deployment remains available. The owner publishes a release by merging it into the Cloudflare-connected `playtest` branch.
 
 ## Contribute
 
