@@ -40,8 +40,8 @@ export function TableSeat({ seat, active, away, local }: Props) {
         <span className="text-xs text-muted">Away</span>
       ) : null}
       {seat.uno && !seat.out && !seat.forfeited && (
-        <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-black tracking-wider text-white shadow-sm">
-          UNO!
+        <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black tracking-wider text-black shadow-md flex items-center gap-0.5 animate-bounce">
+          🐾 MEOW!
         </span>
       )}
     </div>

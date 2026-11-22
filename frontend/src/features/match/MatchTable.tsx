@@ -73,7 +73,7 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
         : last.type === 'pass'
           ? 'kept the drawn card'
           : last.type === 'call-uno'
-            ? 'called UNO!'
+            ? 'called MEOW! 🐾'
             : last.type === 'roulette'
               ? `chose ${suitNames[last.suit]} and drew ${last.drawnCount} cards (turn skipped)`
               : last.choice === 'give'
@@ -134,7 +134,7 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
         }
       }
     } else if (action.type === 'call-uno') {
-      sfx.uno();
+      sfx.meow();
     } else if (action.type === 'roulette') {
       sfx.skip();
     }
@@ -281,19 +281,21 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
 
       {activity && <p className="text-center text-sm text-muted wrap-anywhere">{activity}</p>}
 
-      {/* UNO Call Button */}
+      {/* MEOW Call Button - press before playing second-to-last card */}
       {canAct && match.hand.length === 2 && !self?.out && (
-        <div className="flex justify-center my-2">
+        <div className="flex justify-center my-3">
           <button
             type="button"
-            className="btn-uno"
+            className={`btn-meow ${match.canCallUno ? 'meow-pulse' : 'meow-called'}`}
             disabled={!match.canCallUno}
             onClick={() => {
-              sfx.uno();
+              sfx.meow();
+              sfx.tick(0.4, 2500);
               submit({ type: 'call-uno' }, false);
             }}
+            title="Press MEOW before playing your second-to-last card!"
           >
-            {match.canCallUno ? 'UNO!' : 'UNO! ✓'}
+            {match.canCallUno ? '🐾 MEOW!' : '🐾 MEOW! ✓'}
           </button>
         </div>
       )}

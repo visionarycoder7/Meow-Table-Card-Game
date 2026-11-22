@@ -3,6 +3,7 @@ import type { ReactNode, Ref } from 'react';
 import { suits } from '@meow-table/protocol';
 import type { Card } from '@meow-table/protocol';
 import { actionDetails, CardFace, cardName } from './CardFace';
+import { sfx } from './sfx';
 
 type Props = {
   cards: Card[];
@@ -47,7 +48,13 @@ export function PlayerHand({ cards, playableIds, canAct, chosenCardId, headingRe
             <button type="button" data-card-id={card.id} aria-label={`Play ${cardName(card)}`} aria-description={rule}
               aria-expanded={chosenCardId === card.id} className="hand-card"
               disabled={!canAct || !playableIds.includes(card.id)}
-              onClick={(event) => onPlay(card, event.currentTarget, event.detail === 0)}>
+              onPointerEnter={() => {
+                if (canAct && playableIds.includes(card.id)) sfx.tick(0.18, 2700);
+              }}
+              onClick={(event) => {
+                sfx.tick(0.3, 2300);
+                onPlay(card, event.currentTarget, event.detail === 0);
+              }}>
               <CardFace card={card} />
             </button>
           </li>;

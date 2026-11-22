@@ -28,6 +28,15 @@ export function fly(
   const dy = b.top - a.top;
   const s = b.width / a.width;
   const r = Math.random() * 50 - 25;
+  // Schedule oddly satisfying micro-ticks during card flight
+  const tickCount = 2;
+  for (let k = 1; k <= tickCount; k++) {
+    const tDelay = delay + (ms * k) / (tickCount + 1);
+    setTimeout(() => {
+      sfx.tick(0.25, 2150 + k * 280);
+    }, tDelay);
+  }
+
   const an = e.animate(
     [
       { opacity: 1, transform: 'translate(0,0) scale(1) rotate(0deg)' },
@@ -38,6 +47,7 @@ export function fly(
   );
   an.onfinish = () => {
     e.remove();
+    sfx.tick(0.38, 1800);
     if (snd) sfx[`${snd}End`]();
     done?.();
   };
