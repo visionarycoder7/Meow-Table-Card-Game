@@ -138,7 +138,8 @@ export class Room extends DurableObject<Env> {
   private async applyMatchAction(socket: WebSocket, lobby: Lobby, seatId: string,
     command: Extract<RoomCommand, { revision: number }>) {
     const now = Date.now();
-    const isMove = command.type === 'play' || command.type === 'draw' || command.type === 'pass' || command.type === 'respond-pounce';
+    const isMove = command.type === 'play' || command.type === 'draw' || command.type === 'pass' ||
+      command.type === 'respond-pounce' || command.type === 'call-uno' || command.type === 'roulette-color';
     const turnExpired = isMove && lobby.match?.turn?.seatId === seatId && lobby.match.turn.deadline <= now;
     if (this.expireMatchAndSeats(lobby, now)) await this.saveAndBroadcast(lobby, undefined, Boolean(lobby.match));
     if (turnExpired) return this.reject(socket, 'Time ran out before that move reached the table.');
@@ -172,7 +173,7 @@ export class Room extends DurableObject<Env> {
       if (roster.length < 2) return this.reject(socket, 'Invite a player or add a bot first.');
       lobby.players = connected;
       lobby.locked = true;
-      lobby.match = startMatch(roster, previous ? rematchOpener(previous, roster) : seatId, now);
+      lobby.match = startMatch(roster, previous ? rematchOpener(previous, roster) : seatId, now, undefined, { noMercyRules: true, unoRules: true });
     } else if (isMove) {
       if (!lobby.match) return this.reject(socket, 'Start a match first.');
       const error = applyTurn(lobby.match, seatId, command, now);

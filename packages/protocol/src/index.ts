@@ -34,16 +34,37 @@ export type RoomView = {
 
 export const suits = ['PAW', 'BELL', 'NIP', 'FISH'] as const;
 export type Suit = (typeof suits)[number];
-export const suitedActions = ['hiss', 'tail-spin', 'double-treat'] as const;
-export const wildActions = ['curious-cat', 'catnap', 'pounce'] as const;
+export const suitedActions = [
+  'hiss',
+  'tail-spin',
+  'double-treat',
+  'skip',
+  'rev',
+  'd2',
+  'discard',
+  'd4',
+  'skipall',
+] as const;
+export const wildActions = [
+  'curious-cat',
+  'catnap',
+  'pounce',
+  'wrd4',
+  'wd6',
+  'wd10',
+  'roul',
+] as const;
 export type ActionName = (typeof suitedActions)[number] | (typeof wildActions)[number];
 export type NumberCard = { id: number; suit: Suit; rank: number };
 export type Card = NumberCard
   | { id: number; suit: Suit; action: (typeof suitedActions)[number] }
   | { id: number; suit: null; action: (typeof wildActions)[number] };
-export type MatchMove = { type: 'play'; cardId: number; suit?: Suit; targetSeatId?: string }
+export type MatchMove =
+  | { type: 'play'; cardId: number; suit?: Suit; targetSeatId?: string }
   | { type: 'draw'; deep?: true }
   | { type: 'pass' }
+  | { type: 'call-uno' }
+  | { type: 'roulette-color'; suit: Suit }
   | { type: 'respond-pounce'; choice: 'draw' | 'give' };
 export type MatchAction = MatchMove | { type: 'start' | 'rematch' | 'return-lobby' };
 export type MatchView = {
@@ -51,17 +72,26 @@ export type MatchView = {
   activeSuit: Suit;
   direction: 1 | -1;
   drawCount: number;
-  seats: { id: string; name: string; cardCount: number; forfeited: boolean; bot?: true }[];
+  pendingDraw?: number;
+  seats: { id: string; name: string; cardCount: number; forfeited: boolean; bot?: true; out?: boolean; uno?: boolean }[];
   hand: Card[];
   playableIds: number[];
   canDraw: boolean;
   canDeepDraw?: boolean;
   canPass: boolean;
+  canCallUno?: boolean;
+  roulette?: { actorSeatId: string; targetSeatId: string };
   pounce?: { actorSeatId: string; targetSeatId: string; canGive: boolean };
   turn: { seatId: string; deadline: number } | null;
   result: { winnerSeatId: string | null } | null;
-  lastAction?: { seatId: string; type: 'draw'; count?: number } | { seatId: string; type: 'pass' } | { seatId: string; type: 'play'; card: Card }
+  lastAction?:
+    | { seatId: string; type: 'draw'; count?: number }
+    | { seatId: string; type: 'pass' }
+    | { seatId: string; type: 'play'; card: Card; targetSeatId?: string }
+    | { seatId: string; type: 'call-uno' }
+    | { seatId: string; type: 'roulette'; suit: Suit; drawnCount: number }
     | { seatId: string; type: 'pounce-response'; choice: 'draw' | 'give' | 'forfeit' };
+  banner?: { items: { seatId: string; text: string }[] };
 };
 
 export type RoomCommand =
@@ -108,10 +138,20 @@ export function parseRoomCommand(message: string | ArrayBuffer): RoomCommand | n
     case 'pass':
     case 'add-bot':
     case 'remove-bot':
+    case 'call-uno':
+    case 'meow':
+    case 'roulette-color':
     case 'respond-pounce':
     case 'play': {
       if (!('revision' in input) || typeof input.revision !== 'number' ||
         !Number.isSafeInteger(input.revision) || input.revision < 0) return null;
+      if (input.type === 'call-uno' || input.type === 'meow') {
+        return { type: 'call-uno', revision: input.revision };
+      }
+      if (input.type === 'roulette-color') {
+        const suit = 'suit' in input ? suits.find((candidate) => candidate === input.suit) : undefined;
+        return suit ? { type: 'roulette-color', suit, revision: input.revision } : null;
+      }
       if (input.type === 'respond-pounce') {
         return 'choice' in input && (input.choice === 'draw' || input.choice === 'give')
           ? { type: input.type, choice: input.choice, revision: input.revision } : null;

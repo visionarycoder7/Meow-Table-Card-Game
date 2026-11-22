@@ -44,8 +44,8 @@ export function PlayerHand({ cards, playableIds, canAct, chosenCardId, headingRe
         {visible.map((card) => {
           const rule = 'action' in card ? actionDetails[card.action].rule : undefined;
           return <li key={card.id} title={rule}>
-            <button type="button" aria-label={`Play ${cardName(card)}`} aria-description={rule}
-              aria-expanded={card.suit === null ? chosenCardId === card.id : undefined} className="hand-card"
+            <button type="button" data-card-id={card.id} aria-label={`Play ${cardName(card)}`} aria-description={rule}
+              aria-expanded={chosenCardId === card.id} className="hand-card"
               disabled={!canAct || !playableIds.includes(card.id)}
               onClick={(event) => onPlay(card, event.currentTarget, event.detail === 0)}>
               <CardFace card={card} />

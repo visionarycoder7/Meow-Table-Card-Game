@@ -5,13 +5,21 @@ import { actionDetails, CardFace, cardName } from '../features/match/CardFace';
 const rulesPdf = 'https://service.mattel.com/instruction_sheets/HVW18-Eng.pdf';
 const licensePage = 'https://github.com/visionarycoder7/Meow-Table-Card-Game/blob/main/LICENSE';
 const examples: { card: Card; counterpart: string; note?: string }[] = [
-  { card: { id: 0, rank: 5, suit: 'NIP' }, counterpart: 'Number cards', note: 'The reference gives 0 and 7 extra effects.' },
-  { card: { id: 1, action: 'hiss', suit: 'PAW' }, counterpart: 'Skip' },
-  { card: { id: 2, action: 'tail-spin', suit: 'FISH' }, counterpart: 'Reverse' },
-  { card: { id: 3, action: 'double-treat', suit: 'BELL' }, counterpart: 'Draw Two', note: 'The reference also allows stacking.' },
-  { card: { id: 4, action: 'curious-cat', suit: null }, counterpart: 'Wild cards', note: 'The reference has no standalone color-change card.' },
-  { card: { id: 5, action: 'catnap', suit: null }, counterpart: 'Draw Four', note: 'The closest reference card has a fixed color.' },
-  { card: { id: 6, action: 'pounce', suit: null }, counterpart: 'No direct counterpart', note: 'Pounce is a Meow Table original.' },
+  { card: { id: 0, rank: 5, suit: 'NIP' }, counterpart: 'Number cards' },
+  { card: { id: 7, rank: 7, suit: 'PAW' }, counterpart: "7’s Swap", note: 'Swap hands with a player you choose.' },
+  { card: { id: 8, rank: 0, suit: 'BELL' }, counterpart: "0’s Pass", note: 'All hands rotate to the next player in turn order.' },
+  { card: { id: 1, action: 'skip', suit: 'PAW' }, counterpart: 'Skip', note: 'Next player loses their turn.' },
+  { card: { id: 2, action: 'rev', suit: 'FISH' }, counterpart: 'Reverse', note: 'Reverses direction (skips the other player at 2 seats).' },
+  { card: { id: 3, action: 'd2', suit: 'BELL' }, counterpart: 'Draw Two', note: 'Stacks draw penalties! Counter with +2, +4, +6, or +10.' },
+  { card: { id: 9, action: 'discard', suit: 'PAW' }, counterpart: 'Discard All', note: 'Drop every card of that color from your hand.' },
+  { card: { id: 10, action: 'd4', suit: 'FISH' }, counterpart: 'Draw Four', note: 'Stacks +4 to the penalty stack.' },
+  { card: { id: 11, action: 'skipall', suit: 'NIP' }, counterpart: 'Skip Everyone', note: 'Everyone else is skipped. You play again immediately!' },
+  { card: { id: 4, action: 'curious-cat', suit: null }, counterpart: 'Wild card', note: 'Choose the next active color.' },
+  { card: { id: 12, action: 'wrd4', suit: null }, counterpart: 'Wild Reverse Draw 4', note: 'Reverses direction and stacks +4 draw penalty!' },
+  { card: { id: 13, action: 'wd6', suit: null }, counterpart: 'Wild Draw 6', note: 'Choose a color and stack +6 draw penalty.' },
+  { card: { id: 14, action: 'wd10', suit: null }, counterpart: 'Wild Draw 10', note: 'Choose a color and stack +10 draw penalty!' },
+  { card: { id: 15, action: 'roul', suit: null }, counterpart: 'Wild Color Roulette', note: 'Next player chooses a color and draws cards until that color appears!' },
+  { card: { id: 6, action: 'pounce', suit: null }, counterpart: 'Pounce', note: 'Signature card: target draws 2 or gives 1 random card.' },
 ];
 
 export function GameToolbar() {

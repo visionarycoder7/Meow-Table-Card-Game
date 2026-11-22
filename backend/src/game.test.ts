@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Card } from '@meow-table/protocol';
-import { applyTurn, expireTurn, forfeitSeats, makeDeck, matchView, rematchOpener, startMatch } from './game.ts';
+import { applyTurn, expireTurn, forfeitSeats, makeDeck, makeNoMercyDeck, matchView, rematchOpener, startMatch } from './game.ts';
 
 const players = [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }];
 const paw = (rank: number) => ({ id: rank, suit: 'PAW' as const, rank });
@@ -326,3 +326,172 @@ test('Pounce expiry draws for a human and resolves the actor’s win', () => {
   assert.equal(match.seats[1].hand.length, 3);
   assert.deepEqual(match.result, { winnerSeatId: 'a' });
 });
+
+test('No Mercy deck deals exactly 168 authentic cards', () => {
+  const deck = makeNoMercyDeck();
+  assert.equal(deck.length, 168);
+  assert.equal(new Set(deck.map(({ id }) => id)).size, 168);
+});
+
+test('Stacking draw penalties accumulate and require equal or higher draw values', () => {
+  const three = [...players, { id: 'c', name: 'C' }];
+  const match = startMatch(three, 'a', 0);
+  match.discards = [paw(1)];
+  const d2Card = { id: 201, suit: 'PAW' as const, action: 'd2' as const };
+  const d4Card = { id: 202, suit: 'PAW' as const, action: 'd4' as const };
+  const wd6Card = { id: 203, suit: null, action: 'wd6' as const };
+  const wd10Card = { id: 204, suit: null, action: 'wd10' as const };
+  const lowerD2 = { id: 205, suit: 'FISH' as const, action: 'd2' as const };
+
+  match.seats[0].hand = [d2Card, paw(2)];
+  match.seats[1].hand = [d4Card, fish(3)];
+  match.seats[2].hand = [wd6Card, fish(4)];
+
+  // A plays d2 (+2)
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 201 }, 1), null);
+  assert.equal(match.pendingDraw, 2);
+  assert.equal(match.turn?.seatId, 'b');
+
+  // B stacks d4 (+4) -> pending is now 6
+  assert.equal(applyTurn(match, 'b', { type: 'play', cardId: 202 }, 2), null);
+  assert.equal(match.pendingDraw, 6);
+  assert.equal(match.turn?.seatId, 'c');
+
+  // C stacks wd6 (+6) -> pending is now 12
+  assert.equal(applyTurn(match, 'c', { type: 'play', cardId: 203, suit: 'PAW' }, 3), null);
+  assert.equal(match.pendingDraw, 12);
+  assert.equal(match.turn?.seatId, 'a');
+
+  // A cannot play a lower draw card (e.g. +2 on +6)
+  match.seats[0].hand = [lowerD2, paw(2)];
+  assert.ok(applyTurn(match, 'a', { type: 'play', cardId: 205 }, 4));
+
+  // A takes the penalty and draws 12 cards
+  match.drawPile = Array.from({ length: 20 }, (_, i) => paw(i % 10));
+  assert.equal(applyTurn(match, 'a', { type: 'draw' }, 5), null);
+  assert.equal(match.pendingDraw, 0);
+  assert.equal(match.seats[0].hand.length, 14);
+  assert.equal(match.turn?.seatId, 'b');
+});
+
+test('Discard All drops every card of that color from the hand', () => {
+  const match = startMatch(players, 'a', 0);
+  match.discards = [paw(1)];
+  const discardCard = { id: 301, suit: 'PAW' as const, action: 'discard' as const };
+  match.seats[0].hand = [discardCard, paw(3), paw(7), fish(4), fish(9)];
+
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 301 }, 1), null);
+  // All PAW cards discarded, only fish cards remain
+  assert.equal(match.seats[0].hand.length, 2);
+  assert.ok(match.seats[0].hand.every((c) => c.suit === 'FISH'));
+  assert.equal(match.turn?.seatId, 'b');
+});
+
+test('Skip Everyone skips all other players and gives the player another turn', () => {
+  const three = [...players, { id: 'c', name: 'C' }];
+  const match = startMatch(three, 'a', 0);
+  match.discards = [paw(1)];
+  const skipAllCard = { id: 401, suit: 'PAW' as const, action: 'skipall' as const };
+  match.seats[0].hand = [skipAllCard, paw(5)];
+
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 401 }, 1), null);
+  // Turn stays with 'a'
+  assert.equal(match.turn?.seatId, 'a');
+  assert.equal(match.seats[0].hand.length, 1);
+});
+
+test('Rank 7 swaps hands with chosen opponent', () => {
+  const match = startMatch(players, 'a', 0);
+  match.discards = [paw(1)];
+  const rank7 = { id: 501, suit: 'PAW' as const, rank: 7 };
+  match.seats[0].hand = [rank7, paw(2)];
+  match.seats[1].hand = [fish(5), fish(6), fish(7), fish(8)];
+
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 501, targetSeatId: 'b' }, 1), null);
+  // 'a' now holds B's 4 cards, B holds the remaining card from A's hand
+  assert.equal(match.seats[0].hand.length, 4);
+  assert.equal(match.seats[1].hand.length, 1);
+  assert.deepEqual(match.seats[1].hand[0], paw(2));
+});
+
+test('Rank 0 rotates all hands in current play direction', () => {
+  const three = [...players, { id: 'c', name: 'C' }];
+  const match = startMatch(three, 'a', 0);
+  match.discards = [paw(1)];
+  const rank0 = { id: 601, suit: 'PAW' as const, rank: 0 };
+  match.seats[0].hand = [rank0, paw(1)]; // A has 1 after play
+  match.seats[1].hand = [fish(2), fish(3)]; // B has 2
+  match.seats[2].hand = [fish(4), fish(5), fish(6)]; // C has 3
+
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 601 }, 1), null);
+  // In clockwise order: A's hand goes to B, B's hand goes to C, C's hand goes to A
+  assert.equal(match.seats[0].hand.length, 3);
+  assert.equal(match.seats[1].hand.length, 1);
+  assert.equal(match.seats[2].hand.length, 2);
+});
+
+test('Mercy rule knocks out any player reaching 25 cards', () => {
+  const match = startMatch(players, 'a', 0, undefined, { noMercyRules: true });
+  match.discards = [paw(1)];
+  match.seats[0].hand = [paw(2)];
+  match.seats[1].hand = Array.from({ length: 24 }, (_, i) => fish(i % 10));
+  match.drawPile = [fish(9), fish(8)];
+  match.turn = { seatId: 'b', deadline: 30_000 };
+
+  // B draws 1 card, reaching 25 cards -> knockout!
+  assert.equal(applyTurn(match, 'b', { type: 'draw' }, 1), null);
+  assert.equal(match.seats[1].out, true);
+  assert.equal(match.seats[1].hand.length, 0);
+  // Only 'a' remains -> 'a' wins by Mercy knockout
+  assert.deepEqual(match.result, { winnerSeatId: 'a' });
+});
+
+test('Wild Color Roulette forces target to draw until chosen suit appears', () => {
+  const match = startMatch(players, 'a', 0);
+  match.discards = [paw(1)];
+  const roulCard = { id: 701, suit: null, action: 'roul' as const };
+  match.seats[0].hand = [roulCard, paw(3)];
+  match.seats[1].hand = [fish(4)];
+  // Deck: two FISH cards, then one BELL card
+  match.drawPile = [fish(1), fish(2), { id: 702, suit: 'BELL' as const, rank: 5 }];
+
+  // A plays Roulette
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: 701 }, 1), null);
+  assert.equal(match.roulette?.targetSeatId, 'b');
+  assert.equal(match.turn?.seatId, 'b');
+
+  // B chooses BELL -> draws until BELL (draws 3 cards total)
+  assert.equal(applyTurn(match, 'b', { type: 'roulette-color', suit: 'BELL' }, 2), null);
+  assert.equal(match.seats[1].hand.length, 4); // 1 original + 3 drawn
+  assert.equal(match.wildSuit, 'BELL');
+  // B's turn was skipped, turn returns to A
+  assert.equal(match.turn?.seatId, 'a');
+});
+
+test('Calling UNO protects from penalty; forgetting UNO draws 2 cards penalty', () => {
+  const match = startMatch(players, 'a', 0, undefined, { unoRules: true });
+  match.discards = [paw(1)];
+  match.seats[0].hand = [paw(2), paw(3)];
+  match.seats[1].hand = [fish(5), fish(6)];
+  match.drawPile = [fish(1), fish(2), fish(3)];
+
+  // A plays without calling UNO -> forgotten penalty!
+  assert.equal(applyTurn(match, 'a', { type: 'play', cardId: paw(2).id }, 1), null);
+  // A played 1 card from 2, so should have had 1, but forgot UNO -> draws 2 cards penalty -> 3 cards
+  assert.equal(match.seats[0].hand.length, 3);
+
+  // Now test with UNO call
+  const match2 = startMatch(players, 'a', 0, undefined, { unoRules: true });
+  match2.discards = [paw(1)];
+  match2.seats[0].hand = [paw(2), paw(3)];
+  match2.seats[1].hand = [fish(5), fish(6)];
+  match2.drawPile = [fish(1), fish(2)];
+
+  // A calls UNO first
+  assert.equal(applyTurn(match2, 'a', { type: 'call-uno' }, 1), null);
+  assert.equal(match2.seats[0].unoCalled, true);
+  // Now A plays -> leaves 1 card with NO penalty
+  assert.equal(applyTurn(match2, 'a', { type: 'play', cardId: paw(2).id }, 2), null);
+  assert.equal(match2.seats[0].hand.length, 1);
+});
+
