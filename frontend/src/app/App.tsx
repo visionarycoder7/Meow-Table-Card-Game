@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AuthorCorner } from '../components/AuthorCorner';
 import { MatchTable } from '../features/match/MatchTable';
 import { Lobby } from '../features/rooms/Lobby';
 import { RoomEntry } from '../features/rooms/RoomEntry';
@@ -38,6 +39,7 @@ export function App() {
           {error && !room?.match && <p className="mt-4 rounded-lg border border-red-300/25 bg-red-400/10 px-3 py-2 text-sm text-red-200" role="alert">{error}</p>}
         </main>
       </div>
+      <AuthorCorner />
     </div>
   );
 }
