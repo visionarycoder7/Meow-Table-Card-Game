@@ -79,6 +79,21 @@ export class Room extends DurableObject<Env> {
         socket.close(1000);
         return;
       }
+      if (command.type === 'emote') {
+        const emoteEvent: RoomEvent = {
+          type: 'emote',
+          seatId: peer.seatId,
+          emote: command.emote,
+          timestamp: Date.now(),
+        };
+        for (const s of this.ctx.getWebSockets()) {
+          const p = attachment(s);
+          if (p?.type === 'seat') {
+            send(s, emoteEvent);
+          }
+        }
+        return;
+      }
       if ('revision' in command) return this.applyMatchAction(socket, lobby, peer.seatId, command);
       if (command.type !== 'lock') return this.reject(socket, 'You already have a seat.');
       if (lobby.match) return this.reject(socket, 'Room access is locked during the match and rematch.');

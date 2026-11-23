@@ -14,6 +14,9 @@ test('room creation and join use the same code alphabet', () => {
 test('room commands validate types, names, and message size', () => {
   assert.deepEqual(parseRoomCommand('{"type":"enter","name":"  Asha  "}'), { type: 'enter', name: 'Asha' });
   assert.deepEqual(parseRoomCommand('{"type":"lock","locked":false}'), { type: 'lock', locked: false });
+  assert.deepEqual(parseRoomCommand('{"type":"emote","emote":"dancing"}'), { type: 'emote', emote: 'dancing' });
+  assert.equal(parseRoomCommand('{"type":"emote","emote":"unknown"}'), null);
+  assert.equal(parseRoomCommand('{"type":"emote"}'), null);
   for (const message of ['{', 'null', '{"type":"start"}', '{"type":"lock","locked":"true"}',
     '{"type":"enter","name":" "}', JSON.stringify({ type: 'enter', name: 'a'.repeat(257) })]) {
     assert.equal(parseRoomCommand(message), null);

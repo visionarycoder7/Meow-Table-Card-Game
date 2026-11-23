@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Card, MatchAction, MatchMove, MatchView, RoomView } from '@meow-table/protocol';
+import type { Card, EmoteId, MatchAction, MatchMove, MatchView, RoomView } from '@meow-table/protocol';
 import { LeaveRoomButton } from '../../components/LeaveRoomButton';
 import { actionDetails, CardFace, cardHtml, cardName, suitNames } from './CardFace';
 import { CardChoice } from './CardChoice';
+import { EmotePicker } from './EmotePicker';
 import { fly } from './fly';
 import { PlayerHand } from './PlayerHand';
 import { sfx } from './sfx';
@@ -28,9 +29,23 @@ type Props = {
   onAction: (action: MatchAction) => void;
   onReconnect: () => void;
   onLeave: () => void;
+  activeEmotes?: Record<string, { emote: EmoteId; key: number }>;
+  onEmote?: (emote: EmoteId) => void;
 };
 
-export function MatchTable({ room, match, seatId, connected, receivedAt, error, onAction, onReconnect, onLeave }: Props) {
+export function MatchTable({
+  room,
+  match,
+  seatId,
+  connected,
+  receivedAt,
+  error,
+  onAction,
+  onReconnect,
+  onLeave,
+  activeEmotes,
+  onEmote,
+}: Props) {
   const [selection, setSelection] = useState<{ cardId: number; revision: number } | null>(null);
   const choiceTrigger = useRef<HTMLButtonElement>(null);
   const handHeading = useRef<HTMLHeadingElement>(null);
@@ -172,8 +187,12 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
         <div className="felt-surface" aria-hidden="true" />
         {opponents.map((seat, index) => (
           <div className="opponent" data-position={index + 1} key={seat.id}>
-            <TableSeat seat={seat} active={match.turn?.seatId === seat.id}
-              away={room.players.some(({ id, connected }) => id === seat.id && !connected)} />
+            <TableSeat
+              seat={seat}
+              active={match.turn?.seatId === seat.id}
+              away={room.players.some(({ id, connected }) => id === seat.id && !connected)}
+              emote={activeEmotes?.[seat.id]?.emote}
+            />
           </div>
         ))}
         <div className="table-center grid justify-items-center gap-3">
@@ -276,14 +295,25 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
             </div>
           )}
         </div>
-        {self && <div className="table-self"><TableSeat seat={self} active={myTurn} away={!connected} local /></div>}
+        {self && (
+          <div className="table-self">
+            <TableSeat
+              seat={self}
+              active={myTurn}
+              away={!connected}
+              local
+              emote={activeEmotes?.[self.id]?.emote}
+            />
+          </div>
+        )}
       </div>
 
       {activity && <p className="text-center text-sm text-muted wrap-anywhere">{activity}</p>}
 
-      {/* MEOW Call Button - press before playing second-to-last card */}
-      {canAct && match.hand.length === 2 && !self?.out && (
-        <div className="flex justify-center my-3">
+      {/* Table Actions Row: Emotes and MEOW call button */}
+      <div className="flex flex-wrap items-center justify-center gap-3 my-2">
+        {onEmote && <EmotePicker onEmote={onEmote} />}
+        {canAct && match.hand.length === 2 && !self?.out && (
           <button
             type="button"
             className={`btn-meow ${match.canCallUno ? 'meow-pulse' : 'meow-called'}`}
@@ -297,8 +327,8 @@ export function MatchTable({ room, match, seatId, connected, receivedAt, error, 
           >
             {match.canCallUno ? '🐾 MEOW!' : '🐾 MEOW! ✓'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       <PlayerHand
         cards={match.hand}

@@ -315,6 +315,22 @@ export const sfx = {
     tone(520, 180, 0.22, 'square', 0.12);
     sfx.tick(0.3, 2100);
   },
+  emote() {
+    const a = ac();
+    if (!a || mute) return;
+    const t = a.currentTime;
+    const osc = a.createOscillator();
+    const gain = a.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(420, t);
+    osc.frequency.exponentialRampToValueAtTime(840, t + 0.08);
+    gain.gain.setValueAtTime(0.25, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    osc.connect(gain);
+    gain.connect(a.destination);
+    osc.start(t);
+    osc.stop(t + 0.15);
+  },
 };
 
 if (typeof window !== 'undefined') {

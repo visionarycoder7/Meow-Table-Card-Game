@@ -1,21 +1,39 @@
-import type { MatchView } from '@meow-table/protocol';
+import type { EmoteId, MatchView } from '@meow-table/protocol';
+
+export const emoteImageMap: Record<EmoteId, string> = {
+  'side-eye': '/emotes/side-eye.jpg',
+  'shocked': '/emotes/shocked.png',
+  'shook': '/emotes/shook.png',
+  'yapping': '/emotes/yapping.png',
+  'dancing': '/emotes/dancing.png',
+  'smug': '/emotes/smug.jpg',
+};
 
 type Props = {
   seat: MatchView['seats'][number];
   active: boolean;
   away: boolean;
   local?: boolean;
+  emote?: EmoteId;
 };
 
-export function TableSeat({ seat, active, away, local }: Props) {
+export function TableSeat({ seat, active, away, local, emote }: Props) {
   const isDanger = seat.cardCount >= 20 && !seat.out && !seat.forfeited;
 
   return (
     <div
       id={`seat-${seat.id}`}
-      className={`table-seat ${isDanger ? 'ring-2 ring-red-500/80' : ''} ${seat.out ? 'opacity-40' : ''}`}
+      className={`table-seat relative ${isDanger ? 'ring-2 ring-red-500/80' : ''} ${seat.out ? 'opacity-40' : ''}`}
       aria-current={active ? 'true' : undefined}
     >
+      {emote && (
+        <div className="emote-bubble" aria-label={`Reaction: ${emote}`}>
+          <div className="emote-bubble-card">
+            <img src={emoteImageMap[emote]} alt={emote} />
+            <div className="emote-bubble-tip" />
+          </div>
+        </div>
+      )}
       {!local && (
         <div aria-hidden="true" className="seat-fan">
           {Array.from({ length: Math.min(seat.cardCount, 8) }, (_, index) => (

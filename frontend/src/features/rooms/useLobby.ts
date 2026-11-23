@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { normalizeDisplayName, normalizeRoomCode, seatExpiredCode, seatReplacedCode } from '@meow-table/protocol';
-import type { RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
+import type { EmoteId, RoomCommand, RoomEvent, RoomView } from '@meow-table/protocol';
+import { sfx } from '../match/sfx';
 
 const seatKey = (code: string) => `meow-table:seat:${code}`;
 type ReceivedRoom = RoomView & { receivedAt: number };
@@ -39,6 +40,7 @@ export function useLobby(invitedCode: string) {
   const [seatId, setSeatId] = useState('');
   const [connection, setConnection] = useState<'idle' | 'connecting' | 'connected' | 'disconnected'>('idle');
   const [error, setError] = useState('');
+  const [activeEmotes, setActiveEmotes] = useState<Record<string, { emote: EmoteId; key: number }>>({});
 
   const clearSeat = useCallback(() => {
     window.clearTimeout(retry.current.timer);
@@ -119,6 +121,25 @@ export function useLobby(invitedCode: string) {
         case 'left':
           clearSeat();
           break;
+        case 'emote': {
+          sfx.emote();
+          const emoteKey = Date.now() + Math.random();
+          setActiveEmotes((prev) => ({
+            ...prev,
+            [event.seatId]: { emote: event.emote, key: emoteKey },
+          }));
+          window.setTimeout(() => {
+            setActiveEmotes((prev) => {
+              if (prev[event.seatId]?.key === emoteKey) {
+                const next = { ...prev };
+                delete next[event.seatId];
+                return next;
+              }
+              return prev;
+            });
+          }, 3600);
+          break;
+        }
       }
     });
     next.addEventListener('error', () => {
@@ -174,5 +195,9 @@ export function useLobby(invitedCode: string) {
     if (seat.current) connect(seat.current.code, { type: 'resume', token: seat.current.token });
   }
 
-  return { room, seatId, connection, error, enter, send, reconnect };
+  function sendEmote(emote: EmoteId) {
+    send({ type: 'emote', emote });
+  }
+
+  return { room, seatId, connection, error, enter, send, reconnect, activeEmotes, sendEmote };
 }

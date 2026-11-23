@@ -9,7 +9,7 @@ import { GameToolbar } from './GameToolbar';
 
 export function App() {
   const [invitedCode] = useState(() => new URLSearchParams(location.search).get('room') ?? '');
-  const { room, seatId, connection, error, enter, send, reconnect } = useLobby(invitedCode);
+  const { room, seatId, connection, error, enter, send, reconnect, activeEmotes, sendEmote } = useLobby(invitedCode);
 
   return (
     <div className="app-shell">
@@ -23,6 +23,7 @@ export function App() {
           </header>
           {room?.match ? <MatchTable room={room} match={room.match} seatId={seatId} connected={connection === 'connected'}
             receivedAt={room.receivedAt} error={error}
+            activeEmotes={activeEmotes} onEmote={sendEmote}
             onAction={(action) => send({ ...action, revision: action.type === 'rematch' || action.type === 'return-lobby'
               ? room.revision : room.matchRevision ?? room.revision })}
             onLeave={() => send({ type: 'leave' })} onReconnect={reconnect} />

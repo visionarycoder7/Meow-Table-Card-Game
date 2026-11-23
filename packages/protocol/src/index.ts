@@ -94,11 +94,15 @@ export type MatchView = {
   banner?: { items: { seatId: string; text: string }[] };
 };
 
+export const emoteIds = ['side-eye', 'shocked', 'shook', 'yapping', 'dancing', 'smug'] as const;
+export type EmoteId = (typeof emoteIds)[number];
+
 export type RoomCommand =
   | { type: 'enter'; name: string }
   | { type: 'resume'; token: string }
   | { type: 'lock'; locked: boolean }
   | { type: 'leave' }
+  | { type: 'emote'; emote: EmoteId }
   | { type: 'add-bot' | 'remove-bot'; revision: number }
   | (MatchAction & { revision: number });
 
@@ -106,7 +110,8 @@ export type RoomEvent =
   | { type: 'session'; seatId: string; token: string; room: RoomView }
   | { type: 'room'; room: RoomView }
   | { type: 'error'; message: string }
-  | { type: 'left' };
+  | { type: 'left' }
+  | { type: 'emote'; seatId: string; emote: EmoteId; timestamp: number };
 
 export function parseRoomCommand(message: string | ArrayBuffer): RoomCommand | null {
   if (typeof message !== 'string' || message.length > 256) return null;
@@ -131,6 +136,11 @@ export function parseRoomCommand(message: string | ArrayBuffer): RoomCommand | n
       return 'locked' in input && typeof input.locked === 'boolean' ? { type: 'lock', locked: input.locked } : null;
     case 'leave':
       return { type: 'leave' };
+    case 'emote': {
+      if (!('emote' in input) || typeof input.emote !== 'string') return null;
+      const emote = emoteIds.find((candidate) => candidate === input.emote);
+      return emote ? { type: 'emote', emote } : null;
+    }
     case 'start':
     case 'rematch':
     case 'return-lobby':
